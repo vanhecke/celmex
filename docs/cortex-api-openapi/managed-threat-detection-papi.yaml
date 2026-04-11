@@ -1,0 +1,899 @@
+openapi: 3.0.0
+x-stoplight:
+  id: pdcziof72gk0x
+info:
+  version: 1.0.0
+  title: Managed Services APIs
+  description: |-
+    Public endpoints are provided for MTH (Managed Threat Hunting) and MDR (Managed Detection and Response) child tenants to manage reports, comments, and assignment-related operations.
+
+    ## Authentication
+    All endpoints require API key based authentication using the x-xdr-auth-id and Authorization headers.
+
+    ## Supported Tenants
+    Access is limited to MTH Child and MDR Child tenants only.
+
+    ## Timestamps
+    All timestamps must be in milliseconds since the Unix epoch (UTC).
+    **Required licenses:** MDR, MTH, Managed XSIAM Pro, Managed XSIAM Premium.
+  contact:
+    email: docs-cortex@paloaltonetworks.com
+    name: Cortex Documentation Team
+    url: 'https://docs-cortex.paloaltonetworks.com/'
+  license:
+    name: Proprietary
+    url: 'https://www.paloaltonetworks.com/legal'
+servers:
+  - url: 'https://api-yourfqdn'
+    description: ''
+security: []
+paths:
+  /public_api/v1/mth/child/add_comment:
+    post:
+      summary: Add a comment to an MTH/MDR report
+      operationId: postAddComment
+      description: |-
+        Adds a new comment to an MTH/MDR report from a child tenant.
+
+        **Notes:**
+        - If the source_id is not found, a generic error response is returned.
+      parameters:
+        - schema:
+            type: string
+            example: UCoWpG4rkNzgCp2dsh8m02iVpZsskwKHz7N1tErPcUV3Wmf59Gc9kytmgOv0pDWoem3PBlORyRIPiir4OcYdWUOWAM3JyTgoCxQf4nQoTlKmFRKz9Bj5vIjluw66p9WP
+          in: header
+          name: Authorization
+          description: '{api_key}'
+          required: true
+        - schema:
+            type: string
+            example: '241'
+          in: header
+          name: x-xdr-auth-id
+          description: '{api_key_id}'
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddCommentRequestData'
+            examples:
+              Example 1:
+                value:
+                  xsoar_source_id: '777771'
+                  comment_text: Investigation completed. No malicious activity found.
+                  comment_created_by: analyst@company.com
+                  attachment_path: comment/investigation-report-1234567890.pdf
+                  extract_zip_file: 'false'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddCommentResponse'
+              examples:
+                Example 1:
+                  value:
+                    reply: true
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      tags:
+        - Comments
+      x-stoplight:
+        id: hip5it578xr6a
+  /public_api/v1/mth/child/get_comments:
+    post:
+      summary: Get comments for MTH/MDR reports
+      operationId: postGetComments
+      description: |-
+        Retrieves comments for a specific report or for all comments within a specified time range.
+
+        **Validation Rules:**
+        - The request requires either the `xsoar_source_id` parameter or the combination of `start_time` and `end_time` parameters.
+        - At least one search criteria must be provided
+      parameters:
+        - schema:
+            type: string
+            example: UCoWpG4rkNzgCp2dsh8m02iVpZsskwKHz7N1tErPcUV3Wmf59Gc9kytmgOv0pDWoem3PBlORyRIPiir4OcYdWUOWAM3JyTgoCxQf4nQoTlKmFRKz9Bj5vIjluw66p9WP
+          in: header
+          name: Authorization
+          description: '{api_key}'
+          required: true
+        - schema:
+            type: string
+            example: '241'
+          in: header
+          name: x-xdr-auth-id
+          description: '{api_key_id}'
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetCommentsRequestData'
+            examples:
+              Get comments by report ID:
+                value:
+                  xsoar_source_id: '777772'
+              Get comments by time range:
+                value:
+                  start_time: 1764517583000
+                  end_time: 1764512583000
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetCommentsResponse'
+              examples:
+                Example 1:
+                  value:
+                    reply:
+                      '9998546484426':
+                        status: true
+                        data:
+                          - comment_id: 7
+                            comment_created_by: stam_updated_user
+                            comment_author_type: 0
+                            comment_insert_time: 1763468552000
+                            comment_update_time: 1763468849000
+                            comment_text: 'Update comment stam2025-11-18 14:27:28.123680'
+                            comment_attachments: []
+                            xsoar_source_id: '777771'
+                            comment_username: Managed Threat Hunting
+                          - comment_id: 8
+                            comment_created_by: stam_user
+                            comment_author_type: 0
+                            comment_insert_time: 1763468560000
+                            comment_update_time: null
+                            comment_text: 'stam comment_2025-11-18 14:22:39.114626'
+                            comment_attachments: []
+                            xsoar_source_id: '777771'
+                            comment_username: Managed Threat Hunting
+                          - comment_id: 21
+                            comment_created_by: random_user
+                            comment_author_type: 0
+                            comment_insert_time: 1763468843000
+                            comment_update_time: null
+                            comment_text: 'stam comment_2025-11-18 14:27:22.608768'
+                            comment_attachments: []
+                            xsoar_source_id: '777771'
+                            comment_username: analyst@company.com
+                          - comment_id: 34
+                            comment_created_by: iavron iavron
+                            comment_author_type: 1
+                            comment_insert_time: 1764235743000
+                            comment_update_time: null
+                            comment_text: Attachment test
+                            comment_attachments:
+                              - 'https://qa2-test-9998546484426-papi.storage.googleapis.com/comment/Screenshot%202025-11-27%20at%2010.34.50.png-1764235743000?Expires=1765122615&GoogleAccessId=api-pod%40qa2-test-9998546484426.iam.gserviceaccount.com&Signature=ku3dHGq8exMve3Hs25iKjDG64ZKqrNPfkCc4G8Njk2hv9aWKnhFqBDC5viMxcZRVMR8EtI7%2BZ7fciRrC7Dsq6n3j0o1TFOsT0VvHgHhb0g1mfm%2B%2FdLYXEe50y2BjmAI2OQiSFFUSuZ5vZomY8QYFpf8i5GMQL5eP%2BJuo4%2Fo7IRfd%2F93vt6FyNuUxkWydAy%2B2tWRCSWHrxC9Drz8BL6tnJubx2n%2BrlEO1YewNMvm6PQ4xDy88GaQvJ4TNmTa44S8HEtOT%2B4ra95yBT3nxvg7Wz5d4El0fUx%2F7nTD3Cfl4FmUPQr5ujTSMDnpN0tN3l9o8HZAOh4abjURdY9UHK6898w%3D%3D'
+                            xsoar_source_id: '484485'
+                            comment_username: iavron@paloaltonetworks.com
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      tags:
+        - Comments
+      x-stoplight:
+        id: 9qrv0fvpkippx
+  /public_api/v1/mth/child/report/update/status:
+    post:
+      summary: Update report status
+      operationId: postUpdateReportStatus
+      description: |-
+        Updates the status of an MTH/MDR report.
+
+        **Validation Rules:**
+        - If the specified source_id cannot be found, a generic error response is returned.
+      parameters:
+        - schema:
+            type: string
+            example: UCoWpG4rkNzgCp2dsh8m02iVpZsskwKHz7N1tErPcUV3Wmf59Gc9kytmgOv0pDWoem3PBlORyRIPiir4OcYdWUOWAM3JyTgoCxQf4nQoTlKmFRKz9Bj5vIjluw66p9WP
+          in: header
+          name: Authorization
+          description: '{api_key}'
+          required: true
+        - schema:
+            type: string
+            example: '241'
+          in: header
+          name: x-xdr-auth-id
+          description: '{api_key_id}'
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateStatusRequestData'
+            examples:
+              Example 1:
+                value:
+                  xsoar_source_id: '777776'
+                  report_status: In Progress
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateStatusResponse'
+              examples:
+                Example 1:
+                  value:
+                    reply:
+                      XSOAR_SOURCE_ID: '777776'
+                      NAME: 'Royi test 2025-11-18 14:27:18.299620'
+                      DESCRIPTION: Royi
+                      CREATED_BY: Roei
+                      INSERT_TIME: 1763468832000
+                      UPDATE_TIME: 1763907713000
+                      ATTACHMENTS: '{"update_report/1763468839243-sample.pdf-d0bc29ba-2b46-46b7-94d6-24826da2c82b": {"attachment_name": "sample.pdf", "attachment_size": 55483}}'
+                      INCIDENT_ID: null
+                      REPORT_TYPE: Cyber Hygiene Report
+                      SEVERITY: SEV_020_LOW
+                      COMMENTS: null
+                      CLASSIFICATION: MTH
+                      ASSIGNED_USER: iavron@paloaltonetworks.com
+                      ASSIGNED_USER_PRETTY: iavron iavron
+                      REPORT_STATUS: IN_PROGRESS
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      tags:
+        - Status
+      x-stoplight:
+        id: 077bbpipie2ja
+  /public_api/v1/mth/child/report/update/assign:
+    post:
+      summary: Update report assignment
+      operationId: postUpdateReportAssignment
+      description: |2-
+
+
+         Assigns a user to an MTH/MDR report.
+
+        **Validation Rules:**
+        - The `user` parameter is validated based on the tenant context; the `username` parameter is not validated
+        - If the specified source_id is not found, a generic error response is returned.
+      parameters:
+        - schema:
+            type: string
+            example: UCoWpG4rkNzgCp2dsh8m02iVpZsskwKHz7N1tErPcUV3Wmf59Gc9kytmgOv0pDWoem3PBlORyRIPiir4OcYdWUOWAM3JyTgoCxQf4nQoTlKmFRKz9Bj5vIjluw66p9WP
+          in: header
+          name: Authorization
+          description: '{api_key}'
+          required: true
+        - schema:
+            type: string
+            example: '241'
+          in: header
+          name: x-xdr-auth-id
+          description: '{api_key_id}'
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateAssignmentRequestData'
+            examples:
+              Example 1:
+                value:
+                  xsoar_source_id: '777774'
+                  user: analyst@company.com
+                  username: Motti Analysto
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateAssignmentResponse'
+              examples:
+                Example 1:
+                  value:
+                    reply:
+                      success: true
+                      xsoar_source_id: '777774'
+                      assigned_user: analyst@company.com
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      tags:
+        - Assignment
+      x-stoplight:
+        id: qna9avvs87ba1
+  /public_api/v1/mth/child/get_reports_by_source_id:
+    post:
+      summary: Get reports by source ID
+      operationId: postGetReportsBySourceId
+      description: |-
+        Retrieves detailed information for one or more MTH/MDR reports based on the provided source_id values.
+         At least one source_id must be specified.
+      parameters:
+        - schema:
+            type: string
+            example: UCoWpG4rkNzgCp2dsh8m02iVpZsskwKHz7N1tErPcUV3Wmf59Gc9kytmgOv0pDWoem3PBlORyRIPiir4OcYdWUOWAM3JyTgoCxQf4nQoTlKmFRKz9Bj5vIjluw66p9WP
+          in: header
+          name: Authorization
+          description: '{api_key}'
+          required: true
+        - schema:
+            type: string
+            example: '241'
+          in: header
+          name: x-xdr-auth-id
+          description: '{api_key_id}'
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetReportsBySourceIdRequestData'
+            examples:
+              Example 1:
+                value:
+                  request_data:
+                    xsoar_source_ids:
+                      - '777774'
+                      - '777771'
+                      - '777772'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetReportsResponse'
+              examples:
+                Example 1:
+                  value:
+                    reply:
+                      - xsoar_source_id: '777771'
+                        report_type: Threat Report Update
+                        insert_time: 1763468832000
+                        name: Updated Report 5
+                        description: Updated description
+                        incident_id: 1
+                        update_time: 1765983782000
+                        created_by: iavron@paloaltonetworks.com
+                        severity: SEV_040_HIGH
+                        attachments: '{"update_report/1764864986901--f2ada4b9-d7f2-43cb-978c-91cc2eb4c97d": {"attachment_name": "", "attachment_size": 0}}'
+                        classification: MTH
+                        assigned_user: iavron@paloaltonetworks.com
+                        report_status: ON_HOLD
+                        assigned_user_pretty: iavron iavron
+                      - xsoar_source_id: '777772'
+                        report_type: Monthly Status Report
+                        insert_time: 1763468615000
+                        name: 'Royi test 2025-11-18 14:23:40.937528'
+                        description: Royi
+                        incident_id: null
+                        update_time: 1763468623000
+                        created_by: Roei
+                        severity: SEV_020_LOW
+                        attachments: '{"update_report/1763468621971-sample.pdf-9b2feb72-0835-4ccf-b49c-e192550bf85f": {"attachment_name": "sample.pdf", "attachment_size": 55483}}'
+                        classification: MTH
+                        assigned_user: null
+                        report_status: New
+                        assigned_user_pretty: null
+                      - xsoar_source_id: '777774'
+                        report_type: Threat Report Update
+                        insert_time: 1763468487000
+                        name: Updated Report
+                        description: Updated description
+                        incident_id: null
+                        update_time: 1766061370000
+                        created_by: Test user
+                        severity: SEV_040_HIGH
+                        attachments: '{"update_report/1764861767462--89d3d06a-39c6-4959-aba6-229b786985c2": {"attachment_name": "", "attachment_size": 0}}'
+                        classification: MTH
+                        assigned_user: tzohar@paloaltonetworks.com
+                        report_status: IN_PROGRESS
+                        assigned_user_pretty: Timor zohar
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      tags:
+        - Reports
+      x-stoplight:
+        id: 664s89tcndxci
+  /public_api/v1/mth/child/get_reports_by_incident_id:
+    post:
+      summary: Get reports by incident ID
+      operationId: postGetReportsByIncidentId
+      description: |-
+        Retrieves detailed information for one or more MTH/MDR reports based on the provided incident_id values.
+         At least one incident_id must be specified.
+      parameters:
+        - schema:
+            type: string
+            example: UCoWpG4rkNzgCp2dsh8m02iVpZsskwKHz7N1tErPcUV3Wmf59Gc9kytmgOv0pDWoem3PBlORyRIPiir4OcYdWUOWAM3JyTgoCxQf4nQoTlKmFRKz9Bj5vIjluw66p9WP
+          in: header
+          name: Authorization
+          description: '{api_key}'
+          required: true
+        - schema:
+            type: string
+            example: '241'
+          in: header
+          name: x-xdr-auth-id
+          description: '{api_key_id}'
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetReportsByIncidentIdRequestData'
+            examples:
+              Example 1:
+                value:
+                  request_data:
+                    incident_ids:
+                      - '777773'
+                      - '15'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetReportsResponse'
+              examples:
+                Example 1:
+                  value:
+                    reply:
+                      - xsoar_source_id: '777773'
+                        report_type: Threat Report Update1
+                        insert_time: 1763468832000
+                        name: Updated Report 5
+                        description: Updated description
+                        incident_id: 777773
+                        update_time: 1765983782000
+                        created_by: iavron@paloaltonetworks.com
+                        severity: SEV_040_HIGH
+                        attachments: '{"update_report/1764864986901--f2ada4b9-d7f2-43cb-978c-91cc2eb4c97d": {"attachment_name": "", "attachment_size": 0}}'
+                        classification: MTH
+                        assigned_user: iavron@paloaltonetworks.com
+                        report_status: ON_HOLD
+                        assigned_user_pretty: iavron iavron
+                      - xsoar_source_id: '15'
+                        report_type: Threat Report Update2
+                        insert_time: 1763468832002
+                        name: Updated Report 6
+                        description: Updated description
+                        incident_id: 15
+                        update_time: 1765983782003
+                        created_by: iavron1@paloaltonetworks.com
+                        severity: SEV_040_HIGH
+                        attachments: '{"update_report/1764864986901--f2ada4b9-d7f2-43cb-978c-91cc2eb4c97e": {"attachment_name": "", "attachment_size": 0}}'
+                        classification: MTH
+                        assigned_user: iavron@paloaltonetworks.com
+                        report_status: ON_HOLD
+                        assigned_user_pretty: iavron1 iavron1
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      tags:
+        - Reports
+      x-stoplight:
+        id: 349dufbtvrg1b
+tags:
+  - name: Assignment
+    description: APIs for managing report assignments
+  - name: Comments
+    description: APIs for managing report comments
+  - name: Reports
+    description: APIs for retrieving MTH/MDR reports
+  - name: Status
+    description: APIs for updating report status
+components:
+  securitySchemes:
+    Authorization:
+      type: apiKey
+      name: Authorization
+      in: header
+      description: API Key for authentication
+    x-xdr-auth-id:
+      type: apiKey
+      name: x-xdr-auth-id
+      in: header
+      description: API Key ID for authentication
+  responses:
+    BadRequest:
+      description: Bad Request - Invalid parameters or missing required fields
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BaseError'
+    Unauthorized:
+      description: Unauthorized - Invalid or missing API key
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BaseError'
+    Forbidden:
+      description: Forbidden - Tenant not authorized for this endpoint
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BaseError'
+    InternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BaseError'
+  schemas:
+    AddCommentRequestData:
+      type: object
+      required:
+        - xsoar_source_id
+        - comment_text
+        - comment_created_by
+      properties:
+        xsoar_source_id:
+          type: string
+          description: The unique identifier of the report to comment on
+        comment_text:
+          type: string
+          maxLength: 2048
+          description: The text content of the comment
+        comment_created_by:
+          type: string
+          description: Email or username of the comment author (not validated)
+        attachment_path:
+          type: string
+          description: Path to attachment
+        extract_zip_file:
+          type: string
+          description: Whether to extract zip file
+      x-stoplight:
+        id: wbop01t19i9sn
+    GetCommentsRequestData:
+      type: object
+      description: Include either `xsoar_source_id` or the combination of `start_time` and `end_time` in the request.
+      properties:
+        xsoar_source_id:
+          type: string
+          description: The unique identifier of the report
+        start_time:
+          type: integer
+          format: int64
+          description: Start timestamp in milliseconds (epoch)
+        end_time:
+          type: integer
+          format: int64
+          description: End timestamp in milliseconds (epoch)
+      x-stoplight:
+        id: 28mpo2ukmtv1s
+    UpdateStatusRequestData:
+      description: Update the report status.
+      type: object
+      required:
+        - xsoar_source_id
+        - report_status
+      properties:
+        xsoar_source_id:
+          type: string
+          description: The unique identifier of the report
+        report_status:
+          type: string
+          enum:
+            - New
+            - In Progress
+            - Pending
+            - Resolved
+            - Closed
+          description: New status for the report. Must include only one of the supported status values.
+      x-stoplight:
+        id: x920x6u6lczkg
+    UpdateAssignmentRequestData:
+      type: object
+      required:
+        - xsoar_source_id
+      properties:
+        xsoar_source_id:
+          type: string
+          description: The unique identifier of the report.
+        user:
+          type: string
+          description: User identifier (email). This parameter is not validated.
+        username:
+          type: string
+          description: Display name of the user.
+      x-stoplight:
+        id: b9fof1ajj7crt
+    GetReportsBySourceIdRequestData:
+      description: Retrieves source_id for one or more MTH/MDR reports.
+      type: object
+      properties:
+        request_data:
+          type: object
+          required:
+            - xsoar_source_ids
+          properties:
+            xsoar_source_ids:
+              type: array
+              items:
+                type: string
+              description: List of source IDs to retrieve
+      x-stoplight:
+        id: 3ihxeknpp9alf
+    GetReportsByIncidentIdRequestData:
+      description: Retrieves incident_id for one or more MTH/MDR reports.
+      type: object
+      properties:
+        request_data:
+          type: object
+          required:
+            - incident_ids
+          properties:
+            incident_ids:
+              type: array
+              items:
+                type: string
+              description: List of incident IDs to retrieve
+      x-stoplight:
+        id: xgh8xyx7je8kz
+    AddCommentResponse:
+      type: object
+      properties:
+        reply:
+          type: boolean
+          description: Indicates if the comment was added successfully
+      x-stoplight:
+        id: euo97ms4liozx
+    GetCommentsResponse:
+      description: ''
+      type: object
+      properties:
+        reply:
+          type: object
+          additionalProperties:
+            type: object
+            properties:
+              status:
+                type: boolean
+              data:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Comment'
+      x-stoplight:
+        id: w4sh0pvquelw8
+    UpdateStatusResponse:
+      type: object
+      properties:
+        reply:
+          $ref: '#/components/schemas/ReportUpperCase'
+      x-stoplight:
+        id: an5h3ieuhwdmp
+    UpdateAssignmentResponse:
+      type: object
+      properties:
+        reply:
+          type: object
+          properties:
+            success:
+              type: boolean
+              description: Indicates if the assignment was successful
+            xsoar_source_id:
+              type: string
+              description: The source ID of the report
+            assigned_user:
+              type: string
+              description: Email of the assigned user
+      x-stoplight:
+        id: y09l921gdhtzf
+    GetReportsResponse:
+      type: object
+      properties:
+        reply:
+          type: array
+          items:
+            $ref: '#/components/schemas/Report'
+      x-stoplight:
+        id: 5r8nx1hf30rrn
+    Report:
+      type: object
+      description: MTH/MDR Report object
+      properties:
+        xsoar_source_id:
+          type: string
+          description: Unique identifier of the report
+        report_type:
+          type: string
+          description: Type of the report
+        insert_time:
+          type: integer
+          format: int64
+          description: Creation timestamp in milliseconds (epoch)
+        name:
+          type: string
+          description: Name/title of the report
+        description:
+          type: string
+          description: Detailed description of the report
+        incident_id:
+          type: integer
+          nullable: true
+          description: Associated incident ID
+        update_time:
+          type: integer
+          format: int64
+          description: Last update timestamp in milliseconds (epoch)
+        created_by:
+          type: string
+          description: Creator of the report
+        severity:
+          type: string
+          description: Severity level of the report
+        attachments:
+          type: string
+          description: JSON-formatted string containing attachment information
+        classification:
+          type: string
+          description: Classification of the report (MTH or MDR)
+        assigned_user:
+          type: string
+          nullable: true
+          description: Email of the assigned user
+        report_status:
+          type: string
+          description: Current status of the report
+        assigned_user_pretty:
+          type: string
+          nullable: true
+          description: Display name of the assigned user
+      x-stoplight:
+        id: lq99v5bhxcnf8
+    ReportUpperCase:
+      type: object
+      description: MTH/MDR Report object with uppercase field names (returned by update status endpoint)
+      properties:
+        XSOAR_SOURCE_ID:
+          type: string
+          description: Unique identifier of the report
+        NAME:
+          type: string
+          description: Name/title of the report
+        DESCRIPTION:
+          type: string
+          description: Detailed description of the report
+        CREATED_BY:
+          type: string
+          description: Creator of the report
+        INSERT_TIME:
+          type: integer
+          format: int64
+          description: Creation timestamp in milliseconds (epoch)
+        UPDATE_TIME:
+          type: integer
+          format: int64
+          description: Last update timestamp in milliseconds (epoch)
+        ATTACHMENTS:
+          type: string
+          description: JSON-formatted string containing attachment information
+        INCIDENT_ID:
+          type: integer
+          nullable: true
+          description: Associated incident ID
+        REPORT_TYPE:
+          type: string
+          description: Type of the report
+        SEVERITY:
+          type: string
+          description: Severity level of the report
+        COMMENTS:
+          type: string
+          nullable: true
+          description: Comments on the report
+        CLASSIFICATION:
+          type: string
+          description: Classification of the report (MTH or MDR)
+        ASSIGNED_USER:
+          type: string
+          nullable: true
+          description: Email of the assigned user
+        ASSIGNED_USER_PRETTY:
+          type: string
+          nullable: true
+          description: Display name of the assigned user
+        REPORT_STATUS:
+          type: string
+          description: Current status of the report
+      x-stoplight:
+        id: ml6gmsm1930vs
+    Comment:
+      type: object
+      description: Comment object for MTH/MDR reports
+      properties:
+        comment_id:
+          type: integer
+          description: Unique identifier of the comment
+        comment_created_by:
+          type: string
+          description: Email or identifier of the comment author
+        comment_author_type:
+          type: integer
+          description: Type of the comment author
+        comment_insert_time:
+          type: integer
+          format: int64
+          description: Creation timestamp in milliseconds (epoch)
+        comment_update_time:
+          type: integer
+          format: int64
+          nullable: true
+          description: Last update timestamp in milliseconds (epoch)
+        comment_text:
+          type: string
+          description: Text content of the comment
+        comment_attachments:
+          type: array
+          items:
+            type: string
+          description: Array of attachment URLs
+        xsoar_source_id:
+          type: string
+          description: Source ID of the associated report
+        comment_username:
+          type: string
+          description: Display name of the comment author
+      x-stoplight:
+        id: dsyogtnw9i9uc
+    BaseError:
+      type: object
+      properties:
+        reply:
+          type: object
+          properties:
+            err_code:
+              type: string
+              description: Error code
+            err_msg:
+              type: string
+              description: Error message
+            err_extra:
+              type: string
+              description: Extra information about the error
+      x-stoplight:
+        id: monbd9skhai2r

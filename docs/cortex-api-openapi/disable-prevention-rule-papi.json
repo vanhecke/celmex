@@ -1,0 +1,1443 @@
+{
+    "openapi": "3.0.3",
+    "x-stoplight": {
+        "id": "adidmqwfho4b5"
+    },
+    "tags": [
+        {
+            "name": "DisablePreventionRule",
+            "description": "Disable Prevention Rule"
+        }
+    ],
+    "info": {
+        "version": "Cortex XSIAM 3.4",
+        "title": "Disable Prevention Rule Public APIs",
+        "description": "The Disable Prevention Rule API lets you manage Disable Prevention rules in Cortex Cloud. These rules allow you to define specific exceptions to prevention actions enforced on endpoints.\n\nYou can apply Disable Prevention rules only to endpoints running Cortex XDR agent version 7.9 or later.\n\nUsing this API, you can:\n\n- Retrieve existing Disable Prevention rules with support for filtering and pagination.\n- Retrieve the list of available modules for a specified platform.\n- Create new Disable Prevention rules to configure granular exceptions to endpoint prevention actions.\n- Update existing Disable Prevention rules.\n- Delete Disable Prevention rules by their IDs.\n\nYou can export the OpenAPI specs in the [Cortex Stoplight instance](https://cortex-panw.stoplight.io/docs/cortex-xsiam-3-x/adidmqwfho4b5-disable-prevention-rule-public-ap-is).\n\n**Required license:** In Cortex XSIAM Premium, Cortex XSIAM Enterprise, or Cortex XSIAM NG SIEM, requires the Cortex Cloud Posture Management add-on. ",
+        "contact": {
+            "email": "docs-cortex@paloaltonetworks.com",
+            "name": "Cortex Documentation Team",
+            "url": "https://docs-cortex.paloaltonetworks.com/"
+        }
+    },
+    "servers": [
+        {
+            "url": "https://api-yourfqdn"
+        }
+    ],
+    "paths": {
+        "/public_api/v1/disable_prevention/fetch": {
+            "post": {
+                "summary": "Get Disable Prevention Rules",
+                "description": "Returns a list of Disable Prevention rules based on filters, sorting, and pagination.",
+                "operationId": "fetchDisablePreventionRules",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "x-examples": {
+                                    "Example 1": {
+                                        "request_data": {
+                                            "search_from": 0,
+                                            "search_to": 8,
+                                            "sort": {
+                                                "field": "rule_id",
+                                                "keyword": "asc"
+                                            },
+                                            "filters": [
+                                                {
+                                                    "field": "status",
+                                                    "operator": "eq",
+                                                    "value": "enabled"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                },
+                                "required": [
+                                    "request_data"
+                                ],
+                                "properties": {
+                                    "request_data": {
+                                        "$ref": "#/components/schemas/GetDataRequest"
+                                    }
+                                }
+                            },
+                            "examples": {
+                                "Example 1": {
+                                    "value": {
+                                        "request_data": {
+                                            "search_from": 0,
+                                            "search_to": 100,
+                                            "sort": {
+                                                "field": "rule_id",
+                                                "keyword": "asc"
+                                            },
+                                            "filters": [
+                                                {
+                                                    "field": "rule_id",
+                                                    "operator": "eq",
+                                                    "value": "1bce99ee792e4f0682d7c9bde0aaf44e"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                },
+                                "Example 2": {
+                                    "value": {
+                                        "request_data": {
+                                            "search_from": 0,
+                                            "search_to": 3,
+                                            "sort": {
+                                                "field": "modification_time",
+                                                "keyword": "desc"
+                                            },
+                                            "filters": [
+                                                {
+                                                    "field": "status",
+                                                    "operator": "eq",
+                                                    "value": "enabled"
+                                                },
+                                                {
+                                                    "field": "modification_time",
+                                                    "operator": "gte",
+                                                    "value": 1762870187000
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicGetDataResponse"
+                                },
+                                "examples": {
+                                    "Example 1": {
+                                        "value": {
+                                            "reply": {
+                                                "data": [
+                                                    {
+                                                        "rule_id": "1bce99ee792e4f0682d7c9bde0aaf44e",
+                                                        "rule_name": "DPR",
+                                                        "description": "Prevention rules using API",
+                                                        "platform": "linux",
+                                                        "conditions": {
+                                                            "hash": "3b7d28f7a6c1e9b0f4a5c2d9e8f1a0b6c7d4e5f8091a2b3c4d5e6f7a8b9c0d1 ",
+                                                            "path": "/*",
+                                                            "signer": "trusted company.inc",
+                                                            "command": "command line argument",
+                                                            "sign_thumbprint": "certificate thumbprint"
+                                                        },
+                                                        "module_ids": [
+                                                            56
+                                                        ],
+                                                        "profile_ids": [
+                                                            96
+                                                        ],
+                                                        "scope": "profile",
+                                                        "status": "enabled",
+                                                        "created_by": "Jane Doe",
+                                                        "user_email": "jane.doe@example.com",
+                                                        "modification_time": 1764475578200,
+                                                        "associated_targets": [
+                                                            "endpoint != AFDSFDS"
+                                                        ]
+                                                    }
+                                                ],
+                                                "filter_count": 1,
+                                                "total_count": 4
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-stoplight": {
+                    "id": "2ldfnpyslt358"
+                },
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "UCoWpG4rkNzgCp2dsh8m02iVpZsskwKHz7N1tErPcUV3Wmf59Gc9kytmgOv0pDWoem3PBlORyRIPiir4OcYdWUOWAM3JyTgoCxQf4nQoTlKmFRKz9Bj5vIjluw66p9WP "
+                        },
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "{api_key}",
+                        "required": true
+                    },
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "241"
+                        },
+                        "in": "header",
+                        "name": "x-xdr-auth-id",
+                        "description": "{api_key_id}",
+                        "required": true
+                    }
+                ]
+            }
+        },
+        "/public_api/v1/disable_prevention/get_modules": {
+            "post": {
+                "summary": "Get Disable Prevention Modules",
+                "description": "Returns a list of available modules for a specific platform.",
+                "operationId": "getDisablePreventionModules",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "x-examples": {
+                                    "Example 1": {
+                                        "request_data": {
+                                            "platform": "windows"
+                                        }
+                                    }
+                                },
+                                "required": [
+                                    "request_data"
+                                ],
+                                "properties": {
+                                    "request_data": {
+                                        "$ref": "#/components/schemas/DisablePreventionGetModulesPAPIRequest"
+                                    }
+                                }
+                            },
+                            "examples": {
+                                "Example 1": {
+                                    "value": {
+                                        "request_data": {
+                                            "platform": "windows"
+                                        }
+                                    }
+                                },
+                                "Example 2": {
+                                    "value": {
+                                        "request_data": {
+                                            "platform": "macos"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BaseResponseArrayModules"
+                                },
+                                "examples": {
+                                    "Example 1": {
+                                        "value": {
+                                            "reply": [
+                                                {
+                                                    "module_id": 1,
+                                                    "name": "DLL Security",
+                                                    "description": "Memory Corruption Exploit",
+                                                    "profile_type": "Exploit",
+                                                    "conditions_definition": {
+                                                        "properties": {
+                                                            "hash": {
+                                                                "type": "string",
+                                                                "description": "Hash"
+                                                            },
+                                                            "path": {
+                                                                "type": "string",
+                                                                "description": "Files / Folders",
+                                                                "minLength": 1
+                                                            },
+                                                            "command": {
+                                                                "type": "string",
+                                                                "description": "Command Line",
+                                                                "minLength": 1
+                                                            },
+                                                            "signer": {
+                                                                "type": "string",
+                                                                "description": "Signer Name",
+                                                                "minLength": 1
+                                                            },
+                                                            "sign_thumbprint": {
+                                                                "type": "string",
+                                                                "description": "Certificate Thumbprint",
+                                                                "minLength": 1
+                                                            }
+                                                        }
+                                                    },
+                                                    "additionalProperties": false,
+                                                    "minProperties": 1
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-stoplight": {
+                    "id": "rzqa8txgillkl"
+                },
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "UCoWpG4rkNzgCp2dsh8m02iVpZsskwKHz7N1tErPcUV3Wmf59Gc9kytmgOv0pDWoem3PBlORyRIPiir4OcYdWUOWAM3JyTgoCxQf4nQoTlKmFRKz9Bj5vIjluw66p9WP "
+                        },
+                        "in": "header",
+                        "name": "Authorization",
+                        "required": true,
+                        "description": "{api_key}"
+                    },
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "241"
+                        },
+                        "in": "header",
+                        "required": true,
+                        "name": "x-xdr-auth-id",
+                        "description": "{api_key_id}"
+                    }
+                ]
+            }
+        },
+        "/public_api/v1/disable_prevention/add": {
+            "post": {
+                "summary": "Add Disable Prevention Rule",
+                "description": "Creates a new Disable Prevention rule.",
+                "operationId": "addDisablePreventionRule",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "x-examples": {
+                                    "Example 1": {
+                                        "request_data": {
+                                            "rule_ids": [
+                                                "5bfb2a15ca2a4525a4e69f11792dfe61"
+                                            ]
+                                        }
+                                    }
+                                },
+                                "required": [
+                                    "request_data"
+                                ],
+                                "properties": {
+                                    "request_data": {
+                                        "$ref": "#/components/schemas/DisablePreventionAddRulePAPIRequest"
+                                    }
+                                }
+                            },
+                            "examples": {
+                                "Example 1": {
+                                    "value": {
+                                        "request_data": {
+                                            "rule_name": "My MacOS Rule",
+                                            "description": "Data prevention rule for MacOS",
+                                            "platform": "macos",
+                                            "module_ids": [
+                                                38
+                                            ],
+                                            "conditions": {
+                                                "hash": "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824",
+                                                "path": "/usr/",
+                                                "signer": "Trusted Company Inc.",
+                                                "command": "command line argument"
+                                            },
+                                            "profile_ids": [
+                                                96
+                                            ],
+                                            "status": "enabled",
+                                            "scope": "profile"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BaseResponseString"
+                                },
+                                "examples": {
+                                    "Example 1": {
+                                        "value": {
+                                            "reply": "330fc8dec96a4810af886af328e73264"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-stoplight": {
+                    "id": "larf1xxjobbat"
+                },
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "UCoWpG4rkNzgCp2dsh8m02iVpZsskwKHz7N1tErPcUV3Wmf59Gc9kytmgOv0pDWoem3PBlORyRIPiir4OcYdWUOWAM3JyTgoCxQf4nQoTlKmFRKz9Bj5vIjluw66p9WP "
+                        },
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "{api_key}",
+                        "required": true
+                    },
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "241"
+                        },
+                        "in": "header",
+                        "name": "x-xdr-auth-id",
+                        "description": "{api_key_id}",
+                        "required": true
+                    }
+                ]
+            }
+        },
+        "/public_api/v1/disable_prevention/edit": {
+            "post": {
+                "summary": "Edit Disable Prevention Rule",
+                "description": "Updates an existing Disable Prevention rule.",
+                "operationId": "editDisablePreventionRule",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "x-examples": {
+                                    "Example 1": {
+                                        "request_data": {
+                                            "rule_ids": [
+                                                "5bfb2a15ca2a4525a4e69f11792dfe61"
+                                            ]
+                                        }
+                                    }
+                                },
+                                "required": [
+                                    "request_data"
+                                ],
+                                "properties": {
+                                    "request_data": {
+                                        "$ref": "#/components/schemas/DisablePreventionEditRulePAPIRequest"
+                                    }
+                                }
+                            },
+                            "examples": {
+                                "Example 1": {
+                                    "value": {
+                                        "request_data": {
+                                            "rule_name": "My MacOS Rule",
+                                            "description": "Data prevention rule for MacOS",
+                                            "platform": "macos",
+                                            "module_ids": [
+                                                38
+                                            ],
+                                            "conditions": {
+                                                "hash": "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824",
+                                                "path": "/usr/",
+                                                "signer": "Trusted Company Inc.",
+                                                "command": "command line argument"
+                                            },
+                                            "profile_ids": [
+                                                96
+                                            ],
+                                            "status": "enabled",
+                                            "scope": "profile",
+                                            "rule_id": "5bfb2a15ca2a4525a4e69f11792dfe61"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BaseResponseString"
+                                },
+                                "examples": {
+                                    "Example 1": {
+                                        "value": {
+                                            "reply": "330fc8dec96a4810af886af328e73264"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-stoplight": {
+                    "id": "6pugiuylhy19l"
+                },
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "UCoWpG4rkNzgCp2dsh8m02iVpZsskwKHz7N1tErPcUV3Wmf59Gc9kytmgOv0pDWoem3PBlORyRIPiir4OcYdWUOWAM3JyTgoCxQf4nQoTlKmFRKz9Bj5vIjluw66p9WP "
+                        },
+                        "in": "header",
+                        "name": "Authorization",
+                        "required": true,
+                        "description": "{api_key}"
+                    },
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "241"
+                        },
+                        "in": "header",
+                        "required": true,
+                        "name": "x-xdr-auth-id",
+                        "description": "{api_key_id}"
+                    }
+                ]
+            }
+        },
+        "/public_api/v1/disable_prevention/delete": {
+            "post": {
+                "summary": "Delete Disable Prevention Rules",
+                "description": "Deletes one or more Disable Prevention rules based on the provided rule ID.",
+                "operationId": "deleteDisablePreventionRules",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "x-examples": {
+                                    "Example 1": {
+                                        "request_data": {
+                                            "rule_ids": [
+                                                "5bfb2a15ca2a4525a4e69f11792dfe61"
+                                            ]
+                                        }
+                                    }
+                                },
+                                "required": [
+                                    "request_data"
+                                ],
+                                "properties": {
+                                    "request_data": {
+                                        "$ref": "#/components/schemas/DisablePreventionDeleteRulesPAPIRequest"
+                                    }
+                                }
+                            },
+                            "examples": {
+                                "Example 1": {
+                                    "value": {
+                                        "request_data": {
+                                            "rule_ids": [
+                                                "00e2308ad4a54fca8b478766ee9de57e"
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DeleteResponseString"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-stoplight": {
+                    "id": "1uwihw0r89hwx"
+                },
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "UCoWpG4rkNzgCp2dsh8m02iVpZsskwKHz7N1tErPcUV3Wmf59Gc9kytmgOv0pDWoem3PBlORyRIPiir4OcYdWUOWAM3JyTgoCxQf4nQoTlKmFRKz9Bj5vIjluw66p9WP "
+                        },
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "{api_key}",
+                        "required": true
+                    },
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "241"
+                        },
+                        "in": "header",
+                        "name": "x-xdr-auth-id",
+                        "description": "{api_key_id}",
+                        "required": true
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "GetDataRequest": {
+                "type": "object",
+                "x-stoplight": {
+                    "id": "ve0lm1q4uhe7s"
+                },
+                "x-examples": {
+                    "Example 1": {
+                        "search_from": 0,
+                        "search_to": 100,
+                        "sort": {
+                            "field": "rule_id",
+                            "keyword": "asc"
+                        },
+                        "filters": [
+                            {
+                                "field": "status",
+                                "operator": "eq",
+                                "value": "enabled"
+                            }
+                        ]
+                    },
+                    "Example 2": {
+                        "search_from": 0,
+                        "search_to": 100,
+                        "sort": {
+                            "field": "modification_time",
+                            "keyword": "desc"
+                        },
+                        "filters": [
+                            {
+                                "field": "status",
+                                "operator": "eq",
+                                "value": "enabled"
+                            },
+                            {
+                                "field": "modification_time",
+                                "operator": "gte",
+                                "value": 1762870187000
+                            }
+                        ]
+                    }
+                },
+                "properties": {
+                    "search_from": {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "Zero-based index of the first Disable Prevention rule to return. Used for pagination.",
+                        "minimum": 0
+                    },
+                    "search_to": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "default": 100,
+                        "description": "Index number of Disable Prevention rules to return starting from `search_from`."
+                    },
+                    "sort": {
+                        "$ref": "#/components/schemas/SortingRequest"
+                    },
+                    "filters": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/FilterRequest"
+                        }
+                    }
+                }
+            },
+            "SortingRequest": {
+                "type": "object",
+                "x-stoplight": {
+                    "id": "3wihmath641y1"
+                },
+                "required": [
+                    "field",
+                    "keyword"
+                ],
+                "properties": {
+                    "field": {
+                        "type": "string",
+                        "description": "Rule attribute to apply the filter on. For example: `rule_id`, `status`, `modification_time`, `platform`).",
+                        "example": "rule_id"
+                    },
+                    "keyword": {
+                        "type": "string",
+                        "enum": [
+                            "asc",
+                            "desc"
+                        ],
+                        "description": "Determines the sort order."
+                    }
+                },
+                "x-examples": {
+                    "Example 1": {
+                        "field": "rule_id",
+                        "keyword": "asc"
+                    }
+                }
+            },
+            "FilterRequest": {
+                "type": "object",
+                "x-stoplight": {
+                    "id": "mhd0cr56bfmdw"
+                },
+                "x-examples": {
+                    "Example 1": {
+                        "field": "status",
+                        "operator": "eq",
+                        "value": "enabled"
+                    },
+                    "Example 2": {
+                        "field": "platform",
+                        "operator": "eq",
+                        "value": "macos"
+                    },
+                    "Example 3": {
+                        "field": "modification_time",
+                        "operator": "eq",
+                        "value": "1762870187000"
+                    }
+                },
+                "required": [
+                    "field",
+                    "operator",
+                    "value"
+                ],
+                "properties": {
+                    "field": {
+                        "type": "string",
+                        "description": "Rule attribute to apply the filter on. For example: `rule_id`, `status`, `modification_time`, `platform`).",
+                        "example": "status"
+                    },
+                    "operator": {
+                        "type": "string",
+                        "description": "Comparison operator used for filtering. For example, (`eq`, `neq`, `gte`, `lte`, `contains` or `not_contains`)",
+                        "default": "eq"
+                    },
+                    "value": {
+                        "type": "object",
+                        "description": "The value to compare against the specified field. The expected data type and format depend on the field being filtered and the operator used.\n\n**Examples:**\n\n* If the `field` is `status`, the `value` can be `enabled` or `disabled`.\n* If the `field` is `modification_time`, the `value` should be a Unix timestamp in milliseconds (for example, **`1762870187000`**).\n* If the `field` is `platform`, the `value` can be a string such as `windows`, `macos`, or `linux`\n"
+                    }
+                }
+            },
+            "PublicGetDataResponse": {
+                "type": "object",
+                "x-stoplight": {
+                    "id": "l1j29tja6usvm"
+                },
+                "properties": {
+                    "reply": {
+                        "type": "object",
+                        "properties": {
+                            "data": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/DisablePreventionRulePAPIObject"
+                                }
+                            },
+                            "filter_count": {
+                                "type": "integer",
+                                "description": "The number of rules returned in the current response after applying filters."
+                            },
+                            "total_count": {
+                                "type": "integer",
+                                "description": "The total number of rules available that match the filter criteria, regardless of pagination."
+                            }
+                        }
+                    }
+                },
+                "x-examples": {
+                    "Example 1": {
+                        "reply": {
+                            "data": [
+                                {
+                                    "rule_id": "171a1ef6086945008ff80a7012807364",
+                                    "rule_name": "My MAC DPR !~~",
+                                    "description": "My DPR via PAPI",
+                                    "platform": "macos",
+                                    "conditions": {
+                                        "path": "/*",
+                                        "signer": "company.inc."
+                                    },
+                                    "module_ids": [
+                                        38,
+                                        55
+                                    ],
+                                    "profile_ids": [
+                                        96
+                                    ],
+                                    "scope": "profile",
+                                    "status": "enabled",
+                                    "created_by": "John Doe",
+                                    "user_email": "john.doe@mysite.com",
+                                    "modification_time": 1764695763000,
+                                    "associated_targets": [
+                                        "endpoint name != AFDSFDS"
+                                    ]
+                                }
+                            ],
+                            "filter_count": 1,
+                            "total_count": 4
+                        }
+                    }
+                }
+            },
+            "BaseResponseString": {
+                "type": "object",
+                "x-stoplight": {
+                    "id": "zy7ioeebxgp7t"
+                },
+                "properties": {
+                    "reply": {
+                        "type": "string",
+                        "example": "330fc8dec96a4810af886af328e73264",
+                        "description": "Returns the Disable Prevention Rule ID."
+                    }
+                }
+            },
+            "DeleteResponseString": {
+                "type": "object",
+                "x-stoplight": {
+                    "id": "am2gwmor4qh75"
+                },
+                "properties": {
+                    "reply": {
+                        "type": "string",
+                        "example": "1 rule was deleted.",
+                        "description": "Describes the result of the API operation."
+                    }
+                }
+            },
+            "BaseResponseArrayModules": {
+                "type": "object",
+                "x-stoplight": {
+                    "id": "9fkaa1z8izlmg"
+                },
+                "properties": {
+                    "reply": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/DisablePreventionModulePAPIObject"
+                        }
+                    }
+                },
+                "x-examples": {
+                    "Example 1": {
+                        "reply": [
+                            {
+                                "module_id": 1,
+                                "name": "DLL Security",
+                                "description": "Memory Corruption Exploit",
+                                "profile_type": "Exploit",
+                                "conditions_definition": {
+                                    "properties": {
+                                        "sign_thumbprint": {
+                                            "type": "string",
+                                            "description": "Certificate Thumbprint"
+                                        },
+                                        "signer": {
+                                            "type": "string",
+                                            "description": "Signer Name"
+                                        },
+                                        "hash": {
+                                            "type": "string",
+                                            "description": "Hash"
+                                        },
+                                        "command": {
+                                            "type": "string",
+                                            "description": "Command Line"
+                                        },
+                                        "path": {
+                                            "type": "string",
+                                            "description": "Files / Folders"
+                                        }
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                }
+            },
+            "DisablePreventionRulePAPIObject": {
+                "type": "object",
+                "x-stoplight": {
+                    "id": "bur6kpyst75dm"
+                },
+                "x-examples": {
+                    "Example 1": {
+                        "rule_id": "1bce99ee792e4f0682d7c9bde0aaf44e",
+                        "rule_name": "My Mac DPR",
+                        "description": "Data prevention rules for my mac",
+                        "platform": "macos",
+                        "conditions": {
+                            "hash": "3b7d28f7a6c1e9b0f4a5c2d9e8f1a0b6c7d4e5f8091a2b3c4d5e6f7a8b9c0d1",
+                            "path": "/*",
+                            "signer": "trusted company.inc",
+                            "command": "command line argument",
+                            "sign_thumbprint": "Certificate thumbprint"
+                        },
+                        "module_ids": [
+                            38
+                        ],
+                        "profile_ids": [
+                            96
+                        ],
+                        "scope": "profile",
+                        "status": "enabled",
+                        "created_by": "John Doe",
+                        "user_email": "john.doe@example.com",
+                        "modification_time": 1764475578200,
+                        "associated_targets": [
+                            "endpoint name != ASFDSFDS"
+                        ]
+                    }
+                },
+                "properties": {
+                    "rule_id": {
+                        "type": "string",
+                        "description": "The unique identifier of the Disable Prevention rule.",
+                        "example": "1bce99ee792e4f0682d7c9bde0aaf44e"
+                    },
+                    "rule_name": {
+                        "type": "string",
+                        "description": "Name of the Disable Prevention rule.",
+                        "example": "My Mac DPR"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Description explaining the purpose and behavior of the rule.",
+                        "example": "Data prevention rules for my mac"
+                    },
+                    "platform": {
+                        "type": "string",
+                        "description": "Indicates the operating system to which the rule applies. For example, `windows`, `linux`, or `macos`",
+                        "example": "macos"
+                    },
+                    "conditions": {
+                        "type": "object",
+                        "description": "A combination of parameters configured during rule creation.",
+                        "properties": {
+                            "hash": {
+                                "type": "string",
+                                "x-stoplight": {
+                                    "id": "t5be281gfvwrg"
+                                },
+                                "description": "SHA256 hash",
+                                "example": "3b7d28f7a6c1e9b0f4a5c2d9e8f1a0b6c7d4e5f8091a2b3c4d5e6f7a8b9c0d1"
+                            },
+                            "path": {
+                                "type": "string",
+                                "x-stoplight": {
+                                    "id": "93lmmz57qjakt"
+                                },
+                                "description": "Path to the required files or folders",
+                                "example": "/*"
+                            },
+                            "signer": {
+                                "type": "string",
+                                "x-stoplight": {
+                                    "id": "mi2gz58l6vdmu"
+                                },
+                                "description": "Trusted signer",
+                                "example": "company.inc"
+                            },
+                            "command": {
+                                "type": "string",
+                                "x-stoplight": {
+                                    "id": "yclicb9p6bx60"
+                                },
+                                "description": "Command line argument",
+                                "example": "hi"
+                            },
+                            "sign_thumbprint": {
+                                "type": "string",
+                                "x-stoplight": {
+                                    "id": "4w8jkq8qqjbbx"
+                                },
+                                "description": "Certificate thumbprint",
+                                "example": "Certificate thumbprint"
+                            }
+                        }
+                    },
+                    "module_ids": {
+                        "type": "array",
+                        "description": "A list of module ids associated with the rule.",
+                        "items": {
+                            "type": "integer",
+                            "example": 38
+                        }
+                    },
+                    "profile_ids": {
+                        "type": "array",
+                        "description": "A list of profile ids to which the rule is applied.",
+                        "items": {
+                            "type": "integer",
+                            "example": 96
+                        }
+                    },
+                    "scope": {
+                        "type": "string",
+                        "description": "Specifies the scope of the rule, such as `global` (All endpoints) or `profile` (Exception profiles).",
+                        "example": "profile"
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Current state of the rule (for example, `enabled` or `disabled`).",
+                        "example": "enabled"
+                    },
+                    "created_by": {
+                        "type": "string",
+                        "description": "Name of the user who created the rule.",
+                        "example": "John Doe"
+                    },
+                    "user_email": {
+                        "type": "string",
+                        "description": "Email address of the user associated with the creation or last modification of the rule.",
+                        "example": "john.doe@example.com"
+                    },
+                    "modification_time": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Timestamp when the rule was last modified.",
+                        "example": 1764475578200
+                    },
+                    "associated_targets": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "example": "endpoint name != ASFDSFDS"
+                        }
+                    }
+                }
+            },
+            "DisablePreventionGetModulesPAPIRequest": {
+                "type": "object",
+                "x-stoplight": {
+                    "id": "c1sy2mwu7umml"
+                },
+                "required": [
+                    "platform"
+                ],
+                "properties": {
+                    "platform": {
+                        "type": "string",
+                        "description": "Indicates the operating system to which the rule applies. For example, `windows`, `linux`, or `macos`."
+                    }
+                },
+                "x-examples": {
+                    "Example 1": {
+                        "platform": "windows"
+                    }
+                }
+            },
+            "DisablePreventionModulePAPIObject": {
+                "type": "object",
+                "x-stoplight": {
+                    "id": "hdh0gcu02gaca"
+                },
+                "x-examples": {
+                    "Example 1": {
+                        "module_id": 1,
+                        "name": "DLL Security",
+                        "description": "Memory Corruption Exploit",
+                        "profile_type": "Exploit",
+                        "conditions_definition": {
+                            "properties": {
+                                "hash": {
+                                    "type": "string",
+                                    "description": "Hash"
+                                },
+                                "path": {
+                                    "type": "string",
+                                    "description": "Files / Folders",
+                                    "minLength": 1
+                                },
+                                "command": {
+                                    "type": "string",
+                                    "description": "Command Line",
+                                    "minLength": 1
+                                },
+                                "signer": {
+                                    "type": "string",
+                                    "description": "Signer Name",
+                                    "minLength": 1
+                                },
+                                "sign_thumbprint": {
+                                    "type": "string",
+                                    "description": "Certificate Thumbprint",
+                                    "minLength": 1
+                                }
+                            }
+                        },
+                        "additionalProperties": false,
+                        "minProperties": 1
+                    }
+                },
+                "properties": {
+                    "module_id": {
+                        "type": "integer",
+                        "description": "Module ID associated with the rule.",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "DLL Security",
+                        "description": "Name of the security module."
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Description of the disable prevention rule.",
+                        "example": "Memory Corruption Exploit"
+                    },
+                    "profile_type": {
+                        "type": "string",
+                        "description": "Type of security profile.",
+                        "example": "Exploit"
+                    },
+                    "conditions_definition": {
+                        "type": "object",
+                        "description": "A combination of parameters configured during rule creation.",
+                        "properties": {
+                            "properties": {
+                                "type": "object",
+                                "properties": {
+                                    "hash": {
+                                        "type": "object",
+                                        "description": "SHA256 hash",
+                                        "properties": {
+                                            "type": {
+                                                "type": "string"
+                                            },
+                                            "description": {
+                                                "type": "string",
+                                                "example": "Hash"
+                                            }
+                                        }
+                                    },
+                                    "path": {
+                                        "type": "object",
+                                        "description": "Path to the required files or folders",
+                                        "properties": {
+                                            "type": {
+                                                "type": "string"
+                                            },
+                                            "description": {
+                                                "type": "string",
+                                                "example": "Files / Folders"
+                                            },
+                                            "minLength": {
+                                                "type": "integer",
+                                                "x-stoplight": {
+                                                    "id": "q0zi0wr1dfrv2"
+                                                },
+                                                "example": 1
+                                            }
+                                        }
+                                    },
+                                    "command": {
+                                        "type": "object",
+                                        "description": "Command line argument",
+                                        "properties": {
+                                            "type": {
+                                                "type": "string"
+                                            },
+                                            "description": {
+                                                "type": "string",
+                                                "example": "Command Line"
+                                            },
+                                            "minLength": {
+                                                "type": "integer",
+                                                "x-stoplight": {
+                                                    "id": "mgg3vfyj5gy2v"
+                                                },
+                                                "example": 1
+                                            }
+                                        }
+                                    },
+                                    "signer": {
+                                        "type": "object",
+                                        "description": "Trusted signer",
+                                        "properties": {
+                                            "type": {
+                                                "type": "string"
+                                            },
+                                            "description": {
+                                                "type": "string",
+                                                "example": "Signer Name"
+                                            },
+                                            "minLength": {
+                                                "type": "integer",
+                                                "x-stoplight": {
+                                                    "id": "spxmj36rq2cx8"
+                                                },
+                                                "example": 1
+                                            }
+                                        }
+                                    },
+                                    "sign_thumbprint": {
+                                        "type": "object",
+                                        "description": "Certificate thumbprint",
+                                        "properties": {
+                                            "type": {
+                                                "type": "string"
+                                            },
+                                            "description": {
+                                                "type": "string",
+                                                "example": "Certificate Thumbprint"
+                                            },
+                                            "minLength": {
+                                                "type": "integer",
+                                                "x-stoplight": {
+                                                    "id": "umh4cv1hf6qrr"
+                                                },
+                                                "example": 1
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "additionalProperties": {
+                        "type": "boolean",
+                        "x-stoplight": {
+                            "id": "nfy4k3njarur7"
+                        }
+                    },
+                    "minProperties": {
+                        "type": "integer",
+                        "x-stoplight": {
+                            "id": "v1penaiy2ski5"
+                        },
+                        "example": 1
+                    }
+                }
+            },
+            "DisablePreventionAddRulePAPIRequest": {
+                "$ref": "#/components/schemas/DisablePreventionModifyRulePAPIRequestBase",
+                "x-stoplight": {
+                    "id": "fryqlucvyvld7"
+                },
+                "x-examples": {
+                    "Example 1": {
+                        "rule_name": "string",
+                        "description": "string",
+                        "platform": "string",
+                        "module_ids": [
+                            0
+                        ],
+                        "conditions": {
+                            "hash": "string",
+                            "path": "string",
+                            "signer": "string",
+                            "command": "string",
+                            "sign_thumbprint": "string"
+                        },
+                        "profile_ids": [
+                            0
+                        ],
+                        "status": "string",
+                        "scope": "string"
+                    }
+                }
+            },
+            "DisablePreventionEditRulePAPIRequest": {
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/DisablePreventionModifyRulePAPIRequestBase"
+                    },
+                    {
+                        "type": "object",
+                        "required": [
+                            "rule_id"
+                        ],
+                        "properties": {
+                            "rule_id": {
+                                "type": "string",
+                                "description": "The unique identifier of the Disable Prevention rule.",
+                                "example": "5bfb2a15ca2a4525a4e69f11792dfe61"
+                            }
+                        }
+                    }
+                ],
+                "x-stoplight": {
+                    "id": "w8j3nrdmeqys6"
+                },
+                "x-examples": {
+                    "Example 1": {
+                        "rule_name": "MAC DPR",
+                        "description": "Data Prevention rule for MAC.",
+                        "platform": "macos",
+                        "module_ids": [
+                            38,
+                            55
+                        ],
+                        "conditions": {
+                            "hash": "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08 ",
+                            "path": "/*",
+                            "signer": "Trusted comapany.Inc",
+                            "command": "command line argument",
+                            "sign_thumbprint": "certificate thumbprint"
+                        },
+                        "profile_ids": [
+                            97
+                        ],
+                        "status": "enabled",
+                        "scope": "profile",
+                        "rule_id": "5bfb2a15ca2a4525a4e69f11792dfe61"
+                    }
+                }
+            },
+            "DisablePreventionModifyRulePAPIRequestBase": {
+                "type": "object",
+                "x-stoplight": {
+                    "id": "ve95ce5gom42p"
+                },
+                "required": [
+                    "rule_name",
+                    "description",
+                    "platform",
+                    "module_ids",
+                    "conditions",
+                    "status",
+                    "scope"
+                ],
+                "properties": {
+                    "rule_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 700,
+                        "description": "Name of the disable prevention rule."
+                    },
+                    "description": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 1000,
+                        "description": "Description explaining the purpose and behavior of the rule."
+                    },
+                    "platform": {
+                        "type": "string",
+                        "description": "Indicates the operating system to which the rule applies. For example, `windows`, `linux`, or `macos`"
+                    },
+                    "module_ids": {
+                        "type": "array",
+                        "minLength": 1,
+                        "description": "A list of module ids associated with the rule.",
+                        "items": {
+                            "type": "integer"
+                        }
+                    },
+                    "conditions": {
+                        "type": "object",
+                        "description": "A combination of parameters configured during rule creation.",
+                        "properties": {
+                            "hash": {
+                                "type": "string",
+                                "x-stoplight": {
+                                    "id": "0qw88e36qcy2z"
+                                },
+                                "description": "SHA256 hash"
+                            },
+                            "path": {
+                                "type": "string",
+                                "x-stoplight": {
+                                    "id": "xrmqkbfy0bfwq"
+                                },
+                                "description": "Path to the required files or folders"
+                            },
+                            "signer": {
+                                "type": "string",
+                                "x-stoplight": {
+                                    "id": "mtqk4x14am4mi"
+                                },
+                                "description": "Trusted signer"
+                            },
+                            "command": {
+                                "type": "string",
+                                "x-stoplight": {
+                                    "id": "8x3wdbdyos3yh"
+                                },
+                                "description": "Command line argument"
+                            },
+                            "sign_thumbprint": {
+                                "type": "string",
+                                "x-stoplight": {
+                                    "id": "357411247674v"
+                                },
+                                "description": "Certificate thumbprint"
+                            }
+                        }
+                    },
+                    "profile_ids": {
+                        "type": "array",
+                        "description": "A list of profile ids to which the rule is applied.",
+                        "nullable": true,
+                        "items": {
+                            "type": "integer"
+                        }
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Status of the rule (for example, `enabled` or `disabled`)."
+                    },
+                    "scope": {
+                        "type": "string",
+                        "description": "Specifies the scope of the rule, such as `global` (All endpoints) or `profile` (Exception profiles)."
+                    }
+                }
+            },
+            "DisablePreventionDeleteRulesPAPIRequest": {
+                "type": "object",
+                "x-stoplight": {
+                    "id": "3ycu1izez1yqv"
+                },
+                "required": [
+                    "rule_ids"
+                ],
+                "properties": {
+                    "rule_ids": {
+                        "type": "array",
+                        "minLength": 1,
+                        "description": "The unique identifier of the Disable Prevention rule.",
+                        "items": {
+                            "type": "string",
+                            "example": "00e2308ad4a54fca8b478766ee9de57e"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

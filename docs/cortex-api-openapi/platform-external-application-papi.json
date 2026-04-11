@@ -1,0 +1,1178 @@
+{
+    "openapi": "3.1.2",
+    "x-stoplight": {
+        "id": "1t20ihqqrbt51"
+    },
+    "info": {
+        "title": "Cortex XSIAM External Application Management API",
+        "version": "Cortex XSIAM 3.4",
+        "description": "This OpenAPI Specification provides documentation about External Applications Public APIs for Cortex XSIAM. With these endpoints, you can create, read, update, and delete external applications including webhook, Splunk, AWS SQS, AWS S3, and Syslog integrations. These APIs are intended to be accessed via API keys. Therefore, the key must have the RBAC permission ```alert_notifications``` for list & read operations and permission ```alert_notifications_action``` for create, edit, enable/disable, & delete operations.",
+        "contact": {
+            "email": "docs-cortex@paloaltonetworks.com",
+            "name": "Cortex Documentation Team",
+            "url": "https://docs-cortex.paloaltonetworks.com/p/"
+        }
+    },
+    "servers": [
+        {
+            "url": "https://api-{fqdn}",
+            "variables": {
+                "fqdn": {
+                    "default": "cortex.paloaltonetworks.com",
+                    "description": "The fully qualified domain name for your Cortex tenant"
+                }
+            }
+        }
+    ],
+    "tags": [
+        {
+            "name": "External Applications",
+            "description": "Operations for managing external applications including creating, editing, deleting, and listing external applications."
+        }
+    ],
+    "paths": {
+        "/platform/integration/v1/external-application": {
+            "summary": "Operations on the collection of applications.",
+            "post": {
+                "summary": "Create a new application",
+                "description": "Allows the user to create a new external application integration and specify its attributes. To see the possible ```application_type``` values, please check the relevant enum in the ```ExternalApplication``` schema for additional information. The ```connection_config``` attribute is where a user would define AWS SQS, AWS S3, Splunk, Syslog, and webhook configurations; the required formats for these fields are documented in the respective schemas that are linked to the base ```ConnectionConfig``` schema. Please ensure that you have setup the proper egress configurations on the Cortex Gateway; this API verifies the new connection against the egress configurations specified for the given tenant. If assistance is required, please utilize the cue on the UI menu for creating a new external application configuration.",
+                "operationId": "createApplication",
+                "tags": [
+                    "External Applications"
+                ],
+                "requestBody": {
+                    "description": "Allows the user to create a new external application. ",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "allOf": [
+                                    {
+                                        "$ref": "#/components/schemas/ExternalApplicationRequest"
+                                    },
+                                    {
+                                        "properties": {
+                                            "application_id": {
+                                                "description": "Omitted on insert",
+                                                "readOnly": true
+                                            },
+                                            "created_at": {
+                                                "description": "Omitted on insert",
+                                                "readOnly": true
+                                            },
+                                            "last_modified_by": {
+                                                "description": "Must be supplied on insert, but not readOnly.",
+                                                "readOnly": true
+                                            },
+                                            "modified_at": {
+                                                "description": "Omitted on insert",
+                                                "readOnly": true
+                                            }
+                                        },
+                                        "example": {
+                                            "request_data": {
+                                                "name": "Test External Application 01",
+                                                "description": "test description for the given external application",
+                                                "application_type": "webhook",
+                                                "connection_config": {
+                                                    "url": "https://webhook.site/305650415-aad3-45ac-9d92-2455105edb96",
+                                                    "http_method": "POST"
+                                                }
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Application successfully created.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ExternalApplicationResponse"
+                                },
+                                "example": {
+                                    "data": {
+                                        "application_id": "e94fbc98-3053-6506-876b-f809f344f118",
+                                        "name": "Test External Application 01",
+                                        "description": "test description for the given external application",
+                                        "status": "connected",
+                                        "created_at": 1753918286,
+                                        "last_modified_by": "john.doe@example.com",
+                                        "modified_at": 1753918286,
+                                        "application_type": "webhook",
+                                        "connection_config": {
+                                            "url": "https://webhook.site/305650415-aad3-45ac-9d92-2455105edb96",
+                                            "http_method": "POST"
+                                        },
+                                        "last_error": null,
+                                        "last_error_at": null
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/ExternalApplicationCreatedBadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/UnauthorizedImproperPermissions"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalError"
+                    }
+                },
+                "x-stoplight": {
+                    "id": "c8d3je6c8pj63"
+                }
+            },
+            "get": {
+                "summary": "List all applications",
+                "operationId": "listApplications",
+                "description": "Retrieves a list of external applications (AWS SQS, AWS S3, Syslog, Splunk, and webhook) and their attributes. The meaning behind all attributes in this response could be found in the ```ExternalApplication``` schema. Please note that the field ```connection_config``` is retrieved with masked attributes for security purposes; examples are provided in the sample response shown for this endpoint. Please note that the ```last_modified_by```, ```last_error```, and ```last_error_at``` attributes are not populated for Syslog integrations.",
+                "tags": [
+                    "External Applications"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "A list of applications.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/ExternalApplication"
+                                            }
+                                        },
+                                        "metadata": {
+                                            "type": "object",
+                                            "$ref": "#/components/schemas/Metadata"
+                                        }
+                                    }
+                                },
+                                "example": {
+                                    "data": [
+                                        {
+                                            "application_id": 1,
+                                            "name": "Test External Application 01",
+                                            "description": "test description for the given external application",
+                                            "status": "connected",
+                                            "created_at": 1753918286,
+                                            "last_modified_by": "john.doe@example.com",
+                                            "modified_at": 1753918286,
+                                            "application_type": "webhook",
+                                            "connection_config": {
+                                                "url": "https://webhook.site/305650415-aad3-45ac-9d92-2455105edb96",
+                                                "http_method": "POST"
+                                            },
+                                            "last_error": null,
+                                            "last_error_at": null
+                                        },
+                                        {
+                                            "application_id": 2,
+                                            "name": "Test External Application 02",
+                                            "status": "connected",
+                                            "created_at": 1753918288,
+                                            "last_modified_by": "john.doe@example.com",
+                                            "modified_at": 1753918288,
+                                            "application_type": "splunk",
+                                            "connection_config": {
+                                                "hec_endpoint": "https://splunk-hec-****.company.com:8088/services/collector/event",
+                                                "auth_token": "123-****-****-****-abcd456"
+                                            },
+                                            "last_error": null,
+                                            "last_error_at": null
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/UnauthorizedImproperPermissions"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalError"
+                    }
+                },
+                "x-stoplight": {
+                    "id": "628gv97zo1ei4"
+                }
+            }
+        },
+        "/platform/integration/v1/external-application/{application_id}": {
+            "put": {
+                "summary": "Update an existing application (full replacement)",
+                "operationId": "updateApplication",
+                "description": "Allows the user to edit an external application and specify its new attributes. To see the possible ```application_type``` values, please check the relevant enum in the ```ExternalApplication``` schema for additional information. The ```connection_config``` attribute is where a user would define AWS SQS, AWS S3, Splunk, Syslog, and webhook configurations; the required formats for these fields are documented in the respective schemas that are linked to the base ```ConnectionConfig``` schema. Please ensure that you have setup the proper egress configurations on the Cortex Gateway; this API verifies the new connection against the egress configurations specified for the given tenant. If assistance is required, please utilize the cue on the UI menu for creating a new external application configuration.",
+                "parameters": [
+                    {
+                        "name": "application_id",
+                        "in": "path",
+                        "example": "e94fbc98-3053-6506-876b-f809f344f118",
+                        "description": "The unique identifier of the application.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "External Applications"
+                ],
+                "requestBody": {
+                    "description": "Application object to update. Must include all non-readOnly required fields: ```name```,```application_type```,```connection_config```. Please note that one cannot update the ```application_type``` of an existing external application; this field must stay constant.",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ExternalApplicationRequest"
+                            },
+                            "example": {
+                                "request_data": {
+                                    "name": "Test External Application 03",
+                                    "description": "test description for the given external application",
+                                    "application_type": "webhook",
+                                    "connection_config": {
+                                        "url": "https://webhook.site/305650415-aad3-45ac-9d92-2455105edb96",
+                                        "http_method": "POST"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Application updated successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ExternalApplicationResponse"
+                                },
+                                "example": {
+                                    "data": {
+                                        "application_id": 2,
+                                        "name": "Test External Application 03",
+                                        "description": "test description for the given external application",
+                                        "status": "connected",
+                                        "created_at": 1753918287,
+                                        "last_modified_by": "john.doe@example.com",
+                                        "modified_at": 1753918288,
+                                        "application_type": "webhook",
+                                        "connection_config": {
+                                            "url": "https://webhook.site/305650415-aad3-45ac-9d92-2455105edb96",
+                                            "http_method": "POST"
+                                        },
+                                        "last_error": null,
+                                        "last_error_at": null
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/ExternalApplicationEditedBadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/UnauthorizedImproperPermissions"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalError"
+                    }
+                },
+                "x-stoplight": {
+                    "id": "xb6ih5tuooeb0"
+                }
+            }
+        },
+        "/platform/integration/v1/external-application/{application_type}/id/{application_id}": {
+            "delete": {
+                "summary": "Delete an application",
+                "operationId": "deleteApplication",
+                "description": "Allows the user to delete an external application. Deletion is not permitted if the application is associated with an active notification rule.",
+                "parameters": [
+                    {
+                        "name": "application_id",
+                        "in": "path",
+                        "required": true,
+                        "example": "e94fbc98-3053-6506-876b-f809f344f118",
+                        "description": "The unique identifier of the application.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "application_type",
+                        "in": "path",
+                        "required": true,
+                        "description": "The application type of the specified application",
+                        "example": "syslog",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "syslog",
+                                "webhook",
+                                "splunk",
+                                "aws_sqs",
+                                "aws_s3"
+                            ]
+                        }
+                    }
+                ],
+                "tags": [
+                    "External Applications"
+                ],
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/ExternalApplicationDeleteSuccess"
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/ExternalApplicationDeleteBadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/UnauthorizedImproperPermissions"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalError"
+                    }
+                },
+                "x-stoplight": {
+                    "id": "gid1x73mpzv6i"
+                }
+            },
+            "get": {
+                "summary": "Get External Application details by ID",
+                "operationId": "getExternalApplicationById",
+                "description": "Retrieves an external application and returns its attributes. The meaning behind all attributes in this response could be found in the ```ExternalApplication``` schema.",
+                "parameters": [
+                    {
+                        "name": "application_id",
+                        "in": "path",
+                        "required": true,
+                        "example": "e94fbc98-3053-6506-876b-f809f344f118",
+                        "description": "The unique identifier of the application.",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "application_type",
+                        "in": "path",
+                        "required": true,
+                        "description": "The application type of the specified application",
+                        "example": "webhook",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "syslog",
+                                "webhook",
+                                "splunk",
+                                "aws_sqs",
+                                "aws_s3"
+                            ]
+                        }
+                    }
+                ],
+                "tags": [
+                    "External Applications"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Application details retrieved successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ExternalApplicationResponse"
+                                },
+                                "example": {
+                                    "data": {
+                                        "application_id": "e94fbc98-3053-6506-876b-f809f344f118",
+                                        "name": "Test External Application 01",
+                                        "description": "test description for the given external application",
+                                        "status": "connected",
+                                        "created_at": 1753918286,
+                                        "last_modified_by": "john.doe@example.com",
+                                        "modified_at": 1753918286,
+                                        "application_type": "webhook",
+                                        "connection_config": {
+                                            "url": "https://webhook.site/305650415-aad3-45ac-9d92-2455105edb96",
+                                            "http_method": "POST"
+                                        },
+                                        "last_error": null,
+                                        "last_error_at": null
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/GetExternalApplicationByUUIDBadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/UnauthorizedImproperPermissions"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalError"
+                    }
+                },
+                "x-stoplight": {
+                    "id": "ze9yqoy5wpk3r"
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "ConnectionConfig": {
+                "type": "object",
+                "description": "Connection configuration based on application_type.",
+                "oneOf": [
+                    {
+                        "$ref": "#/components/schemas/WebhookConnectionConfig"
+                    },
+                    {
+                        "$ref": "#/components/schemas/SplunkConnectionConfig"
+                    },
+                    {
+                        "$ref": "#/components/schemas/AwsSqsConnectionConfig"
+                    },
+                    {
+                        "$ref": "#/components/schemas/AwsS3ConnectionConfig"
+                    },
+                    {
+                        "$ref": "#/components/schemas/SyslogConnectionConfig"
+                    }
+                ],
+                "example": {
+                    "url": "https://webhook.site/305650415-aad3-45ac-9d92-2455105edb96"
+                },
+                "x-stoplight": {
+                    "id": "v0ynjecvbj3ys"
+                }
+            },
+            "WebhookConnectionConfig": {
+                "title": "WebhookConnectionConfig",
+                "description": "Enumerates the configuration parameters for webhook external applications",
+                "type": "object",
+                "required": [
+                    "url"
+                ],
+                "properties": {
+                    "url": {
+                        "type": "string",
+                        "format": "url",
+                        "description": "webhook URL."
+                    },
+                    "http_method": {
+                        "type": "string",
+                        "enum": [
+                            "POST",
+                            "PUT"
+                        ],
+                        "default": "POST"
+                    },
+                    "headers": {
+                        "type": "object",
+                        "description": "Custom HTTP headers to include."
+                    }
+                },
+                "x-stoplight": {
+                    "id": "fc2o0x93d0vhh"
+                }
+            },
+            "SyslogConnectionConfig": {
+                "title": "SyslogConnectionConfig",
+                "description": "Enumerates the configuration parameters for syslog external applications",
+                "type": "object",
+                "properties": {
+                    "port": {
+                        "type": "integer"
+                    },
+                    "protocol": {
+                        "type": "string",
+                        "enum": [
+                            "UDP",
+                            "TCP",
+                            "TLS"
+                        ]
+                    },
+                    "facility": {
+                        "type": "string",
+                        "description": "Choose one of the syslog standard values. The value maps to how your syslog server uses the facility field to manage messages. For details on the facility field, see RFC 5424."
+                    },
+                    "address": {
+                        "type": "string",
+                        "description": "IP address or fully qualified domain name (FQDN) of the syslog server."
+                    },
+                    "security_info": {
+                        "type": "object",
+                        "properties": {
+                            "certificate_name": {
+                                "type": "string",
+                                "description": "When using TLS for communication between Cortex and the syslog server, Cortex validates that the syslog receiver has a certificate. Specify the certificate name here."
+                            },
+                            "ignore_cert_errors": {
+                                "type": "boolean",
+                                "default": false,
+                                "description": "Whether to ignore certificate errors. For security reasons, this is not recommended. If you set this to true, logs will be forwarded even if the certificate contains errors."
+                            },
+                            "certificate_content": {
+                                "type": "string",
+                                "format": "binary",
+                                "description": "Binary string of the certificate."
+                            }
+                        }
+                    }
+                },
+                "required": [
+                    "port",
+                    "protocol",
+                    "address",
+                    "facility"
+                ],
+                "example": {
+                    "address": "xdr-splunk-qa.traps.company.com",
+                    "facility": "FAC_USER",
+                    "port": 5006,
+                    "protocol": "TCP",
+                    "security_info": null
+                },
+                "x-stoplight": {
+                    "id": "n8a9edlefmssg"
+                }
+            },
+            "SplunkConnectionConfig": {
+                "title": "SplunkConnectionConfig",
+                "description": "Enumerates the configuration parameters for splunk external applications",
+                "type": "object",
+                "properties": {
+                    "hec_endpoint": {
+                        "type": "string",
+                        "format": "url",
+                        "description": "Splunk HTTP Event Collector (HEC) endpoint."
+                    },
+                    "auth_token": {
+                        "type": "string",
+                        "description": "HEC authentication token."
+                    }
+                },
+                "required": [
+                    "hec_endpoint",
+                    "auth_token"
+                ],
+                "x-stoplight": {
+                    "id": "hvivp7anocba1"
+                }
+            },
+            "AwsSqsConnectionConfig": {
+                "title": "SQSConnectionConfig",
+                "type": "object",
+                "description": "Enumerates the configuration parameters for aws sqs external applications",
+                "properties": {
+                    "queue_url": {
+                        "type": "string",
+                        "format": "url",
+                        "description": "The SQS queue destination URL."
+                    },
+                    "access_key": {
+                        "type": "string"
+                    },
+                    "secret_key": {
+                        "type": "string"
+                    },
+                    "role_arn": {
+                        "type": "string"
+                    },
+                    "connection_type": {
+                        "type": "string",
+                        "enum": [
+                            "ROLE_ARN",
+                            "ACCESS_KEY"
+                        ],
+                        "default": "ROLE_ARN"
+                    }
+                },
+                "required": [
+                    "queue_url"
+                ],
+                "example": [
+                    {
+                        "connection_type": "ACCESS_KEY",
+                        "queue_url": "https://sqs.usXXXXm/122XXX4/XXXX",
+                        "access_key": "XXXXXXX",
+                        "secret_key": "XXXXXXX"
+                    },
+                    {
+                        "connection_type": "ROLE_ARN",
+                        "queue_url": "https://sqs.usXXXXm/122XXX4/XXXX",
+                        "role_arn": "arn:aws:iam::122XXXXX4:role/XXXXXX"
+                    }
+                ],
+                "x-stoplight": {
+                    "id": "l8m9bllyruurq"
+                }
+            },
+            "AwsS3ConnectionConfig": {
+                "title": "S3ConnectionConfig",
+                "type": "object",
+                "description": "Enumerates the configuration parameters for aws s3 external applications",
+                "properties": {
+                    "s3_uri": {
+                        "type": "string",
+                        "format": "url",
+                        "description": "Amazon S3 bucket URI"
+                    },
+                    "region": {
+                        "type": "string",
+                        "description": "AWS region where the S3 bucket resides"
+                    },
+                    "role_arn": {
+                        "type": "string",
+                        "description": "Role ARN associated with the IAM role for S3 access"
+                    },
+                    "roll_up_interval": {
+                        "type": "integer",
+                        "format": "int32",
+                        "description": "Roll-up interval for metrics or data aggregation (in minutes)",
+                        "enum": [
+                            15,
+                            30,
+                            60,
+                            180
+                        ],
+                        "default": 60
+                    }
+                },
+                "required": [
+                    "s3_uri",
+                    "region",
+                    "role_arn"
+                ],
+                "example": {
+                    "region": "us-east-1",
+                    "role_arn": "arn:aws:iam::122XXXXX4:role/XXXXXX",
+                    "s3_uri": "s3://XXXX-01/folder-01/",
+                    "roll_up_interval": 60
+                },
+                "x-stoplight": {
+                    "id": "uv0wfey5ue7d4"
+                }
+            },
+            "ExternalApplication": {
+                "type": "object",
+                "description": "Enumerates the various attributes of an external application object",
+                "properties": {
+                    "application_id": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Unique identifier",
+                        "readOnly": true
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Name of the application."
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Description of the application."
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "connected",
+                            "warning",
+                            "disabled",
+                            "error",
+                            "in_progress",
+                            "pending_authorization",
+                            "authorization_failure",
+                            "incomplete",
+                            "pending"
+                        ],
+                        "description": "Current status of the application.",
+                        "readOnly": true,
+                        "default": "connected"
+                    },
+                    "created_at": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Timestamp when the application was created.",
+                        "readOnly": true
+                    },
+                    "last_modified_by": {
+                        "type": "string",
+                        "description": "Identifier of the user who created the app.",
+                        "readOnly": true
+                    },
+                    "last_error": {
+                        "type": "string",
+                        "description": "Description summarizing that last known error for the given external application.",
+                        "readOnly": true
+                    },
+                    "last_error_at": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Timestamp of the last error.",
+                        "readOnly": true
+                    },
+                    "modified_at": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Timestamp of the last modification.",
+                        "readOnly": true
+                    },
+                    "application_type": {
+                        "type": "string",
+                        "enum": [
+                            "syslog",
+                            "webhook",
+                            "splunk",
+                            "aws_sqs",
+                            "aws_s3"
+                        ],
+                        "description": "The type of application instance."
+                    },
+                    "connection_config": {
+                        "$ref": "#/components/schemas/ConnectionConfig"
+                    }
+                },
+                "x-stoplight": {
+                    "id": "2ajnlvtutx9mf"
+                }
+            },
+            "ExternalApplicationResponse": {
+                "type": "object",
+                "description": "Enumerates the various attributes of an external application response object",
+                "properties": {
+                    "data": {
+                        "type": "object",
+                        "properties": {
+                            "application_id": {
+                                "type": "integer",
+                                "format": "int64",
+                                "description": "Unique identifier",
+                                "readOnly": true
+                            },
+                            "name": {
+                                "type": "string",
+                                "maxLength": 256,
+                                "description": "Name of the application."
+                            },
+                            "description": {
+                                "type": "string",
+                                "description": "Description of the application."
+                            },
+                            "status": {
+                                "type": "string",
+                                "enum": [
+                                    "connected",
+                                    "warning",
+                                    "disabled",
+                                    "error",
+                                    "in_progress",
+                                    "pending_authorization",
+                                    "authorization_failure",
+                                    "incomplete",
+                                    "pending"
+                                ],
+                                "description": "Current status of the application.",
+                                "readOnly": true,
+                                "default": "connected"
+                            },
+                            "created_at": {
+                                "type": "integer",
+                                "format": "int64",
+                                "description": "Timestamp when the application was created.",
+                                "readOnly": true
+                            },
+                            "last_modified_by": {
+                                "type": "string",
+                                "description": "Identifier of the user who created the app.",
+                                "readOnly": true
+                            },
+                            "last_error": {
+                                "type": "string",
+                                "description": "Description summarizing that last known error for the given external application.",
+                                "readOnly": true
+                            },
+                            "last_error_at": {
+                                "type": "integer",
+                                "format": "int64",
+                                "description": "Timestamp of the last error.",
+                                "readOnly": true
+                            },
+                            "modified_at": {
+                                "type": "integer",
+                                "format": "int64",
+                                "description": "Timestamp of the last modification.",
+                                "readOnly": true
+                            },
+                            "application_type": {
+                                "type": "string",
+                                "enum": [
+                                    "syslog",
+                                    "webhook",
+                                    "splunk",
+                                    "aws_sqs",
+                                    "aws_s3"
+                                ],
+                                "description": "The type of application instance."
+                            },
+                            "connection_config": {
+                                "$ref": "#/components/schemas/ConnectionConfig"
+                            }
+                        }
+                    }
+                },
+                "x-stoplight": {
+                    "id": "mf2a17zryt3kn"
+                }
+            },
+            "ExternalApplicationRequest": {
+                "type": "object",
+                "description": "Enumerates the parameters for an external application request object",
+                "required": [
+                    "request_data"
+                ],
+                "properties": {
+                    "request_data": {
+                        "type": "object",
+                        "required": [
+                            "name",
+                            "application_type",
+                            "connection_config"
+                        ],
+                        "properties": {
+                            "name": {
+                                "type": "string",
+                                "description": "Name of the application."
+                            },
+                            "description": {
+                                "type": "string",
+                                "description": "Description of the application."
+                            },
+                            "application_type": {
+                                "type": "string",
+                                "enum": [
+                                    "syslog",
+                                    "webhook",
+                                    "splunk",
+                                    "aws_sqs",
+                                    "aws_s3"
+                                ],
+                                "description": "The type of application instance."
+                            },
+                            "connection_config": {
+                                "$ref": "#/components/schemas/ConnectionConfig"
+                            }
+                        }
+                    }
+                },
+                "x-stoplight": {
+                    "id": "9x1v9axq37eau"
+                }
+            },
+            "Metadata": {
+                "type": "object",
+                "description": "Metadata for the response",
+                "additionalProperties": true,
+                "x-stoplight": {
+                    "id": "iou7m8m7v1dyi"
+                }
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT",
+                "description": "JWT token for authentication"
+            }
+        },
+        "responses": {
+            "Unauthorized": {
+                "description": "Unauthorized access",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "reply": {
+                                    "type": "object",
+                                    "properties": {
+                                        "err_msg": {
+                                            "type": "string"
+                                        },
+                                        "err_extra": {
+                                            "type": "string"
+                                        },
+                                        "err_code": {
+                                            "type": "integer"
+                                        }
+                                    }
+                                }
+                            },
+                            "example": {
+                                "reply": {
+                                    "err_code": 401,
+                                    "err_msg": "Public API request unauthorized",
+                                    "err_extra": null
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "UnauthorizedImproperPermissions": {
+                "description": "Unauthorized access due to lack of sufficient permissions",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "reply": {
+                                    "type": "object",
+                                    "properties": {
+                                        "err_msg": {
+                                            "type": "string"
+                                        },
+                                        "err_extra": {
+                                            "type": "string"
+                                        },
+                                        "err_code": {
+                                            "type": "integer"
+                                        }
+                                    }
+                                }
+                            },
+                            "example": {
+                                "reply": {
+                                    "err_code": 403,
+                                    "err_msg": "Forbidden. Access was denied to this resource.",
+                                    "err_extra": "Insufficient permissions for api key"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "InternalError": {
+                "description": "Internal server error. A unified status for API communication type errors.",
+                "content": {
+                    "application/json": {
+                        "example": {
+                            "data": {
+                                "err_msg": "An unexpected error occurred by XDR public API",
+                                "metadata": {
+                                    "err_extra": null,
+                                    "err_code": 500
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "ExternalApplicationCreatedBadRequest": {
+                "description": "Bad request for external application create call. Errors here could come from validations of input, egress failures, test connection issues, and more.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "err_msg": {
+                                            "type": "string",
+                                            "description": "Error message describing the issue"
+                                        },
+                                        "metadata": {
+                                            "type": "object",
+                                            "properties": {
+                                                "err_extra": {
+                                                    "type": "string",
+                                                    "description": "Additional error details"
+                                                },
+                                                "err_code": {
+                                                    "type": "integer",
+                                                    "description": "HTTP error code"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "example": {
+                            "data": {
+                                "err_msg": "The request contains invalid or missing parameters.",
+                                "metadata": {
+                                    "err_extra": "Test Connection failed: message={\\\"response_code\\\":404,\\\"message\\\":{\\\"message\\\":\\\"Token \\\\\\\"57f8759b-9c58-4443-b922-a706\\\\\\\" not found\\\",\\\"id\\\":\\\"\\\"}}",
+                                    "err_code": 400
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "ExternalApplicationEditedBadRequest": {
+                "description": "Bad request for external application update call. Errors here could come from validations of input, egress failures, test connection issues, and more.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "err_msg": {
+                                            "type": "string",
+                                            "description": "Error message describing the issue"
+                                        },
+                                        "metadata": {
+                                            "type": "object",
+                                            "properties": {
+                                                "err_extra": {
+                                                    "type": "string",
+                                                    "description": "Additional error details"
+                                                },
+                                                "err_code": {
+                                                    "type": "integer",
+                                                    "description": "HTTP error code"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "example": {
+                            "data": {
+                                "err_msg": "The request contains invalid or missing parameters.",
+                                "metadata": {
+                                    "err_extra": "Application type for a given external application cannot be modified",
+                                    "err_code": 400
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "ExternalApplicationDeleteSuccess": {
+                "description": "Successful deletion of External Application",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "null"
+                        }
+                    }
+                }
+            },
+            "ExternalApplicationDeleteBadRequest": {
+                "description": "Bad request for external application delete call",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "err_msg": {
+                                            "type": "string",
+                                            "description": "Error message describing the issue"
+                                        },
+                                        "metadata": {
+                                            "type": "object",
+                                            "properties": {
+                                                "err_extra": {
+                                                    "type": "string",
+                                                    "description": "Additional error details"
+                                                },
+                                                "err_code": {
+                                                    "type": "integer",
+                                                    "description": "HTTP error code"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "example": {
+                            "data": {
+                                "err_msg": "The request contains invalid or missing parameters.",
+                                "metadata": {
+                                    "err_extra": "External application not found, id=25",
+                                    "err_code": 400
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "GetExternalApplicationByUUIDBadRequest": {
+                "description": "Bad request for external application get by id call",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "err_msg": {
+                                            "type": "string",
+                                            "description": "Error message describing the issue"
+                                        },
+                                        "metadata": {
+                                            "type": "object",
+                                            "properties": {
+                                                "err_extra": {
+                                                    "type": "string",
+                                                    "description": "Additional error details"
+                                                },
+                                                "err_code": {
+                                                    "type": "integer",
+                                                    "description": "HTTP error code"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "example": {
+                            "data": {
+                                "err_msg": "The request contains invalid or missing parameters.",
+                                "metadata": {
+                                    "err_extra": "External application with id 1bef0d93-e82e-40e5-852b-2ab0a98791b2 not found",
+                                    "err_code": 400
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

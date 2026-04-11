@@ -1,0 +1,842 @@
+openapi: 3.0.3
+x-stoplight:
+  id: uh85y8lektqtf
+info:
+  title: NetScan Public API
+  description: |
+    Public API for network scan configuration and management. Use these endpoints
+    to create scan definitions from templates, launch scan runs, monitor scan status,
+    and control running scans with pause, resume, or abort commands.
+
+    **Required permission**: `network_scanners_action`
+  version: 1.0.0
+  contact:
+    name: Cortex API Documentation
+servers:
+  - url: 'https://api-{fqdn}'
+    variables:
+      fqdn:
+        default: cortex.paloaltonetworks.com
+        description: fully qualified domain name for Cortex tenant
+tags:
+  - name: Vulnerability Network Scan Management
+    description: 'Endpoints for managing network vulnerability scans, including scan definitions, scan runs, and scan control commands.'
+paths:
+  /public_api/netscan/v1/scan/run:
+    post:
+      tags:
+        - Vulnerability Network Scan Management
+      x-pan-permission: network_scanners_action
+      summary: Launch a scan run
+      description: |
+        Launch a scan execution using a previously configured scan definition.
+        Optionally override the target IP addresses for this specific run.
+      operationId: publicLaunchScanRun
+      parameters:
+        - in: header
+          schema:
+            type: string
+          required: true
+          name: User-Agent
+      requestBody:
+        description: Scan launch parameters including the definition ID and optional target override
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - request_data
+              properties:
+                request_data:
+                  type: object
+                  required:
+                    - definition_id
+                  properties:
+                    definition_id:
+                      type: integer
+                      description: Scan definition ID to execute
+                      minimum: 1
+                      example: 123
+                    target:
+                      type: string
+                      description: 'IP address or IP range. If provided, overrides the targets configured in the scan definition for this run.'
+                      example: 1.2.3.4.0/12
+      responses:
+        '200':
+          description: Scan launched successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScanActionResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseBody'
+        '403':
+          description: User not Authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseBody'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseBody'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseBody'
+      x-stoplight:
+        id: u1iw88hgr4nsi
+    get:
+      tags:
+        - Vulnerability Network Scan Management
+      x-pan-permission: network_scanners_action
+      summary: Get scan run status
+      description: |
+        Retrieve the current status of a scan run by its ID. Use the `fields`
+        parameter to specify which fields to return in the response.
+      operationId: publicScanDefinitionRunStatus
+      parameters:
+        - in: header
+          name: User-Agent
+          schema:
+            type: string
+          required: true
+        - in: query
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: Scan run ID to check status for
+        - name: fields
+          description: 'Fields to include in the response (for example, `status`).'
+          in: query
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        '200':
+          description: Scan status retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScanStatusResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseBody'
+        '403':
+          description: User not Authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseBody'
+        '404':
+          description: Run ID not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseBody'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseBody'
+      x-stoplight:
+        id: 8phozjwunco1m
+  '/public_api/netscan/v1/scan/run/{id}':
+    post:
+      tags:
+        - Vulnerability Network Scan Management
+      x-pan-permission: network_scanners_action
+      summary: Launch a scan run by definition ID
+      description: |
+        Launch a scan execution using a scan definition specified by the path
+        parameter. Optionally override the target IP addresses for this run.
+      operationId: publicLaunchScanRunById
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: Scan definition ID
+        - in: header
+          schema:
+            type: string
+          required: true
+          name: User-Agent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - request_data
+              properties:
+                request_data:
+                  type: object
+                  required:
+                    - definition_id
+                  properties:
+                    definition_id:
+                      type: integer
+                      description: Scan definition ID to execute
+                      minimum: 1
+                      example: 123
+                    target:
+                      type: string
+                      description: 'IP address or IP range. If provided, overrides the targets configured in the scan definition for this run.'
+                      example: 1.2.3.4.0/12
+      responses:
+        '200':
+          description: Scan launched successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScanActionResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseBody'
+        '403':
+          description: User not Authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseBody'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseBody'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseBody'
+      x-stoplight:
+        id: ekbgld65hslr2
+    get:
+      tags:
+        - Vulnerability Network Scan Management
+      x-pan-permission: network_scanners_action
+      summary: Get scan run status by ID
+      description: |
+        Retrieve the current status of a specific scan run identified by the
+        path parameter. Use the `fields` parameter to specify which fields
+        to return in the response.
+      operationId: publicGetScanDefinitionRunStatus
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: Scan run ID
+        - in: header
+          name: User-Agent
+          schema:
+            type: string
+          required: true
+        - name: fields
+          description: 'Fields to include in the response (for example, `status`).'
+          in: query
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        '200':
+          description: Scan status retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScanStatusResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseBody'
+        '403':
+          description: User not Authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseBody'
+        '404':
+          description: Run ID not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseBody'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseBody'
+      x-stoplight:
+        id: efi44v5yljcll
+  /public_api/netscan/v1/scan/definition:
+    post:
+      tags:
+        - Vulnerability Network Scan Management
+      x-pan-permission: network_scanners_action
+      summary: Create a scan definition
+      description: |
+        Create a new scan definition with detailed settings and validation options.
+        A scan definition specifies the targets, schedule, credentials, and scan
+        parameters used when launching scan runs.
+      operationId: configureNewScan
+      parameters:
+        - in: header
+          name: User-Agent
+          schema:
+            type: string
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json; charset=UTF-8:
+            schema:
+              $ref: '#/components/schemas/ScanDefinitionPayload'
+      responses:
+        '201':
+          description: New scan definition created successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  definition_id:
+                    type: integer
+                    description: ID of the created definition
+                    example: 123
+                  message:
+                    type: string
+                    description: Success message
+                    example: Scan created successfully
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseBody'
+        '403':
+          description: User not Authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseBody'
+        '404':
+          description: VT template not found or cannot create a new scan definition
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseBody'
+        '422':
+          description: Failed definition validation during scan definition creation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseBody'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseBody'
+      x-stoplight:
+        id: 73ga1pvxfiyfu
+  '/public_api/netscan/v1/scan/run/{id}/command':
+    post:
+      tags:
+        - Vulnerability Network Scan Management
+      x-pan-permission: network_scanners_action
+      summary: Send a command to a running scan
+      description: |
+        Send a control command to a running scan execution. Supported commands
+        are `ABORT` (cancel the scan), `PAUSE` (pause the scan), and `RESUME`
+        (resume a paused scan).
+      operationId: publicScanDefinitionRunAction
+      parameters:
+        - in: header
+          name: User-Agent
+          schema:
+            type: string
+          required: true
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            format: int64
+          description: Unique identifier of the scan run
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - request_data
+              properties:
+                request_data:
+                  type: object
+                  required:
+                    - type
+                  properties:
+                    type:
+                      type: string
+                      description: Command to perform on the scan run
+                      enum:
+                        - ABORT
+                        - PAUSE
+                        - RESUME
+      responses:
+        '200':
+          description: Command executed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ScanActionResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseBody'
+        '403':
+          description: User not Authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseBody'
+        '404':
+          description: Run ID not found or command cannot be performed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseBody'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponseBody'
+      x-stoplight:
+        id: yjevj9f036uq5
+components:
+  schemas:
+    ScanTime:
+      type: object
+      description: Time of day specification for scan scheduling
+      required:
+        - hour
+        - minute
+        - second
+      properties:
+        hour:
+          type: integer
+          description: Hour of the day (0-23)
+          minimum: 0
+          maximum: 23
+          example: 2
+        minute:
+          type: integer
+          description: Minute of the hour (0-59)
+          minimum: 0
+          maximum: 59
+          example: 0
+        second:
+          type: integer
+          description: Second of the minute (0-59)
+          minimum: 0
+          maximum: 59
+          example: 0
+      x-stoplight:
+        id: 8k43km1e8vqgs
+    FieldAndMessage:
+      type: object
+      description: Field-level error detail
+      properties:
+        field:
+          type: string
+          description: Name of the field that caused the error
+        message:
+          type: string
+          description: Error message for the field
+      x-stoplight:
+        id: 8k9ivds7705oj
+    ErrorMetadata:
+      type: object
+      description: Additional error context with field-level details
+      properties:
+        err_extra:
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldAndMessage'
+          description: List of field-level error details
+      x-stoplight:
+        id: tgrlos82qa9i9
+    ErrorResponseBody:
+      type: object
+      description: Standard error response returned for all error status codes
+      required:
+        - err_msg
+      properties:
+        err_msg:
+          type: string
+          description: Human-readable error message
+        metadata:
+          $ref: '#/components/schemas/ErrorMetadata'
+      example:
+        err_msg: The request contains invalid or missing parameters
+        metadata:
+          err_extra:
+            - field: name
+              message: Field required
+            - field: extra_info
+              message: Extra inputs are not permitted
+      x-stoplight:
+        id: ud4bx9as4344w
+    ScanSettingsPayload:
+      type: object
+      description: 'Scan engine settings controlling port scanning, timeouts, and host discovery behavior'
+      required:
+        - port_list_id
+        - scan_ports
+      properties:
+        port_list_id:
+          type: integer
+          description: Port list ID to use
+          minimum: 1
+          example: 5
+        scan_ports:
+          type: array
+          items:
+            type: object
+          description: Custom list of ports to scan (overrides `port_list_id` if provided)
+          example: []
+        auth_port_ssh:
+          type: integer
+          description: SSH authentication port
+          minimum: 1
+          maximum: 65535
+          example: 22
+        disable_cgi_cache:
+          type: string
+          description: 'Disable CGI cache (`0` = enabled, `1` = disabled)'
+          enum:
+            - '0'
+            - '1'
+          example: '1'
+        plugins_timeout:
+          type: integer
+          description: Plugin timeout in minutes
+          minimum: 1
+          example: 5
+        checks_read_timeout:
+          type: integer
+          description: Checks read timeout in minutes
+          minimum: 1
+          example: 5
+        max_hosts:
+          type: integer
+          description: Maximum number of hosts to scan simultaneously
+          minimum: 1
+          example: 30
+        max_checks:
+          type: integer
+          description: Maximum number of checks per host
+          minimum: 1
+          example: 4
+        scanner_plugins_timeout:
+          type: integer
+          description: Scanner plugins timeout in seconds
+          minimum: 1
+          example: 3600
+        timeout_retry:
+          type: integer
+          description: Number of timeout retries
+          minimum: 0
+          example: 5
+        open_sock_max_attempts:
+          type: integer
+          description: Maximum attempts to open socket
+          minimum: 1
+          example: 5
+        non_simult_ports:
+          type: string
+          description: Ports that should not be scanned simultaneously (comma-separated)
+          example: '139,445,3389,Services/irc'
+        strict_unauthenticated:
+          type: string
+          description: 'Strict unauthenticated mode (`0` = disabled, `1` = enabled)'
+          enum:
+            - '0'
+            - '1'
+          example: '0'
+        optimize_test:
+          type: string
+          description: 'Optimize test execution (`0` = disabled, `1` = enabled)'
+          enum:
+            - '0'
+            - '1'
+          example: '1'
+        expand_vhosts:
+          type: string
+          description: 'Expand virtual hosts (`0` = disabled, `1` = enabled)'
+          enum:
+            - '0'
+            - '1'
+          example: '1'
+        exclude_fragile_devices:
+          type: string
+          description: 'Exclude fragile devices (`0` = disabled, `1` = enabled)'
+          enum:
+            - '0'
+            - '1'
+          example: '1'
+        exclude_printers:
+          type: string
+          description: 'Exclude printers (`0` = disabled, `1` = enabled)'
+          enum:
+            - '0'
+            - '1'
+          example: '1'
+        safe_checks:
+          type: string
+          description: 'Enable safe checks (`0` = disabled, `1` = enabled)'
+          enum:
+            - '0'
+            - '1'
+          example: '1'
+        disable_win_cmd_exec:
+          type: string
+          description: 'Disable Windows command execution (`0` = disabled, `1` = enabled)'
+          enum:
+            - '0'
+            - '1'
+          example: '1'
+        disable_wmi_search:
+          type: string
+          description: 'Disable WMI search (`0` = disabled, `1` = enabled)'
+          enum:
+            - '0'
+            - '1'
+          example: '1'
+        alive_test_methods:
+          type: array
+          items:
+            type: string
+            enum:
+              - arp
+              - icmp
+              - tcp_ack
+              - tcp_syn
+              - consider_alive
+          description: Methods to test if hosts are alive
+          example:
+            - arp
+            - icmp
+            - tcp_ack
+        alive_test_ports:
+          type: string
+          description: Ports to use for alive testing (comma-separated or ranges)
+          example: '21-23,25,53,80,110-111,135,139,143,443,445,993,995,1723,3306,3389,5900,8080'
+      x-stoplight:
+        id: 51m8gt6l8f9ts
+    ScanDefinitionPayload:
+      description: 'Complete scan definition including scan settings, targets, schedule, and credentials'
+      allOf:
+        - $ref: '#/components/schemas/ScanSettingsPayload'
+        - type: object
+          required:
+            - vt_config_id
+            - name
+            - description
+            - network_scanner_ids
+            - network
+            - credential_ids
+            - schedule_cadence
+            - schedule_days
+            - schedule_dates
+            - schedule_start_date
+            - schedule_time
+            - schedule_quiet_hours
+            - schedule_timezone
+            - override_target_exclusions
+            - target_ids
+            - targets
+            - excluded_targets
+            - enable_report
+          properties:
+            definition_id:
+              type: integer
+              description: ID of existing definition (for updates)
+              example: 123
+            vt_config_id:
+              type: integer
+              description: Vulnerability test configuration template ID
+              minimum: 1
+              example: 4
+            name:
+              type: string
+              description: Name of the scan definition
+              minLength: 1
+              maxLength: 100
+              example: Weekly Production Scan
+            description:
+              type: string
+              description: Description of the scan definition
+              maxLength: 500
+              example: Weekly security scan for production servers
+            network_scanner_ids:
+              type: array
+              items:
+                type: string
+                format: uuid
+              description: Array of network scanner UUIDs to use for this scan
+              minItems: 1
+              example:
+                - scanner-1
+                - scanner-2
+            network:
+              type: integer
+              description: Network ID
+              minimum: 1
+              example: 1
+            credential_ids:
+              type: array
+              items:
+                type: integer
+              description: Array of credential IDs for authenticated scanning
+              example:
+                - 1
+            schedule_cadence:
+              type: string
+              description: Schedule cadence frequency
+              enum:
+                - DAILY
+                - WEEKLY
+                - MONTHLY
+                - ONCE
+              example: DAILY
+            schedule_days:
+              type: integer
+              description: Scheduled days as bitmask (127 = all days)
+              minimum: 0
+              maximum: 127
+              example: 127
+            schedule_dates:
+              type: array
+              items:
+                type: integer
+              description: Array of scheduled dates (for monthly cadence)
+              example: []
+            schedule_start_date:
+              type: integer
+              format: int64
+              description: Schedule start date as Unix timestamp in milliseconds
+              minimum: 0
+              example: 1765083183326
+            schedule_time:
+              $ref: '#/components/schemas/ScanTime'
+            schedule_quiet_hours:
+              type: array
+              items:
+                type: object
+                required:
+                  - start
+                  - end
+                properties:
+                  start:
+                    $ref: '#/components/schemas/ScanTime'
+                  end:
+                    $ref: '#/components/schemas/ScanTime'
+              description: Array of quiet hours periods when scanning should not run
+              example: []
+            schedule_timezone:
+              type: string
+              description: Timezone for scheduling (IANA timezone format)
+              example: America/Los_Angeles
+            override_target_exclusions:
+              type: boolean
+              description: Whether to override global target exclusions
+              example: false
+            target_ids:
+              type: array
+              items:
+                type: integer
+              description: Array of target group IDs
+              example: []
+            targets:
+              type: array
+              items:
+                type: string
+              description: Array of target hosts or IP ranges (CIDR notation)
+              example:
+                - 192.168.1.0/24
+                - 10.0.0.1-10.0.0.100
+            excluded_targets:
+              type: array
+              items:
+                type: string
+              description: Array of excluded targets
+              example:
+                - ''
+            enable_report:
+              type: boolean
+              description: Whether to enable scan reporting
+              example: true
+      x-stoplight:
+        id: llrrx2lj3gx2s
+    ScanActionResponse:
+      type: object
+      description: 'Response returned after a scan action (launch, pause, resume, or abort)'
+      required:
+        - DATA
+      properties:
+        DATA:
+          type: string
+          description: Action result message
+          example: 'Scan launched successfully with run ID: 789'
+      x-stoplight:
+        id: 54s916blpe6qe
+    ScanStatusResponse:
+      type: object
+      description: Response containing the current status of a scan run
+      required:
+        - DATA
+      properties:
+        DATA:
+          type: string
+          description: Scan status message
+          example: Scan is in Running state
+      x-stoplight:
+        id: ppcxmfvtsxt3k

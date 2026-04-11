@@ -1,0 +1,3154 @@
+{
+    "openapi": "3.0.0",
+    "x-stoplight": {
+        "id": "w99ivod2ry3ms"
+    },
+    "info": {
+        "version": "Cortex XSIAM 3.4",
+        "title": "Cloud Workload Protection APIs",
+        "description": "You can export the OpenAPI specs in the [Cortex Stoplight instance](https://cortex-panw.stoplight.io/docs/cortex-xsiam-3-x/7bi6u9mf8zd6p-cloud-workload-protection-ap-is). \n\nCloud Workload Policies and Rules ensure security compliance, prevent misconfigurations, and mitigate risks across cloud environments. Cloud Workload Policies leverage actionable findings or enforce preventive measures at defined stages of the Software Development Life Cycle (SDLC).\n\n Registry Connectors are used to connect to third-party registries. You can use the Registry Onboarding APIs to onboard third-party registry connectors (such as Docker Hub, GitLab, Harbor, JFrog, and\nOpenShift) and managing their instances.\n\n**Required license:** Requires the Cortex Cloud Runtime Security add-on. Not available in Cortex XSIAM Enterprise Plus.",
+        "contact": {
+            "email": "docs-cortex@paloaltonetworks.com",
+            "name": "Cortex Documentation Team",
+            "url": "https://docs-cortex.paloaltonetworks.com/"
+        },
+        "license": {
+            "name": "Proprietary",
+            "url": "https://www.paloaltonetworks.com/legal/terms-of-use"
+        }
+    },
+    "servers": [
+        {
+            "url": "https://api-yourfqdn"
+        }
+    ],
+    "security": [],
+    "paths": {
+        "/public_api/v2/cwp/policies": {
+            "get": {
+                "x-go-middlewares": [
+                    "CustomLogging"
+                ],
+                "x-public": true,
+                "tags": [
+                    "Policies"
+                ],
+                "operationId": "getv2CwpPolicies",
+                "summary": "Get CWP Policies (v2)",
+                "description": "Fetches a list of all CWP policy instances. You can filter the results by policy type (e.g., COMPLIANCE, MALWARE, SECRET). By default, all policy types are returned. Use the disableVerbose flag to optimize performance by skipping asset group data updates.\n\n**Required license:** Requires the Cortex Cloud Runtime Security add-on. Not available in Cortex XSIAM Enterprise Plus.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "types",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/components/schemas/PolicyType"
+                            }
+                        },
+                        "description": "The policies type"
+                    },
+                    {
+                        "in": "query",
+                        "name": "disableVerbose",
+                        "schema": {
+                            "type": "boolean",
+                            "default": false,
+                            "nullable": true
+                        },
+                        "description": "Flag to bypass calling platform for asset groups data when fetching policies. Note that this means asset groups will not be updated upon fetching policies."
+                    },
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "UCoWpG4rkNzgCp2dsh8m02iVpZsskwKHz7N1tErPcUV3Wmf59Gc9kytmgOv0pDWoem3PBlORyRIPiir4OcYdWUOWAM3JyTgoCxQf4nQoTlKmFRKz9Bj5vIjluw66p9WP "
+                        },
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "{api_key}",
+                        "required": true
+                    },
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "241"
+                        },
+                        "in": "header",
+                        "name": "x-xdr-auth-id",
+                        "description": "{api_key_id}",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GetPoliciesResponseV2"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Client error",
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                },
+                                "example": {
+                                    "err_msg": "Bad Request",
+                                    "metadata": {
+                                        "code": "BAD_REQUEST"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Service had unexpected internal error",
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                },
+                                "example": {
+                                    "err_msg": "Internal Error",
+                                    "metadata": {
+                                        "code": "INTERNAL_ERROR"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-stoplight": {
+                    "id": "0yumqa6ild8wi"
+                }
+            },
+            "post": {
+                "x-go-middlewares": [
+                    "CustomLogging"
+                ],
+                "x-public": true,
+                "tags": [
+                    "Policies"
+                ],
+                "operationId": "addv2CwpPolicies",
+                "summary": "Add CWP Policies (v2)",
+                "description": "Creates new CWP policy. This version supports advanced configuration including policyRules, gracePeriod, and usingSystemAssetGroups.\n\n**Required license:** Requires the Cortex Cloud Runtime Security add-on. Not available in Cortex XSIAM Enterprise Plus.",
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "UCoWpG4rkNzgCp2dsh8m02iVpZsskwKHz7N1tErPcUV3Wmf59Gc9kytmgOv0pDWoem3PBlORyRIPiir4OcYdWUOWAM3JyTgoCxQf4nQoTlKmFRKz9Bj5vIjluw66p9WP "
+                        },
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "{api_key}",
+                        "required": true
+                    },
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "241"
+                        },
+                        "in": "header",
+                        "name": "x-xdr-auth-id",
+                        "description": "{api_key_id}",
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "description": "Policy to add.",
+                    "required": true,
+                    "content": {
+                        "application/json; charset=UTF-8": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PolicyPostRequestDataV2"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Success",
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Client error",
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                },
+                                "example": {
+                                    "err_msg": "Bad Request",
+                                    "metadata": {
+                                        "code": "BAD_REQUEST"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden error",
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                },
+                                "example": {
+                                    "err_msg": "Forbidden",
+                                    "metadata": {
+                                        "code": "FORBIDDEN"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Service had unexpected internal error",
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                },
+                                "example": {
+                                    "err_msg": "Internal Error",
+                                    "metadata": {
+                                        "code": "INTERNAL_ERROR"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-stoplight": {
+                    "id": "05uymhjoclvaa"
+                }
+            }
+        },
+        "/public_api/v2/cwp/policies/{id}": {
+            "get": {
+                "x-go-middlewares": [
+                    "CustomLogging"
+                ],
+                "x-public": true,
+                "tags": [
+                    "Policies"
+                ],
+                "operationId": "getv2CwpPoliciesbyId",
+                "summary": "Get a CWP Policy by ID (v2)",
+                "description": "Fetches the detailed configuration of a single CWP policy identified by its unique ID. This includes associated rules, evaluation stages, and asset scope. Use disableVerbose to exclude platform-specific asset group metadata.\n\n**Required license:** Requires the Cortex Cloud Runtime Security add-on. Not available in Cortex XSIAM Enterprise Plus.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "disableVerbose",
+                        "schema": {
+                            "type": "boolean",
+                            "default": false,
+                            "nullable": true
+                        },
+                        "description": "Flag to bypass calling platform for asset groups data when fetching policies. Note that this means asset groups will not be updated upon fetching policies."
+                    },
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "UCoWpG4rkNzgCp2dsh8m02iVpZsskwKHz7N1tErPcUV3Wmf59Gc9kytmgOv0pDWoem3PBlORyRIPiir4OcYdWUOWAM3JyTgoCxQf4nQoTlKmFRKz9Bj5vIjluw66p9WP "
+                        },
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "{api_key}",
+                        "required": true
+                    },
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "241"
+                        },
+                        "in": "header",
+                        "name": "x-xdr-auth-id",
+                        "description": "{api_key_id}",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PolicyGetResponseDataV2"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Policy ID not found",
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                },
+                                "example": {
+                                    "err_msg": "Policy ID not found",
+                                    "metadata": {
+                                        "code": "NOT_FOUND"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Service had unexpected internal error",
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                },
+                                "example": {
+                                    "err_msg": "Internal Error",
+                                    "metadata": {
+                                        "code": "INTERNAL_ERROR"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-stoplight": {
+                    "id": "u1r6xd0f9ei6k"
+                }
+            },
+            "put": {
+                "x-go-middlewares": [
+                    "CustomLogging"
+                ],
+                "x-public": true,
+                "tags": [
+                    "Policies"
+                ],
+                "operationId": "updatev2CwpPolicies",
+                "summary": "Update a CWP Policy by ID (v2)",
+                "description": "Updates the configuration of an existing CWP policy. The policy ID is mandatory. \n Note: The policy revision will be automatically incremented upon a successful update. Fields not provided in the request body will be reset to their default values.\n\n**Required license:** Requires the Cortex Cloud Runtime Security add-on. Not available in Cortex XSIAM Enterprise Plus.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "The policy ID to delete"
+                    },
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "UCoWpG4rkNzgCp2dsh8m02iVpZsskwKHz7N1tErPcUV3Wmf59Gc9kytmgOv0pDWoem3PBlORyRIPiir4OcYdWUOWAM3JyTgoCxQf4nQoTlKmFRKz9Bj5vIjluw66p9WP "
+                        },
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "{api_key}",
+                        "required": true
+                    },
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "241"
+                        },
+                        "in": "header",
+                        "name": "x-xdr-auth-id",
+                        "description": "{api_key_id}",
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "description": "Policy object to update. Policy ID is mandatory. Revision will be auto-incremented. All other data fields in the request will be updated. If a data field is not present, it is considered as filled with the default value and will be updated with the default.",
+                    "required": true,
+                    "content": {
+                        "application/json; charset=UTF-8": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PolicyPutRequestDataV2"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "Success"
+                    },
+                    "400": {
+                        "description": "Client error",
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                },
+                                "example": {
+                                    "err_msg": "Bad Request",
+                                    "metadata": {
+                                        "code": "BAD_REQUEST"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden error",
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                },
+                                "example": {
+                                    "err_msg": "Forbidden",
+                                    "metadata": {
+                                        "code": "FORBIDDEN"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Policy ID not found",
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                },
+                                "example": {
+                                    "err_msg": "Policy ID not found",
+                                    "metadata": {
+                                        "code": "NOT_FOUND"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Service had unexpected internal error",
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                },
+                                "example": {
+                                    "err_msg": "Internal Error",
+                                    "metadata": {
+                                        "code": "INTERNAL_ERROR"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-stoplight": {
+                    "id": "sdmpsra6we98o"
+                }
+            }
+        },
+        "/public_api/v1/cwp/policies": {
+            "get": {
+                "summary": "Get CWP Policies (v1)",
+                "operationId": "getCwpPolicies",
+                "description": "Cloud Workload Policies help you prevent and manage security violations in your cloud runtime instances. They enable you to apply detection logic to specific asset groups at the desired SDLC stage, and define what action needs to be taken if the conditions are met.\n\nGet all CWP policies of the given type. Default behavior is all.\n\n**Required license:** Requires the Cortex Cloud Runtime Security add-on. Not available in Cortex XSIAM Enterprise Plus.",
+                "parameters": [
+                    {
+                        "name": "types",
+                        "in": "query",
+                        "description": "The policy type",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/components/schemas/PolicyType"
+                            }
+                        }
+                    },
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "UCoWpG4rkNzgCp2dsh8m02iVpZsskwKHz7N1tErPcUV3Wmf59Gc9kytmgOv0pDWoem3PBlORyRIPiir4OcYdWUOWAM3JyTgoCxQf4nQoTlKmFRKz9Bj5vIjluw66p9WP "
+                        },
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "{api_key}",
+                        "required": true
+                    },
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "241"
+                        },
+                        "in": "header",
+                        "name": "x-xdr-auth-id",
+                        "description": "{api_key_id}",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GetPoliciesResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Client error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                },
+                                "examples": {
+                                    "default": {
+                                        "value": {
+                                            "err_msg": "Bad Request",
+                                            "metadata": {
+                                                "code": "BAD_REQUEST"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Service had unexpected internal error",
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                },
+                                "examples": {
+                                    "default": {
+                                        "value": {
+                                            "err_msg": "Internal Error",
+                                            "metadata": {
+                                                "code": "INTERNAL_ERROR"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-go-middlewares": [
+                    "CustomLogging"
+                ],
+                "x-public": true,
+                "tags": [
+                    "Policies"
+                ],
+                "x-stoplight": {
+                    "id": "env1pataaw3v5"
+                }
+            },
+            "post": {
+                "summary": "Add CWP Policies (v1)",
+                "operationId": "postCwpPolicies",
+                "description": "Add CWP policy instances.\n\n**Required license:** Requires the Cortex Cloud Runtime Security add-on. Not available in Cortex XSIAM Enterprise Plus.",
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "UCoWpG4rkNzgCp2dsh8m02iVpZsskwKHz7N1tErPcUV3Wmf59Gc9kytmgOv0pDWoem3PBlORyRIPiir4OcYdWUOWAM3JyTgoCxQf4nQoTlKmFRKz9Bj5vIjluw66p9WP "
+                        },
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "{api_key}",
+                        "required": true
+                    },
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "241"
+                        },
+                        "in": "header",
+                        "name": "x-xdr-auth-id",
+                        "description": "{api_key_id}",
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "description": "Policy to add.",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PolicyData"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Success",
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Client error",
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                },
+                                "examples": {
+                                    "default": {
+                                        "value": {
+                                            "err_msg": "Bad Request",
+                                            "metadata": {
+                                                "code": "BAD_REQUEST"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Service had unexpected internal error",
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                },
+                                "examples": {
+                                    "default": {
+                                        "value": {
+                                            "err_msg": "Internal Error",
+                                            "metadata": {
+                                                "code": "INTERNAL_ERROR"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-go-middlewares": [
+                    "CustomLogging"
+                ],
+                "x-public": true,
+                "tags": [
+                    "Policies"
+                ],
+                "x-stoplight": {
+                    "id": "8mdgtl1a48c5n"
+                }
+            }
+        },
+        "/public_api/v1/cwp/policies/{id}": {
+            "get": {
+                "summary": "Get a CWP Policy by ID (v1)",
+                "operationId": "getCwpPoliciesId",
+                "description": "Get a CWP policy by its ID.\n\n**Required license:** Requires the Cortex Cloud Runtime Security add-on. Not available in Cortex XSIAM Enterprise Plus.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "UCoWpG4rkNzgCp2dsh8m02iVpZsskwKHz7N1tErPcUV3Wmf59Gc9kytmgOv0pDWoem3PBlORyRIPiir4OcYdWUOWAM3JyTgoCxQf4nQoTlKmFRKz9Bj5vIjluw66p9WP "
+                        },
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "{api_key}",
+                        "required": true
+                    },
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "241"
+                        },
+                        "in": "header",
+                        "name": "x-xdr-auth-id",
+                        "description": "{api_key_id}",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PolicyData"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Policy ID not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                },
+                                "examples": {
+                                    "default": {
+                                        "value": {
+                                            "err_msg": "Policy ID not found",
+                                            "metadata": {
+                                                "code": "NOT_FOUND"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Service had unexpected internal error",
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                },
+                                "examples": {
+                                    "default": {
+                                        "value": {
+                                            "err_msg": "Internal Error",
+                                            "metadata": {
+                                                "code": "INTERNAL_ERROR"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-go-middlewares": [
+                    "CustomLogging"
+                ],
+                "x-public": true,
+                "tags": [
+                    "Policies"
+                ],
+                "x-stoplight": {
+                    "id": "x1wpsjmcgbget"
+                }
+            },
+            "delete": {
+                "summary": "Delete a CWP Policy by ID (v1)",
+                "operationId": "deleteCwpPoliciesId",
+                "description": "Delete a CWP policy by its ID.\n\n**Required license:** Requires the Cortex Cloud Runtime Security add-on. Not available in Cortex XSIAM Enterprise Plus.",
+                "parameters": [
+                    {
+                        "name": "closeIssues",
+                        "in": "query",
+                        "description": "If set, will trigger issue closing of issues opened by the deleted policy",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The policy ID to delete",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "UCoWpG4rkNzgCp2dsh8m02iVpZsskwKHz7N1tErPcUV3Wmf59Gc9kytmgOv0pDWoem3PBlORyRIPiir4OcYdWUOWAM3JyTgoCxQf4nQoTlKmFRKz9Bj5vIjluw66p9WP "
+                        },
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "{api_key}",
+                        "required": true
+                    },
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "241"
+                        },
+                        "in": "header",
+                        "name": "x-xdr-auth-id",
+                        "description": "{api_key_id}",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Success"
+                    },
+                    "400": {
+                        "description": "Client error",
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                },
+                                "examples": {
+                                    "default": {
+                                        "value": {
+                                            "err_msg": "Bad Request",
+                                            "metadata": {
+                                                "code": "BAD_REQUEST"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Policy ID not found",
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                },
+                                "examples": {
+                                    "default": {
+                                        "value": {
+                                            "err_msg": "Policy ID not found",
+                                            "metadata": {
+                                                "code": "NOT_FOUND"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Service had unexpected internal error",
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                },
+                                "examples": {
+                                    "default": {
+                                        "value": {
+                                            "err_msg": "Internal Error",
+                                            "metadata": {
+                                                "code": "INTERNAL_ERROR"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-go-middlewares": [
+                    "CustomLogging"
+                ],
+                "x-public": true,
+                "tags": [
+                    "Policies"
+                ],
+                "x-stoplight": {
+                    "id": "ftog7g3cn4yu2"
+                }
+            },
+            "put": {
+                "summary": "Update a CWP Policy by ID (v1)",
+                "operationId": "putCwpPoliciesId",
+                "description": "Update a CWP policy by its ID.\n\n**Required license:** Requires the Cortex Cloud Runtime Security add-on. Not available in Cortex XSIAM Enterprise Plus.",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "The policy ID to delete",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "UCoWpG4rkNzgCp2dsh8m02iVpZsskwKHz7N1tErPcUV3Wmf59Gc9kytmgOv0pDWoem3PBlORyRIPiir4OcYdWUOWAM3JyTgoCxQf4nQoTlKmFRKz9Bj5vIjluw66p9WP "
+                        },
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "{api_key}",
+                        "required": true
+                    },
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "241"
+                        },
+                        "in": "header",
+                        "name": "x-xdr-auth-id",
+                        "description": "{api_key_id}",
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "description": "policy object to update. Policy ID is mandatory. Revision will be auto-incremented. All other data fields in the request will be updated. If a data field is not present, it is considered as filled with the default value and will be updated with the default.",
+                    "required": true,
+                    "content": {
+                        "application/json; charset=UTF-8": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PolicyData"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "Success"
+                    },
+                    "400": {
+                        "description": "Client error",
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                },
+                                "examples": {
+                                    "default": {
+                                        "value": {
+                                            "err_msg": "Bad Request",
+                                            "metadata": {
+                                                "code": "BAD_REQUEST"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Policy ID not found",
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                },
+                                "examples": {
+                                    "default": {
+                                        "value": {
+                                            "err_msg": "Policy ID not found",
+                                            "metadata": {
+                                                "code": "NOT_FOUND"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Service had unexpected internal error",
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                },
+                                "examples": {
+                                    "default": {
+                                        "value": {
+                                            "err_msg": "Internal Error",
+                                            "metadata": {
+                                                "code": "INTERNAL_ERROR"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-go-middlewares": [
+                    "CustomLogging"
+                ],
+                "x-public": true,
+                "tags": [
+                    "Policies"
+                ],
+                "x-stoplight": {
+                    "id": "hd5006bgtzv1f"
+                }
+            }
+        },
+        "/public_api/v1/assets/{assetID}/sbom": {
+            "get": {
+                "tags": [
+                    "SBOM"
+                ],
+                "summary": "Get the SBOM of the specified asset",
+                "description": "Get an SBOM (Software Bill of Materials) report for the specified asset. You can specify the format and version of the SBOM, as well as which attribute you would like included.\n\n**Required license:** Cortex Cloud Runtime Security. In Cortex Cloud Posture Management, requires the Cortex Cloud Runtime Security add-on.",
+                "operationId": "get-public_api-v1-assets-assetID-sbom",
+                "parameters": [
+                    {
+                        "name": "format",
+                        "in": "query",
+                        "description": "The format in which the SBOM is to be exported.",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "XML",
+                                "JSON"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "output_format",
+                        "in": "query",
+                        "description": "The version of the SBOM format to be used.",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "CycloneDX 1.4",
+                                "SPDX"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "attributes",
+                        "in": "query",
+                        "description": "The list of attributes to be included in the SBOM. If not specified, all fields are included except `Type` and `Name`, which are always included.",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "PURL",
+                                "Author",
+                                "Version",
+                                "License",
+                                "Source Package",
+                                "Binaries"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "assetID",
+                        "in": "path",
+                        "description": "ID of the asset of which you want to export the SBOM",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "UCoWpG4rkNzgCp2dsh8m02iVpZsskwKHz7N1tErPcUV3Wmf59Gc9kytmgOv0pDWoem3PBlORyRIPiir4OcYdWUOWAM3JyTgoCxQf4nQoTlKmFRKz9Bj5vIjluw66p9WP "
+                        },
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "{api_key}",
+                        "required": true
+                    },
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "241"
+                        },
+                        "in": "header",
+                        "name": "x-xdr-auth-id",
+                        "description": "{api_key_id}",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK. The request was successful, and the SBOM data is returned in the specified format.",
+                        "content": {
+                            "application/xml": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request. The request was malformed, missing the required parameters, or the Asset ID provided does not support SBOM Export.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "err_code": {
+                                            "type": "string",
+                                            "description": "HTTP response code."
+                                        },
+                                        "err_msg": {
+                                            "type": "string",
+                                            "description": "Error message."
+                                        },
+                                        "err_extra": {
+                                            "type": "string",
+                                            "description": "Additional information describing the error."
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "The API key provided is invalid or missing.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "err_code": {
+                                            "$ref": "#/components/schemas/err_code"
+                                        },
+                                        "err_msg": {
+                                            "$ref": "#/components/schemas/err_msg"
+                                        },
+                                        "err_extra": {
+                                            "$ref": "#/components/schemas/err_extra"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden. The API key does not have the necessary permissions to access the requested resource.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "err_code": {
+                                            "$ref": "#/components/schemas/err_code"
+                                        },
+                                        "err_msg": {
+                                            "$ref": "#/components/schemas/err_msg"
+                                        },
+                                        "err_extra": {
+                                            "$ref": "#/components/schemas/err_extra"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "The specified asset was not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "err_code": {
+                                            "$ref": "#/components/schemas/err_code"
+                                        },
+                                        "err_msg": {
+                                            "$ref": "#/components/schemas/err_msg"
+                                        },
+                                        "err_extra": {
+                                            "$ref": "#/components/schemas/err_extra"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "An error occurred on the server while processing the request.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "err_code": {
+                                            "$ref": "#/components/schemas/err_code"
+                                        },
+                                        "err_msg": {
+                                            "$ref": "#/components/schemas/err_msg"
+                                        },
+                                        "err_extra": {
+                                            "$ref": "#/components/schemas/err_extra"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-stoplight": {
+                    "id": "khklmanrihk43"
+                }
+            }
+        },
+        "/public_api/v1/cwp/registry_onboarding/instances": {
+            "post": {
+                "summary": "Create a registry connector",
+                "operationId": "createUnmanagedRegistryConnectorPublicAPI",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UnmanagedRegistryConnectorPublicAPIObject"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Connector details have been stored successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "connector_id": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "connector_id"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Client error",
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                },
+                                "example": {
+                                    "err_msg": "Bad Request",
+                                    "metadata": {
+                                        "code": "BAD_REQUEST"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Service had unexpected internal error",
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                },
+                                "example": {
+                                    "err_msg": "Internal Error",
+                                    "metadata": {
+                                        "code": "INTERNAL_ERROR"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "Registry Onboarding"
+                ],
+                "description": "Creates a new registry connector for  based on the provided details.\n\n> **Required license:** \n>\n> Cortex Cloud Posture Management or Cortex Cloud Runtime Security.",
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "UCoWpG4rkNzgCp2dsh8m02iVpZsskwKHz7N1tErPcUV3Wmf59Gc9kytmgOv0pDWoem3PBlORyRIPiir4OcYdWUOWAM3JyTgoCxQf4nQoTlKmFRKz9Bj5vIjluw66p9WP "
+                        },
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "{api_key}",
+                        "required": true
+                    },
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "241"
+                        },
+                        "in": "header",
+                        "required": true,
+                        "name": "x-xdr-auth-id",
+                        "description": "{api_key_id}"
+                    }
+                ],
+                "x-stoplight": {
+                    "id": "r3o1hbec64dro"
+                }
+            }
+        },
+        "/public_api/v1/cwp/registry_onboarding/instances/{connectorID}": {
+            "parameters": [
+                {
+                    "name": "connectorID",
+                    "description": "The unique identifier for the connector.",
+                    "in": "path",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "get": {
+                "summary": "Get a registry connector",
+                "operationId": "getUnmanagedRegistryConnectorPublicAPI",
+                "tags": [
+                    "Registry Onboarding"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Connector details retrieved successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GetUnmanagedRegistryConnectorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Connector not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                },
+                                "example": {
+                                    "err_msg": "Connector ID not found",
+                                    "metadata": {
+                                        "code": "NOT_FOUND"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Service had unexpected internal error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                },
+                                "example": {
+                                    "err_msg": "Internal Error",
+                                    "metadata": {
+                                        "code": "INTERNAL_ERROR"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-stoplight": {
+                    "id": "eq7ecfnk17h9j"
+                },
+                "description": "Retrieves a registry connector details using its unique ID.\n\n> **Required license:** \n>\n> Cortex Cloud Posture Management or Cortex Cloud Runtime Security.",
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "UCoWpG4rkNzgCp2dsh8m02iVpZsskwKHz7N1tErPcUV3Wmf59Gc9kytmgOv0pDWoem3PBlORyRIPiir4OcYdWUOWAM3JyTgoCxQf4nQoTlKmFRKz9Bj5vIjluw66p9WP"
+                        },
+                        "in": "header",
+                        "name": "Authentication",
+                        "description": "{api_key}",
+                        "required": true
+                    },
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "241"
+                        },
+                        "in": "header",
+                        "description": "{api_key_id}",
+                        "required": true,
+                        "name": "x-xdr-auth-id"
+                    }
+                ]
+            },
+            "put": {
+                "summary": "Update a registry connector",
+                "operationId": "modifyUnmanagedRegistryConnectorPublicAPI",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UnmanagedRegistryConnectorPublicAPIObject"
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "Registry Onboarding"
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Connector details have been updated successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "connector_id": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "connector_id"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Client error",
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                },
+                                "example": {
+                                    "err_msg": "Bad Request",
+                                    "metadata": {
+                                        "code": "BAD_REQUEST"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Connector ID not found",
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                },
+                                "example": {
+                                    "err_msg": "Connector ID not found",
+                                    "metadata": {
+                                        "code": "NOT_FOUND"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Service had unexpected internal error",
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                },
+                                "example": {
+                                    "err_msg": "Internal Error",
+                                    "metadata": {
+                                        "code": "INTERNAL_ERROR"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-stoplight": {
+                    "id": "2y5yu5fpvy2km"
+                },
+                "description": "Updates the attributes of an existing registry connector identified by its unique ID.\n\n> **Required license:** \n>\n> Cortex Cloud Posture Management or Cortex Cloud Runtime Security.",
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "UCoWpG4rkNzgCp2dsh8m02iVpZsskwKHz7N1tErPcUV3Wmf59Gc9kytmgOv0pDWoem3PBlORyRIPiir4OcYdWUOWAM3JyTgoCxQf4nQoTlKmFRKz9Bj5vIjluw66p9WP"
+                        },
+                        "in": "header",
+                        "name": "Authentication",
+                        "description": "{api_key}",
+                        "required": true
+                    },
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "241"
+                        },
+                        "in": "header",
+                        "name": "x-xdr-auth-id",
+                        "description": "{api_key_id}",
+                        "required": true
+                    }
+                ]
+            },
+            "delete": {
+                "summary": "Delete a registry connector",
+                "operationId": "deleteUnmanagedRegistryConnectorPublicAPI",
+                "tags": [
+                    "Registry Onboarding"
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Connector deleted successfully."
+                    },
+                    "404": {
+                        "description": "Connector not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                },
+                                "example": {
+                                    "err_msg": "Connector ID not found",
+                                    "metadata": {
+                                        "code": "NOT_FOUND"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Service had unexpected internal error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                },
+                                "example": {
+                                    "err_msg": "Internal Error",
+                                    "metadata": {
+                                        "code": "INTERNAL_ERROR"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "description": "Deletes a specific registry connector identified by its unique ID.\n\n> **Required license:** \n>\n> Cortex Cloud Posture Management or Cortex Cloud Runtime Security.",
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "UCoWpG4rkNzgCp2dsh8m02iVpZsskwKHz7N1tErPcUV3Wmf59Gc9kytmgOv0pDWoem3PBlORyRIPiir4OcYdWUOWAM3JyTgoCxQf4nQoTlKmFRKz9Bj5vIjluw66p9WP"
+                        },
+                        "in": "header",
+                        "name": "Authentication",
+                        "description": "{api_key}",
+                        "required": true
+                    },
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "241"
+                        },
+                        "in": "header",
+                        "name": "x-xdr-auth-id",
+                        "description": "{api_key_id}",
+                        "required": true
+                    }
+                ],
+                "x-stoplight": {
+                    "id": "yyog5qov6aui3"
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Policies",
+            "description": "APIs for managing Cloud Workload Policies"
+        },
+        {
+            "name": "SBOM",
+            "description": "APIs for managing SBOMs"
+        },
+        {
+            "name": "Registry Onboarding",
+            "description": "APIs for managing Registry Onboarding"
+        }
+    ],
+    "components": {
+        "securitySchemes": {
+            "Authorization": {
+                "type": "apiKey",
+                "name": "x-api-key",
+                "in": "header"
+            },
+            "x-xdr-auth-id": {
+                "type": "apiKey",
+                "name": "x-api-key-id",
+                "in": "header"
+            }
+        },
+        "schemas": {
+            "FilterObject": {
+                "oneOf": [
+                    {
+                        "$ref": "#/components/schemas/ConnectorNode"
+                    },
+                    {
+                        "$ref": "#/components/schemas/TerminalNode"
+                    }
+                ],
+                "x-stoplight": {
+                    "id": "m5at5mj1rm9f1"
+                },
+                "title": "Asset Scope Filter",
+                "description": "Defines the type of assets to be filtered (the scope). You can combine multiple conditions to create complex rules for when the asset filter should be applied."
+            },
+            "ConnectorNode": {
+                "type": "object",
+                "oneOf": [
+                    {
+                        "$ref": "#/components/schemas/AndConnectorNode"
+                    },
+                    {
+                        "$ref": "#/components/schemas/OrConnectorNode"
+                    }
+                ],
+                "x-stoplight": {
+                    "id": "rou00f9xd269n"
+                },
+                "description": ""
+            },
+            "AndConnectorNode": {
+                "type": "object",
+                "properties": {
+                    "AND": {
+                        "type": "array",
+                        "x-go-type-skip-optional-pointer": true,
+                        "items": {
+                            "$ref": "#/components/schemas/FilterObject"
+                        }
+                    }
+                },
+                "x-stoplight": {
+                    "id": "5ens8uz494b64"
+                }
+            },
+            "OrConnectorNode": {
+                "type": "object",
+                "properties": {
+                    "OR": {
+                        "type": "array",
+                        "x-go-type-skip-optional-pointer": true,
+                        "items": {
+                            "$ref": "#/components/schemas/FilterObject"
+                        }
+                    }
+                },
+                "x-stoplight": {
+                    "id": "ovc0oa3bab8zw"
+                }
+            },
+            "TerminalNode": {
+                "type": "object",
+                "x-stoplight": {
+                    "id": "j3tgr5b0lvudn"
+                },
+                "properties": {
+                    "SEARCH_FIELD": {
+                        "type": "string",
+                        "description": "Defines the Field to be searched.",
+                        "example": "Registry",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "SEARCH_TYPE": {
+                        "type": "string",
+                        "description": "Defines the comparison operator to use for this filter. ",
+                        "example": "EQ",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "SEARCH_VALUE": {
+                        "type": "string",
+                        "description": "Defines the value to be searched.",
+                        "example": "library/ubuntu",
+                        "x-go-type-skip-optional-pointer": true
+                    }
+                }
+            },
+            "VendorSpecificConfig": {
+                "type": "object",
+                "description": "Vendor specific configuration options for scanning.",
+                "oneOf": [
+                    {
+                        "$ref": "#/components/schemas/GitlabSpecificConfig"
+                    },
+                    {
+                        "$ref": "#/components/schemas/DockerhubSpecificConfig"
+                    },
+                    {
+                        "$ref": "#/components/schemas/OpenShiftSpecificConfig"
+                    }
+                ],
+                "x-oapi-codegen-extra-tags": {
+                    "gorm": "type:jsonb"
+                },
+                "x-stoplight": {
+                    "id": "pyzz8h4x30uei"
+                },
+                "title": ""
+            },
+            "OpenShiftSpecificConfig": {
+                "type": "object",
+                "description": "Properties of an OpenShift connector.",
+                "x-stoplight": {
+                    "id": "mmgw47m0iqf3l"
+                },
+                "properties": {
+                    "cluster_id": {
+                        "type": "string",
+                        "description": "The unique identifier of the OpenShift cluster."
+                    },
+                    "cluster_name": {
+                        "type": "string",
+                        "description": "The name of the OpenShift cluster."
+                    },
+                    "cluster_asset_id": {
+                        "type": "string",
+                        "description": "The asset ID associated with the cluster."
+                    },
+                    "cluster_asset_type_id": {
+                        "type": "string",
+                        "description": "The asset type ID of the cluster."
+                    },
+                    "cluster_realm": {
+                        "type": "string",
+                        "description": "The realm or environment in which the cluster resides."
+                    }
+                },
+                "title": "OpenShift"
+            },
+            "DockerhubSpecificConfig": {
+                "type": "object",
+                "description": "Properties of a Dockerhub connector.",
+                "x-stoplight": {
+                    "id": "1gcjolkk8xmwq"
+                },
+                "properties": {
+                    "repository": {
+                        "type": "string",
+                        "description": "*Optional*. The Docker Hub repository to scan.",
+                        "example": "my-repo",
+                        "x-go-type-skip-optional-pointer": true
+                    }
+                },
+                "title": "DockerHub"
+            },
+            "GitlabSpecificConfig": {
+                "type": "object",
+                "description": "Properties of a GitLab connector.",
+                "x-stoplight": {
+                    "id": "h3oucj6jnykpi"
+                },
+                "properties": {
+                    "group_ids": {
+                        "type": "string",
+                        "description": "*Optional*. The group IDs to scan.",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "project_ids": {
+                        "type": "string",
+                        "description": "*Optional*. The project IDs to scan.",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "api_domain_name": {
+                        "type": "string",
+                        "description": "*Optional*. The API domain name to use for the scan.",
+                        "x-go-type-skip-optional-pointer": true
+                    }
+                },
+                "x-examples": {},
+                "title": "GitLab"
+            },
+            "InitialScanConfiguration": {
+                "type": "object",
+                "x-oapi-codegen-extra-tags": {
+                    "gorm": "type:jsonb"
+                },
+                "x-stoplight": {
+                    "id": "srhpjdvqfs4ji"
+                },
+                "title": "Initial Scan Configuration",
+                "properties": {
+                    "mode": {
+                        "type": "string",
+                        "description": "Specifies the initial scan configuration mode.\n \n* `ALL` — Scans all container images, including every tag, in all discovered repositories.\n* `LATEST_TAG` — Scans only images tagged as `latest` in all discovered repositories.\n* `TAGS_MODIFIED_DAYS` — Scans images in each repository modified within the last *X* days, where *X* is set via an argument. You can select a range of up to 90 days for the scan.\n",
+                        "enum": [
+                            "ALL",
+                            "LATEST_TAG",
+                            "TAGS_MODIFIED_DAYS"
+                        ],
+                        "example": "TAGS_MODIFIED_DAYS",
+                        "x-enum-varnames": [
+                            "LatestOnly",
+                            "LastNDays",
+                            "ScanAll"
+                        ],
+                        "x-go-type-skip-optional-pointer": true,
+                        "default": "ALL"
+                    },
+                    "numDays": {
+                        "type": "integer",
+                        "description": "Number of days for the scan mode `lastNDays`",
+                        "example": 7
+                    }
+                }
+            },
+            "Vendor": {
+                "type": "string",
+                "enum": [
+                    "DOCKER",
+                    "JFROG",
+                    "SONATYPE",
+                    "DOCKER_HUB",
+                    "HARBOR",
+                    "GITLAB_CONTAINER_REGISTRY",
+                    "OPENSHIFT"
+                ],
+                "x-enum-varnames": [
+                    "Docker",
+                    "JFrog",
+                    "Sonatype",
+                    "Docker Hub",
+                    "Harbor",
+                    "Gitlab Container Registry",
+                    "JFrog CAS",
+                    "OpenShift"
+                ],
+                "description": "Name of the registry vendor.",
+                "x-go-type-skip-optional-pointer": true,
+                "x-stoplight": {
+                    "id": "d7gysaji3wkyi"
+                },
+                "title": "Vendor"
+            },
+            "ScanningMode": {
+                "type": "string",
+                "enum": [
+                    "CLOUD",
+                    "OUTPOST",
+                    "BROKER",
+                    "NOT_APPLICABLE",
+                    "KAPI"
+                ],
+                "x-enum-varnames": [
+                    "Cloud",
+                    "Outpost",
+                    "Broker",
+                    "NOT_APPLICABLE",
+                    "KAPI"
+                ],
+                "description": "The scanning mode used by the connector",
+                "x-stoplight": {
+                    "id": "l2jqhlsbpnfkt"
+                }
+            },
+            "Provider": {
+                "type": "string",
+                "enum": [
+                    "AWS",
+                    "GCP",
+                    "AZURE"
+                ],
+                "x-enum-varnames": [
+                    "AWS",
+                    "GCP",
+                    "Azure"
+                ],
+                "description": "Specifies the cloud provider for the Cortex environment to use for registry scanning.",
+                "x-go-type-skip-optional-pointer": true,
+                "x-stoplight": {
+                    "id": "kwfpox4g035nr"
+                }
+            },
+            "RegistryType": {
+                "type": "string",
+                "enum": [
+                    "CLOUD_HOSTED",
+                    "SELF_HOSTED"
+                ],
+                "x-enum-varnames": [
+                    "CloudHosted",
+                    "SelfHosted"
+                ],
+                "description": "The type of registry.",
+                "x-stoplight": {
+                    "id": "80oo4szmolpwc"
+                }
+            },
+            "BrokerType": {
+                "type": "string",
+                "enum": [
+                    "BROKER_VM",
+                    "BROKER_CLUSTER"
+                ],
+                "x-enum-varnames": [
+                    "VM",
+                    "Cluster"
+                ],
+                "x-stoplight": {
+                    "id": "1nvyof9vdr5py"
+                },
+                "description": "Indicates the Broker VM type used by the Outpost."
+            },
+            "FilterType": {
+                "type": "string",
+                "enum": [
+                    "INCLUDE",
+                    "EXCLUDE"
+                ],
+                "x-enum-varnames": [
+                    "Include",
+                    "Exclude"
+                ],
+                "x-stoplight": {
+                    "id": "kg1ujsdd8cef4"
+                }
+            },
+            "PublicAPIErrorMetadata": {
+                "type": "object",
+                "description": "Details for the PublicAPIError",
+                "properties": {
+                    "code": {
+                        "$ref": "#/components/schemas/Code"
+                    }
+                },
+                "required": [
+                    "code"
+                ],
+                "example": {
+                    "code": "INTERNAL_ERROR"
+                },
+                "x-stoplight": {
+                    "id": "vobvy36lz8hwa"
+                }
+            },
+            "PublicAPIErrorResponse": {
+                "type": "object",
+                "required": [
+                    "err_msg",
+                    "metadata"
+                ],
+                "properties": {
+                    "err_msg": {
+                        "type": "string",
+                        "description": "The error message"
+                    },
+                    "metadata": {
+                        "$ref": "#/components/schemas/PublicAPIErrorMetadata"
+                    }
+                },
+                "example": {
+                    "err_msg": "Policy ID not found",
+                    "metadata": {
+                        "code": "NOT_FOUND"
+                    }
+                },
+                "x-stoplight": {
+                    "id": "rwvtmbhibadyf"
+                }
+            },
+            "UnmanagedRegistryConnectorPublicAPIObject": {
+                "type": "object",
+                "x-stoplight": {
+                    "id": "05oj6vdcmsg8j"
+                },
+                "required": [
+                    "vendor",
+                    "name",
+                    "url",
+                    "username",
+                    "password",
+                    "auth_token",
+                    "scanning_mode",
+                    "region",
+                    "insecure_pull",
+                    "initial_scan_configuration"
+                ],
+                "properties": {
+                    "connector_id": {
+                        "type": "string",
+                        "description": "The connector ID.",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "vendor": {
+                        "$ref": "#/components/schemas/Vendor"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Name of the registry connector."
+                    },
+                    "enabled": {
+                        "type": "boolean",
+                        "description": "Indicates whether the connector is enabled.",
+                        "x-go-type-skip-optional-pointer": true,
+                        "default": true
+                    },
+                    "url": {
+                        "type": "string",
+                        "description": "The URL of the registry."
+                    },
+                    "username": {
+                        "type": "string",
+                        "description": "The username for authentication."
+                    },
+                    "password": {
+                        "type": "string",
+                        "description": "The password for authentication."
+                    },
+                    "auth_token": {
+                        "type": "string",
+                        "description": "Token to authenticate the request."
+                    },
+                    "scanning_mode": {
+                        "$ref": "#/components/schemas/ScanningMode"
+                    },
+                    "cloud_provider": {
+                        "$ref": "#/components/schemas/Provider"
+                    },
+                    "outpost_id": {
+                        "type": "string",
+                        "description": "The outpost ID.",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "region": {
+                        "type": "string",
+                        "description": "Specifies the region to use for registry scanning. As a best practice, choose the region closest to your registry deployment to achieve the best scanning throughput and potentially reduce cloud costs."
+                    },
+                    "insecure_pull": {
+                        "type": "boolean",
+                        "description": "When set to `true`, allows image pulls from insecure registries.",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "ca_certificate": {
+                        "type": "string",
+                        "description": "*Optional*. The CA certificate used for authentication.",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "repository": {
+                        "type": "string",
+                        "description": "*Optional*. The repository used for image discovery.",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "initial_scan_configuration": {
+                        "$ref": "#/components/schemas/InitialScanConfiguration"
+                    },
+                    "allow_static_ips": {
+                        "type": "boolean",
+                        "description": "*Optional*. Indicates whether static IP addresses are allowed.",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "ip_identifier": {
+                        "type": "string",
+                        "description": "*Optional*. The identifier associated with the IP address.",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "asset_scope_filters": {
+                        "$ref": "#/components/schemas/FilterObject"
+                    },
+                    "registry_type": {
+                        "$ref": "#/components/schemas/RegistryType"
+                    },
+                    "tenant_id": {
+                        "type": "string",
+                        "description": "The tenant ID",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "broker_type": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/BrokerType"
+                            }
+                        ],
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "broker_id": {
+                        "type": "string",
+                        "x-go-type-skip-optional-pointer": true,
+                        "description": "The broker ID."
+                    },
+                    "filter_type": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/FilterType"
+                            }
+                        ],
+                        "description": "Controls whether `asset_scope_filters` act as an inclusion or exclusion filter.",
+                        "default": "INCLUDE",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "vendor_specific_configuration": {
+                        "$ref": "#/components/schemas/VendorSpecificConfig"
+                    }
+                }
+            },
+            "GetUnmanagedRegistryConnectorResponse": {
+                "type": "object",
+                "x-stoplight": {
+                    "id": "xyzv7ntii5lxt"
+                },
+                "properties": {
+                    "connector_id": {
+                        "type": "string",
+                        "description": "The connector ID.",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "vendor": {
+                        "$ref": "#/components/schemas/Vendor"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "The name of the registry connector."
+                    },
+                    "enabled": {
+                        "type": "boolean",
+                        "description": "Indicates whether the connector is enabled.",
+                        "x-go-type-skip-optional-pointer": true,
+                        "default": true
+                    },
+                    "url": {
+                        "type": "string",
+                        "description": "The URL of the registry."
+                    },
+                    "username": {
+                        "type": "string",
+                        "description": "The username for authentication."
+                    },
+                    "password": {
+                        "type": "string",
+                        "description": "The password for authentication."
+                    },
+                    "auth_token": {
+                        "type": "string",
+                        "description": "Authentication token used to authorize requests to the API."
+                    },
+                    "scanning_mode": {
+                        "$ref": "#/components/schemas/ScanningMode"
+                    },
+                    "cloud_provider": {
+                        "$ref": "#/components/schemas/Provider"
+                    },
+                    "outpost_id": {
+                        "type": "string",
+                        "description": "The outpost ID.",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "region": {
+                        "type": "string",
+                        "description": "The region of the connector."
+                    },
+                    "insecure_pull": {
+                        "type": "boolean",
+                        "description": "When set to `true`, allows image pulls from insecure registries.",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "ca_certificate": {
+                        "type": "string",
+                        "description": "*Optional*. The CA certificate used for authentication.",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "repository": {
+                        "type": "string",
+                        "description": "*Optional*. The repository used for image discovery.",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "initial_scan_configuration": {
+                        "$ref": "#/components/schemas/InitialScanConfiguration"
+                    },
+                    "allow_static_ips": {
+                        "type": "boolean",
+                        "description": "*Optional*. Indicates whether static IP addresses are allowed.",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "ip_identifier": {
+                        "type": "string",
+                        "description": "*Optional*. The identifier associated with the IP address.",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "asset_scope_filters": {
+                        "$ref": "#/components/schemas/FilterObject"
+                    },
+                    "registry_type": {
+                        "$ref": "#/components/schemas/RegistryType"
+                    },
+                    "tenant_id": {
+                        "type": "string",
+                        "description": "The tenant ID",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "broker_type": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/BrokerType"
+                            }
+                        ],
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "broker_id": {
+                        "type": "string",
+                        "x-go-type-skip-optional-pointer": true,
+                        "description": "The broker ID."
+                    },
+                    "filter_type": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/FilterType"
+                            }
+                        ],
+                        "description": "Controls whether `asset_scope_filters` act as an inclusion or exclusion filter.",
+                        "default": "INCLUDE",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "vendor_specific_configuration": {
+                        "$ref": "#/components/schemas/VendorSpecificConfig"
+                    }
+                }
+            },
+            "Code": {
+                "type": "string",
+                "description": "A short, programmatically safe string indicating the error code reported",
+                "example": "NOT_FOUND",
+                "enum": [
+                    "BAD_REQUEST",
+                    "INTERNAL_ERROR",
+                    "NOT_FOUND",
+                    "FORBIDDEN"
+                ],
+                "x-stoplight": {
+                    "id": "6dv5a96b9wunn"
+                }
+            },
+            "err_code": {
+                "type": "string",
+                "description": "HTTP response code.",
+                "x-stoplight": {
+                    "id": "qxw2m3da0iwwk"
+                }
+            },
+            "err_msg": {
+                "type": "string",
+                "description": "Error message.",
+                "x-stoplight": {
+                    "id": "qn6hsk97me9v7"
+                }
+            },
+            "err_extra": {
+                "type": "string",
+                "description": "Additional information describing the error.",
+                "x-stoplight": {
+                    "id": "xlce5z2g0dh7s"
+                }
+            },
+            "EvaluationMode": {
+                "type": "string",
+                "nullable": true,
+                "enum": [
+                    "PERIODIC",
+                    "CONTINUOUS",
+                    null
+                ],
+                "description": "One of the supported evaluation modes",
+                "example": "PERIODIC",
+                "x-stoplight": {
+                    "id": "z7y5buh1wnyfa"
+                }
+            },
+            "EvaluationStage": {
+                "type": "string",
+                "nullable": true,
+                "enum": [
+                    "CI",
+                    "RUNTIME",
+                    "DEPLOY",
+                    null
+                ],
+                "description": "One of the supported evaluation stages",
+                "example": "CI",
+                "x-stoplight": {
+                    "id": "ehflb2r7lrpuo"
+                }
+            },
+            "GetPoliciesResponse": {
+                "type": "array",
+                "description": "The response you get when calling the `get policies` path",
+                "items": {
+                    "$ref": "#/components/schemas/PolicyData"
+                },
+                "example": [
+                    {
+                        "id": "1",
+                        "revision": 3,
+                        "createdAt": "2024-07-28T18:50:55Z",
+                        "modifiedAt": "2024-07-28T18:50:55Z",
+                        "type": "COMPLIANCE",
+                        "createdBy": "admin",
+                        "disabled": false,
+                        "name": "some policy",
+                        "description": "some policy description",
+                        "evaluationModes": [
+                            "PERIODIC"
+                        ],
+                        "evaluationStage": "CI",
+                        "rulesIds": [
+                            "1",
+                            "2"
+                        ],
+                        "condition": "U29tZUJhc2U2NEGhdGE=",
+                        "exception": "U29tZUJhc2U2NEhhdGE=",
+                        "assetScope": "U29tZUJhc2U2NE2hdGE=",
+                        "assetGroupsIDs": [
+                            1,
+                            2
+                        ],
+                        "assetGroups": [
+                            "group1",
+                            "group2"
+                        ],
+                        "action": "ISSUE",
+                        "severity": "CRITICAL",
+                        "remediationGuidance": "some remediation guidance"
+                    }
+                ],
+                "x-stoplight": {
+                    "id": "xy6pd0ggwwgai"
+                }
+            },
+            "PolicyAction": {
+                "type": "string",
+                "nullable": true,
+                "enum": [
+                    "ISSUE",
+                    "PREVENT",
+                    null
+                ],
+                "description": "One of the supported policy actions",
+                "example": "ISSUE",
+                "x-stoplight": {
+                    "id": "y43ohuuu9qk8e"
+                }
+            },
+            "PolicyData": {
+                "type": "object",
+                "description": "The schema of a policy",
+                "example": {
+                    "id": "1",
+                    "revision": 3,
+                    "createdAt": "2024-07-28T18:50:44Z",
+                    "modifiedAt": "2024-07-28T18:50:55Z",
+                    "type": "COMPLIANCE",
+                    "createdBy": "admin",
+                    "disabled": false,
+                    "name": "some policy",
+                    "description": "some policy description",
+                    "evaluationModes": [
+                        "PERIODIC"
+                    ],
+                    "evaluationStage": "CI",
+                    "rulesIds": [],
+                    "condition": "U29tZUJhc1U2NERhdGE=",
+                    "exception": "U29tZUJhc5U2NERhdGE=",
+                    "assetScope": "U29tZUJh72U2NERhdGE=",
+                    "assetGroupsIDs": [
+                        1,
+                        2
+                    ],
+                    "assetGroups": [
+                        "group1",
+                        "group2"
+                    ],
+                    "action": "ISSUE",
+                    "severity": "CRITICAL",
+                    "remediationGuidance": "some remediation guidance"
+                },
+                "required": [
+                    "type",
+                    "name",
+                    "description",
+                    "evaluationStage",
+                    "rulesIds",
+                    "condition",
+                    "assetGroupsIDs",
+                    "action",
+                    "severity"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "revision": {
+                        "type": "integer"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "modifiedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "type": {
+                        "$ref": "#/components/schemas/PolicyType"
+                    },
+                    "createdBy": {
+                        "type": "string"
+                    },
+                    "disabled": {
+                        "type": "boolean"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "evaluationModes": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/EvaluationMode"
+                        }
+                    },
+                    "evaluationStage": {
+                        "$ref": "#/components/schemas/EvaluationStage"
+                    },
+                    "rulesIds": {
+                        "type": "array",
+                        "description": "The UUIDs of the rules that define the condition\nThe `rulesIds` field is only required for non-compliance policies.",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "condition": {
+                        "type": "string",
+                        "format": "byte",
+                        "description": "The `condition` field is only required for non-compliance policies."
+                    },
+                    "exception": {
+                        "type": "string",
+                        "format": "byte"
+                    },
+                    "assetScope": {
+                        "type": "string",
+                        "format": "byte"
+                    },
+                    "assetGroupsIDs": {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        }
+                    },
+                    "assetGroups": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "action": {
+                        "$ref": "#/components/schemas/PolicyAction"
+                    },
+                    "severity": {
+                        "$ref": "#/components/schemas/PolicySeverity"
+                    },
+                    "remediationGuidance": {
+                        "type": "string"
+                    }
+                },
+                "x-stoplight": {
+                    "id": "nwqgpe3ornef3"
+                }
+            },
+            "PolicySeverity": {
+                "type": "string",
+                "nullable": true,
+                "enum": [
+                    "LOW",
+                    "MEDIUM",
+                    "HIGH",
+                    "CRITICAL",
+                    null
+                ],
+                "description": "One of the supported policy severities",
+                "example": "CRITICAL",
+                "x-stoplight": {
+                    "id": "7kxdmslhbksm1"
+                }
+            },
+            "PolicyType": {
+                "type": "string",
+                "nullable": true,
+                "enum": [
+                    "COMPLIANCE",
+                    "MALWARE",
+                    "SECRET"
+                ],
+                "description": "One of the supported policy types",
+                "example": "MALWARE",
+                "x-stoplight": {
+                    "id": "8fl9gba8bnni5"
+                }
+            },
+            "GetPoliciesResponseV2": {
+                "description": "The response you get when calling the `get policies V2` path",
+                "type": "array",
+                "items": {
+                    "$ref": "#/components/schemas/PolicyGetResponseDataV2"
+                },
+                "example": [
+                    {
+                        "id": "1",
+                        "revision": 3,
+                        "createdAt": "2024-07-28T18:50:55Z",
+                        "modifiedAt": "2024-07-28T18:50:55Z",
+                        "type": "COMPLIANCE",
+                        "createdBy": "admin",
+                        "disabled": false,
+                        "name": "some policy",
+                        "description": "some policy description",
+                        "evaluationModes": [
+                            "PERIODIC"
+                        ],
+                        "usingSystemAssetGroups": false,
+                        "gracePeriod": "",
+                        "evaluationStage": "CI",
+                        "policyRules": [
+                            {
+                                "id": "2",
+                                "rule_id": "3",
+                                "policy_id": "1",
+                                "severity": "CRITICAL",
+                                "action": "ISSUE",
+                                "policy_revision": 3,
+                                "rule_name": "ruleName",
+                                "remediation_guidance": "",
+                                "user_remediation_guidance": ""
+                            },
+                            {
+                                "id": "3",
+                                "rule_id": "4",
+                                "policy_id": "1",
+                                "severity": "HIGH",
+                                "action": "PREVENT",
+                                "policy_revision": 4,
+                                "rule_name": "ruleName2",
+                                "remediation_guidance": "",
+                                "user_remediation_guidance": ""
+                            }
+                        ],
+                        "condition": "U19tZUJhc2U2NERhdGE=",
+                        "exception": "U39tZUJhc2U2NERhdGE=",
+                        "assetScope": "U59tZUJhc2U2NERhdGE=",
+                        "assetGroupsIDs": [
+                            1,
+                            2
+                        ],
+                        "assetGroups": [
+                            "group1",
+                            "group2"
+                        ],
+                        "action": "ISSUE",
+                        "severity": "CRITICAL",
+                        "remediationGuidance": "some remediation guidance",
+                        "missingInformationAction": "ISSUE"
+                    }
+                ],
+                "x-stoplight": {
+                    "id": "a2rglg7ccxcav"
+                }
+            },
+            "PolicyGetResponseDataV2": {
+                "type": "object",
+                "description": "The schema of a returned policy",
+                "required": [
+                    "id",
+                    "revision",
+                    "createdAt",
+                    "modifiedAt",
+                    "type",
+                    "createdBy",
+                    "disabled",
+                    "name",
+                    "description",
+                    "evaluationModes",
+                    "evaluationStage",
+                    "policyRules",
+                    "condition",
+                    "exception",
+                    "assetScope",
+                    "assetGroupsIDs",
+                    "assetGroups",
+                    "action",
+                    "severity",
+                    "remediationGuidance",
+                    "usingSystemAssetGroups",
+                    "gracePeriod"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "revision": {
+                        "type": "integer"
+                    },
+                    "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "modifiedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "type": {
+                        "$ref": "#/components/schemas/PolicyType"
+                    },
+                    "createdBy": {
+                        "type": "string"
+                    },
+                    "disabled": {
+                        "type": "boolean"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "evaluationModes": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/EvaluationMode"
+                        }
+                    },
+                    "evaluationStage": {
+                        "$ref": "#/components/schemas/EvaluationStage"
+                    },
+                    "policyRules": {
+                        "type": "array",
+                        "description": "Array of policy_rule objects related to the policy",
+                        "items": {
+                            "$ref": "#/components/schemas/PolicyRuleGetResponseData"
+                        }
+                    },
+                    "condition": {
+                        "type": "string",
+                        "format": "byte"
+                    },
+                    "exception": {
+                        "type": "string",
+                        "format": "byte"
+                    },
+                    "assetScope": {
+                        "type": "string",
+                        "format": "byte"
+                    },
+                    "assetGroupsIDs": {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        }
+                    },
+                    "assetGroups": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "action": {
+                        "$ref": "#/components/schemas/PolicyAction"
+                    },
+                    "severity": {
+                        "$ref": "#/components/schemas/PolicySeverity"
+                    },
+                    "remediationGuidance": {
+                        "type": "string"
+                    },
+                    "missingInformationAction": {
+                        "$ref": "#/components/schemas/PolicyAction"
+                    },
+                    "usingSystemAssetGroups": {
+                        "type": "boolean"
+                    },
+                    "unifiedPolicyId": {
+                        "type": "string",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "gracePeriod": {
+                        "type": "string",
+                        "description": "Grace period duration string in days"
+                    }
+                },
+                "example": {
+                    "id": "1",
+                    "revision": 3,
+                    "createdAt": "2024-07-28T18:50:55Z",
+                    "modifiedAt": "2024-07-28T18:50:55Z",
+                    "type": "COMPLIANCE",
+                    "createdBy": "admin",
+                    "disabled": false,
+                    "name": "some policy",
+                    "description": "some policy description",
+                    "evaluationModes": [
+                        "PERIODIC"
+                    ],
+                    "gracePeriod": "",
+                    "evaluationStage": "CI",
+                    "policyRules": [
+                        {
+                            "id": "2",
+                            "rule_id": "3",
+                            "policy_id": "1",
+                            "severity": "CRITICAL",
+                            "action": "ISSUE",
+                            "policy_revision": 3,
+                            "rule_name": "Rule1",
+                            "remediation_guidance": "",
+                            "user_remediation_guidance": ""
+                        },
+                        {
+                            "id": "3",
+                            "rule_id": "4",
+                            "policy_id": "1",
+                            "severity": "HIGH",
+                            "action": "PREVENT",
+                            "policy_revision": 4,
+                            "rule_name": "Rule2",
+                            "remediation_guidance": "",
+                            "user_remediation_guidance": ""
+                        }
+                    ],
+                    "condition": "U29tZUJhc1U2NERhdGE=",
+                    "exception": "U29tZUJhc3U2NERhdGE=",
+                    "assetScope": "U29tZUJh42U2NERhdGE=",
+                    "assetGroupsIDs": [
+                        1,
+                        2
+                    ],
+                    "assetGroups": [
+                        "group1",
+                        "group2"
+                    ],
+                    "action": "ISSUE",
+                    "severity": "CRITICAL",
+                    "remediationGuidance": "some remediation guidance",
+                    "missingInformationAction": "ISSUE",
+                    "usingSystemAssetGroups": false
+                },
+                "x-stoplight": {
+                    "id": "zcg2qq1skh5o9"
+                }
+            },
+            "PolicyRuleGetResponseData": {
+                "type": "object",
+                "description": "The schema of policy_rule object",
+                "required": [
+                    "id",
+                    "rule_id",
+                    "policy_id",
+                    "severity",
+                    "action",
+                    "policy_revision",
+                    "rule_name",
+                    "remediation_guidance",
+                    "user_remediation_guidance"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "rule_id": {
+                        "type": "string"
+                    },
+                    "policy_id": {
+                        "type": "string"
+                    },
+                    "severity": {
+                        "$ref": "#/components/schemas/PolicySeverity"
+                    },
+                    "action": {
+                        "$ref": "#/components/schemas/PolicyAction"
+                    },
+                    "policy_revision": {
+                        "type": "integer"
+                    },
+                    "rule_name": {
+                        "type": "string"
+                    },
+                    "remediation_guidance": {
+                        "type": "string"
+                    },
+                    "user_remediation_guidance": {
+                        "type": "string",
+                        "description": "Additional remediation guidance that can be added to the rule’s predefined guidance."
+                    }
+                },
+                "x-stoplight": {
+                    "id": "1xck00zmb1xe5"
+                }
+            },
+            "PolicyPostRequestDataV2": {
+                "type": "object",
+                "description": "The schema of a created policy",
+                "required": [
+                    "type",
+                    "disabled",
+                    "name",
+                    "description",
+                    "evaluationModes",
+                    "evaluationStage",
+                    "policyRules",
+                    "condition",
+                    "exception",
+                    "assetScope",
+                    "assetGroupsIDs",
+                    "assetGroups",
+                    "action",
+                    "severity",
+                    "remediationGuidance",
+                    "createdBy",
+                    "usingSystemAssetGroups",
+                    "gracePeriod"
+                ],
+                "properties": {
+                    "type": {
+                        "$ref": "#/components/schemas/PolicyType"
+                    },
+                    "disabled": {
+                        "type": "boolean"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "evaluationModes": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/EvaluationMode"
+                        }
+                    },
+                    "evaluationStage": {
+                        "$ref": "#/components/schemas/EvaluationStage"
+                    },
+                    "policyRules": {
+                        "type": "array",
+                        "description": "Array of policy_rule objects related to the policy",
+                        "items": {
+                            "$ref": "#/components/schemas/PolicyRulePostRequestData"
+                        }
+                    },
+                    "condition": {
+                        "type": "string",
+                        "format": "byte"
+                    },
+                    "exception": {
+                        "type": "string",
+                        "format": "byte"
+                    },
+                    "assetScope": {
+                        "type": "string",
+                        "format": "byte"
+                    },
+                    "assetGroupsIDs": {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        }
+                    },
+                    "assetGroups": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "action": {
+                        "$ref": "#/components/schemas/PolicyAction"
+                    },
+                    "severity": {
+                        "$ref": "#/components/schemas/PolicySeverity"
+                    },
+                    "remediationGuidance": {
+                        "type": "string"
+                    },
+                    "createdBy": {
+                        "type": "string"
+                    },
+                    "missingInformationAction": {
+                        "$ref": "#/components/schemas/PolicyAction"
+                    },
+                    "usingSystemAssetGroups": {
+                        "type": "boolean"
+                    },
+                    "unifiedPolicyId": {
+                        "type": "string",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "gracePeriod": {
+                        "type": "string",
+                        "description": "Grace period duration string in days"
+                    }
+                },
+                "example": {
+                    "type": "COMPLIANCE",
+                    "disabled": false,
+                    "name": "some policy",
+                    "description": "some policy description",
+                    "evaluationModes": [
+                        "PERIODIC"
+                    ],
+                    "evaluationStage": "CI",
+                    "gracePeriod": "",
+                    "policyRules": [
+                        {
+                            "rule_id": "3",
+                            "severity": "CRITICAL",
+                            "action": "ISSUE",
+                            "user_remediation_guidance": "2"
+                        },
+                        {
+                            "rule_id": "4",
+                            "severity": "HIGH",
+                            "action": "PREVENT",
+                            "user_remediation_guidance": "1"
+                        }
+                    ],
+                    "condition": "Y29uZGl0aW9u",
+                    "exception": "ZXhjZXB0aW9u",
+                    "assetScope": "YXNzZXRTY29wZQ==",
+                    "assetGroupsIDs": [
+                        1,
+                        2
+                    ],
+                    "assetGroups": [
+                        "group1",
+                        "group2"
+                    ],
+                    "action": "ISSUE",
+                    "severity": "CRITICAL",
+                    "remediationGuidance": "some remediation guidance",
+                    "createdBy": "user",
+                    "missingInformationAction": "ISSUE",
+                    "usingSystemAssetGroups": false
+                },
+                "x-stoplight": {
+                    "id": "ii29ul8k2zovz"
+                }
+            },
+            "PolicyRulePostRequestData": {
+                "type": "object",
+                "description": "The schema of policy_rule object",
+                "required": [
+                    "rule_id",
+                    "severity",
+                    "action",
+                    "user_remediation_guidance"
+                ],
+                "properties": {
+                    "rule_id": {
+                        "type": "string"
+                    },
+                    "severity": {
+                        "$ref": "#/components/schemas/PolicySeverity"
+                    },
+                    "action": {
+                        "$ref": "#/components/schemas/PolicyAction"
+                    },
+                    "user_remediation_guidance": {
+                        "type": "string"
+                    }
+                },
+                "x-stoplight": {
+                    "id": "w6qg411zv8xh2"
+                }
+            },
+            "PolicyPutRequestDataV2": {
+                "type": "object",
+                "description": "The schema of a created policy",
+                "required": [
+                    "id",
+                    "type",
+                    "disabled",
+                    "name",
+                    "description",
+                    "evaluationModes",
+                    "evaluationStage",
+                    "policyRules",
+                    "condition",
+                    "exception",
+                    "assetScope",
+                    "assetGroupsIDs",
+                    "assetGroups",
+                    "action",
+                    "severity",
+                    "remediationGuidance",
+                    "usingSystemAssetGroups",
+                    "gracePeriod"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "$ref": "#/components/schemas/PolicyType"
+                    },
+                    "disabled": {
+                        "type": "boolean"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "evaluationModes": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/EvaluationMode"
+                        }
+                    },
+                    "evaluationStage": {
+                        "$ref": "#/components/schemas/EvaluationStage"
+                    },
+                    "policyRules": {
+                        "type": "array",
+                        "description": "Array of policy_rule objects related to the policy",
+                        "items": {
+                            "$ref": "#/components/schemas/PolicyRulePostRequestData"
+                        }
+                    },
+                    "condition": {
+                        "type": "string",
+                        "format": "byte"
+                    },
+                    "exception": {
+                        "type": "string",
+                        "format": "byte"
+                    },
+                    "assetScope": {
+                        "type": "string",
+                        "format": "byte"
+                    },
+                    "assetGroupsIDs": {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        }
+                    },
+                    "assetGroups": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "action": {
+                        "$ref": "#/components/schemas/PolicyAction"
+                    },
+                    "severity": {
+                        "$ref": "#/components/schemas/PolicySeverity"
+                    },
+                    "remediationGuidance": {
+                        "type": "string"
+                    },
+                    "createdBy": {
+                        "type": "string"
+                    },
+                    "missingInformationAction": {
+                        "$ref": "#/components/schemas/PolicyAction"
+                    },
+                    "usingSystemAssetGroups": {
+                        "type": "boolean"
+                    },
+                    "unifiedPolicyId": {
+                        "type": "string",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "gracePeriod": {
+                        "type": "string",
+                        "description": "Grace period duration string in days"
+                    }
+                },
+                "example": {
+                    "id": "policyID",
+                    "type": "COMPLIANCE",
+                    "disabled": false,
+                    "name": "some policy",
+                    "description": "some policy description",
+                    "evaluationModes": [
+                        "PERIODIC"
+                    ],
+                    "gracePeriod": "",
+                    "evaluationStage": "CI",
+                    "policyRules": [
+                        {
+                            "rule_id": "3",
+                            "severity": "CRITICAL",
+                            "action": "ISSUE",
+                            "user_remediation_guidance": "1"
+                        },
+                        {
+                            "rule_id": "4",
+                            "severity": "HIGH",
+                            "action": "PREVENT",
+                            "user_remediation_guidance": "1"
+                        }
+                    ],
+                    "condition": "U29tZUJhc2U2NERfdGE=",
+                    "exception": "U29tZUJhc2U2NERfdGE=",
+                    "assetScope": "U29tZUJhc2U2NEFhdGE=",
+                    "assetGroupsIDs": [
+                        1,
+                        2
+                    ],
+                    "assetGroups": [
+                        "group1",
+                        "group2"
+                    ],
+                    "action": "ISSUE",
+                    "severity": "CRITICAL",
+                    "remediationGuidance": "some remediation guidance",
+                    "createdBy": "user",
+                    "missingInformationAction": "ISSUE",
+                    "usingSystemAssetGroups": false
+                },
+                "x-stoplight": {
+                    "id": "fjex5pu2sjwoz"
+                }
+            }
+        }
+    }
+}

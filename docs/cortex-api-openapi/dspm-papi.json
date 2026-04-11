@@ -1,0 +1,405 @@
+{
+    "openapi": "3.1.0",
+    "x-stoplight": {
+        "id": "tj9x58i79vv1m"
+    },
+    "info": {
+        "title": "Data Security Posture Management APIs",
+        "description": "You can export the OpenAPI specs in the [Cortex Stoplight instance](https://cortex-panw.stoplight.io/docs/cortex-xsiam-3-x/tj9x58i79vv1m-data-security-posture-management-ap-is). \n\nThe Cortex Cloud Data Security solution is an agentless multi-cloud data security platform that discovers, classifies, protects, and governs sensitive data.\n\n**Required license:** Cortex Cloud Runtime Security or Cortex Cloud Posture Management",
+        "contact": {
+            "email": "docs-cortex@paloaltonetworks.com",
+            "name": "Cortex Documentation Team",
+            "url": "https://docs-cortex.paloaltonetworks.com/"
+        },
+        "version": "Cortex XSIAM 3.4"
+    },
+    "servers": [
+        {
+            "url": "https://api-yourfqdn"
+        }
+    ],
+    "paths": {
+        "/public_api/v1/data-security/data-patterns": {
+            "post": {
+                "description": "Get all data patterns found in the environment, including high-level aggregations for each of them.\n\n**Required license:** Cortex Cloud Runtime Security or Cortex Cloud Posture Management",
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "UCoWpG4rkNzgCp2dsh8m02iVpZsskwKHz7N1tErPcUV3Wmf59Gc9kytmgOv0pDWoem3PBlORyRIPiir4OcYdWUOWAM3JyTgoCxQf4nQoTlKmFRKz9Bj5vIjluw66p9WP "
+                        },
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "{api_key}",
+                        "required": true
+                    },
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "241"
+                        },
+                        "in": "header",
+                        "name": "x-xdr-auth-id",
+                        "description": "{api_key_id}",
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DasRequestBody"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DasResponseBody"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
+                                "examples": {
+                                    "Example#1": {
+                                        "description": "",
+                                        "value": {
+                                            "err_msg": "BadRequest",
+                                            "err_extra": []
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
+                                "examples": {
+                                    "Example#1": {
+                                        "description": "",
+                                        "value": {
+                                            "err_msg": "InternalServerError",
+                                            "err_extra": []
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-stoplight": {
+                    "id": "xf8ji16t5xy46"
+                },
+                "summary": "Get data pattern inventory",
+                "operationId": "postGetDataPatternInventory"
+            }
+        },
+        "/public_api/v1/data-security/objects/fields": {
+            "post": {
+                "description": "**Required license:** Cortex Cloud Runtime Security or Cortex Cloud Posture Management",
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "UCoWpG4rkNzgCp2dsh8m02iVpZsskwKHz7N1tErPcUV3Wmf59Gc9kytmgOv0pDWoem3PBlORyRIPiir4OcYdWUOWAM3JyTgoCxQf4nQoTlKmFRKz9Bj5vIjluw66p9WP "
+                        },
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "{api_key}",
+                        "required": true
+                    },
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "241"
+                        },
+                        "in": "header",
+                        "name": "x-xdr-auth-id",
+                        "description": "{api_key_id}",
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DasRequestBody"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DasResponseBody"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
+                                "examples": {
+                                    "Example#1": {
+                                        "description": "",
+                                        "value": {
+                                            "err_msg": "BadRequest",
+                                            "err_extra": []
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
+                                "examples": {
+                                    "Example#1": {
+                                        "description": "",
+                                        "value": {
+                                            "err_msg": "InternalServerError",
+                                            "err_extra": []
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-stoplight": {
+                    "id": "aymcrr2ipxhiv"
+                },
+                "summary": "Get field inventory details",
+                "operationId": "postGetFieldInventoryDetails"
+            }
+        },
+        "/public_api/v1/data-security/objects/files": {
+            "post": {
+                "description": "**Required license:** Cortex Cloud Runtime Security or Cortex Cloud Posture Management",
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "UCoWpG4rkNzgCp2dsh8m02iVpZsskwKHz7N1tErPcUV3Wmf59Gc9kytmgOv0pDWoem3PBlORyRIPiir4OcYdWUOWAM3JyTgoCxQf4nQoTlKmFRKz9Bj5vIjluw66p9WP "
+                        },
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "{api_key}",
+                        "required": true
+                    },
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "241"
+                        },
+                        "in": "header",
+                        "name": "x-xdr-auth-id",
+                        "description": "{api_key_id}",
+                        "required": true
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DasRequestBody"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DasResponseBody"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
+                                "examples": {
+                                    "Example#1": {
+                                        "description": "",
+                                        "value": {
+                                            "err_msg": "BadRequest",
+                                            "err_extra": []
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "*/*": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
+                                "examples": {
+                                    "Example#1": {
+                                        "description": "",
+                                        "value": {
+                                            "err_msg": "InternalServerError",
+                                            "err_extra": []
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-stoplight": {
+                    "id": "votfz4lfs5hhg"
+                },
+                "summary": "Get file inventory details",
+                "operationId": "postGetFileInventoryDetails"
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "DasRequestBody": {
+                "type": "object",
+                "properties": {
+                    "filter": {
+                        "type": "object",
+                        "properties": {}
+                    },
+                    "sort": {
+                        "type": "array",
+                        "properties": {}
+                    },
+                    "next_page_token": {
+                        "type": "string",
+                        "properties": {}
+                    }
+                },
+                "x-stoplight": {
+                    "id": "tfloaa9xa6zh4"
+                }
+            },
+            "JsonElement": {
+                "type": "object",
+                "properties": {},
+                "x-stoplight": {
+                    "id": "vsbbfwim5qy9j"
+                }
+            },
+            "JsonArray": {
+                "type": "array",
+                "properties": {},
+                "x-stoplight": {
+                    "id": "hn34b763n8y6t"
+                }
+            },
+            "ErrorResponse": {
+                "type": "object",
+                "properties": {
+                    "err_msg": {
+                        "type": "string"
+                    },
+                    "err_extra": {
+                        "$ref": "#/components/schemas/JsonArray"
+                    }
+                },
+                "required": [
+                    "err_msg",
+                    "err_extra"
+                ],
+                "x-stoplight": {
+                    "id": "ti4m9mz8x8gaa"
+                }
+            },
+            "DasResponseBodyMetadata": {
+                "type": "object",
+                "x-stoplight": {
+                    "id": "7an6h9134gxr9"
+                },
+                "properties": {
+                    "total_count": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "filter_count": {
+                        "type": "integer",
+                        "format": "int32"
+                    },
+                    "next_page_token": {
+                        "type": "string"
+                    }
+                }
+            },
+            "DasResponseBody": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "$ref": "#/components/schemas/JsonArray"
+                    },
+                    "metadata": {
+                        "$ref": "#/components/schemas/DasResponseBodyMetadata"
+                    }
+                },
+                "required": [
+                    "data",
+                    "metadata"
+                ],
+                "x-stoplight": {
+                    "id": "z9x5pku5rcja9"
+                }
+            },
+            "Map": {
+                "type": "object",
+                "properties": {},
+                "x-stoplight": {
+                    "id": "4vborn43vpj8u"
+                }
+            },
+            "Map_String": {
+                "type": "string",
+                "x-stoplight": {
+                    "id": "gsjfq833qgfd0"
+                }
+            }
+        }
+    }
+}

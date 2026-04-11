@@ -1,0 +1,1440 @@
+openapi: 3.0.3
+x-stoplight:
+  id: 56de1za45y83g
+info:
+  title: Agent Configuration Settings API
+  description: |
+    Manage global agent configuration settings for your Cortex Cloud environment.
+    These endpoints allow you to retrieve and update settings that control agent
+    behavior across content management, auto-upgrades, status timeouts, analysis
+    options, and administrative cleanup.
+
+    **Required license:** Cortex Cloud Runtime Security or Cortex Cloud Posture Management
+  version: 1.0.0
+  contact:
+    email: docs-cortex@paloaltonetworks.com
+    name: Cortex Documentation Team
+    url: 'https://docs-cortex.paloaltonetworks.com/'
+servers:
+  - url: 'https://api-yourfqdn'
+tags:
+  - name: Agent Configurations
+    x-displayName: Agent Configurations
+    description: |
+      Endpoints for managing global agent configuration settings. Each configuration
+      area has a paired get/set endpoint pattern. Use the GET endpoint to retrieve
+      current settings and the POST endpoint to update them.
+security:
+  - api-key-header-x-xdr-auth-id: []
+    api-key-header-authorization: []
+paths:
+  /public_api/v1/configurations/agent/content_management:
+    description: |
+      Retrieve or update the content management configuration for the tenant, including
+      bandwidth control and minor content version update settings.
+    get:
+      tags:
+        - Agent Configurations
+      summary: Retrieve content management settings
+      description: |-
+        Returns the current content management configuration for the tenant, including bandwidth control and minor content version update settings.
+
+        Requires appropriate RBAC permissions for agent settings management.
+      operationId: getContentManagement
+      responses:
+        '200':
+          description: Successful response containing the current content management configuration.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContentManagementResponse'
+              example:
+                enable_bandwidth_control: true
+                bandwidth_in_mbps: 100
+                enable_minor_content_version_updates: true
+        '400':
+          description: Bad request. The request was malformed or contained invalid parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized. Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden. The API key does not have the required permissions.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-stoplight:
+        id: cu7vli2i7zq5l
+  /public_api/v1/configurations/agent/content_management/set:
+    description: |
+      Updates the content management configuration for the tenant. Changes take effect immediately.
+
+      Requires appropriate RBAC permissions for agent settings management.
+    post:
+      tags:
+        - Agent Configurations
+      summary: Update content management settings
+      description: |-
+        Updates the content management configuration for the tenant. Changes to bandwidth control and content version settings take effect immediately.
+
+        Requires appropriate RBAC permissions for agent settings management.
+      operationId: setContentManagement
+      requestBody:
+        required: true
+        description: Content management configuration settings to update.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetContentManagementRequest'
+      responses:
+        '200':
+          description: Successful response indicating the configuration was updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                reply: true
+        '400':
+          description: Bad request. The request was malformed or contained invalid parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized. Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden. The API key does not have the required permissions.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-stoplight:
+        id: q2ar2zxzgrxs0
+  /public_api/v1/configurations/agent/agent_status:
+    description: |
+      Retrieve or update the agent status timeout configuration for the tenant, including
+      license revocation and agent deletion retention settings.
+    get:
+      tags:
+        - Agent Configurations
+      summary: Retrieve agent status timeout settings
+      description: |-
+        Returns the current agent status configuration for the tenant, including license revocation timeout and agent deletion retention period.
+
+        Requires appropriate RBAC permissions for agent settings management.
+      operationId: getAgentStatus
+      responses:
+        '200':
+          description: Successful response containing the current agent status configuration.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentStatusResponse'
+              example:
+                license_revocation_after_lost_connection: 30
+                agent_deletion_retention: 90
+        '400':
+          description: Bad request. The request was malformed or contained invalid parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized. Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden. The API key does not have the required permissions.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-stoplight:
+        id: reb902057qnsa
+  /public_api/v1/configurations/agent/agent_status/set:
+    description: |
+      Updates the agent status configuration for the tenant. Changes take effect immediately.
+
+      Requires appropriate RBAC permissions for agent settings management.
+    post:
+      tags:
+        - Agent Configurations
+      summary: Update agent status timeout settings
+      description: |-
+        Updates the agent status configuration for the tenant. Changes to license revocation and deletion retention settings take effect immediately.
+
+        Requires appropriate RBAC permissions for agent settings management.
+      operationId: setAgentStatus
+      requestBody:
+        required: true
+        description: Agent status timeout configuration settings to update.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetAgentStatusRequest'
+      responses:
+        '200':
+          description: Successful response indicating the configuration was updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                reply: true
+        '400':
+          description: Bad request. The request was malformed or contained invalid parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized. Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden. The API key does not have the required permissions.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-stoplight:
+        id: l7dq2kf5s8r80
+  /public_api/v1/configurations/agent/auto_upgrade:
+    description: |
+      Retrieve or update the agent auto upgrade configuration for the tenant, including
+      the number of parallel upgrades allowed.
+    get:
+      tags:
+        - Agent Configurations
+      summary: Retrieve agent auto-upgrade settings
+      description: |-
+        Returns the current agent auto upgrade configuration for the tenant, including the number of parallel upgrades allowed.
+
+        Requires appropriate RBAC permissions for agent settings management.
+      operationId: getAgentAutoUpgrade
+      responses:
+        '200':
+          description: Successful response containing the current auto-upgrade configuration.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentAutoUpgradeResponse'
+              example:
+                amount_of_parallel_upgrades: 10
+        '400':
+          description: Bad request. The request was malformed or contained invalid parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized. Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden. The API key does not have the required permissions.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-stoplight:
+        id: lnsplfqx385lj
+  /public_api/v1/configurations/agent/auto_upgrade/set:
+    description: |
+      Updates the agent auto upgrade configuration for the tenant. Changes take effect immediately.
+
+      Requires appropriate RBAC permissions for agent settings management.
+    post:
+      tags:
+        - Agent Configurations
+      summary: Update agent auto-upgrade settings
+      description: |-
+        Updates the agent auto upgrade configuration for the tenant. Changes to parallel upgrade limits take effect immediately.
+
+        Requires appropriate RBAC permissions for agent settings management.
+      operationId: setAgentAutoUpgrade
+      requestBody:
+        required: true
+        description: Agent auto upgrade configuration settings to update.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetAgentAutoUpgradeRequest'
+      responses:
+        '200':
+          description: Successful response indicating the configuration was updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                reply: true
+        '400':
+          description: Bad request. The request was malformed or contained invalid parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized. Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden. The API key does not have the required permissions.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-stoplight:
+        id: yw6q3lvab3u32
+  /public_api/v1/configurations/agent/wildfire_analysis:
+    description: |
+      Retrieve or update the WildFire analysis configuration for the tenant, including
+      scoring settings for benign verdicts.
+    get:
+      tags:
+        - Agent Configurations
+      summary: Retrieve WildFire analysis settings
+      description: |-
+        Returns the current WildFire analysis configuration for the tenant, including scoring settings for benign verdicts.
+
+        Requires appropriate RBAC permissions for agent settings management.
+      operationId: getWildfireAnalysis
+      responses:
+        '200':
+          description: Successful response containing the current WildFire analysis configuration.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WildfireAnalysisResponse'
+              example:
+                enable_wildfire_analysis_scoring_for_benign_verdicts: false
+        '400':
+          description: Bad request. The request was malformed or contained invalid parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized. Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden. The API key does not have the required permissions.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-stoplight:
+        id: d6nw37rv5zqei
+  /public_api/v1/configurations/agent/wildfire_analysis/set:
+    description: |
+      Updates the WildFire analysis configuration for the tenant. Changes take effect immediately.
+
+      Requires appropriate RBAC permissions for agent settings management.
+    post:
+      tags:
+        - Agent Configurations
+      summary: Update WildFire analysis settings
+      description: |-
+        Updates the WildFire analysis configuration for the tenant. Changes to analysis scoring settings take effect immediately.
+
+        Requires appropriate RBAC permissions for agent settings management.
+      operationId: setWildfireAnalysis
+      requestBody:
+        required: true
+        description: WildFire analysis configuration settings to update.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetWildfireAnalysisRequest'
+      responses:
+        '200':
+          description: Successful response indicating the configuration was updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                reply: true
+        '400':
+          description: Bad request. The request was malformed or contained invalid parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized. Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden. The API key does not have the required permissions.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-stoplight:
+        id: cr3b4gao958gc
+  /public_api/v1/configurations/agent/informative_btp_issues:
+    description: |
+      Retrieve or update the informative BTP issues configuration for the tenant, controlling
+      display of unique Behavioral Threat Protection rules.
+    get:
+      tags:
+        - Agent Configurations
+      summary: Retrieve informative BTP issues settings
+      description: |-
+        Returns the current configuration for displaying unique and informative BTP (Behavioral Threat Protection) rules.
+
+        Requires appropriate RBAC permissions for agent settings management.
+      operationId: getInformativeBTPIssues
+      responses:
+        '200':
+          description: Successful response containing the current BTP issues configuration.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InformativeBTPIssuesResponse'
+              example:
+                display_unique_and_informative_btp_rules: true
+        '400':
+          description: Bad request. The request was malformed or contained invalid parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized. Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden. The API key does not have the required permissions.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-stoplight:
+        id: 4azrtclwv4bz6
+  /public_api/v1/configurations/agent/informative_btp_issues/set:
+    description: |
+      Updates the informative BTP issues configuration for the tenant. Changes take effect immediately.
+
+      Requires appropriate RBAC permissions for agent settings management.
+    post:
+      tags:
+        - Agent Configurations
+      summary: Update informative BTP issues settings
+      description: |-
+        Updates the configuration for displaying unique and informative BTP (Behavioral Threat Protection) rules. Changes take effect immediately.
+
+        Requires appropriate RBAC permissions for agent settings management.
+      operationId: setInformativeBTPIssues
+      requestBody:
+        required: true
+        description: Informative BTP issues display configuration to update.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetInformativeBTPIssuesRequest'
+      responses:
+        '200':
+          description: Successful response indicating the configuration was updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                reply: true
+        '400':
+          description: Bad request. The request was malformed or contained invalid parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized. Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden. The API key does not have the required permissions.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-stoplight:
+        id: wk6gngxfqfoay
+  /public_api/v1/configurations/agent/cortex_xdr_log_collection:
+    description: |
+      Retrieve or update the Cortex XDR log collection configuration for the tenant, controlling
+      whether agents collect and send diagnostic logs.
+    get:
+      tags:
+        - Agent Configurations
+      summary: Retrieve log collection settings
+      description: |-
+        Returns the current Cortex XDR log collection configuration for the tenant.
+
+        Requires appropriate RBAC permissions for agent settings management.
+      operationId: getCortexXDRLogCollection
+      responses:
+        '200':
+          description: Successful response containing the current log collection configuration.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LogCollectionResponse'
+              example:
+                allow_logs_collection: true
+        '400':
+          description: Bad request. The request was malformed or contained invalid parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized. Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden. The API key does not have the required permissions.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-stoplight:
+        id: knidvpcki2c9j
+  /public_api/v1/configurations/agent/cortex_xdr_log_collection/set:
+    description: |
+      Updates the Cortex XDR log collection configuration for the tenant. Changes take effect immediately.
+
+      Requires appropriate RBAC permissions for agent settings management.
+    post:
+      tags:
+        - Agent Configurations
+      summary: Update log collection settings
+      description: |-
+        Updates the Cortex XDR log collection configuration for the tenant. Changes take effect immediately.
+
+        Requires appropriate RBAC permissions for agent settings management.
+      operationId: setCortexXDRLogCollection
+      requestBody:
+        required: true
+        description: Cortex XDR log collection configuration settings to update.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetLogCollectionRequest'
+      responses:
+        '200':
+          description: Successful response indicating the configuration was updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                reply: true
+        '400':
+          description: Bad request. The request was malformed or contained invalid parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized. Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden. The API key does not have the required permissions.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-stoplight:
+        id: pnfzswt3d80tw
+  /public_api/v1/configurations/agent/action_center_expiration:
+    description: |
+      Retrieve or update the action center expiration configuration for the tenant, controlling
+      how long authorized actions remain valid.
+    get:
+      tags:
+        - Agent Configurations
+      summary: Retrieve action center expiration settings
+      description: |-
+        Returns the current action center expiration settings for authorized actions, specifying timeout durations in hours.
+
+        Requires appropriate RBAC permissions for agent settings management.
+      operationId: getActionCenterExpiration
+      responses:
+        '200':
+          description: Successful response containing the current action center expiration settings.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionCenterExpirationResponse'
+              example:
+                isolate: 72
+                scan: 24
+        '400':
+          description: Bad request. The request was malformed or contained invalid parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized. Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden. The API key does not have the required permissions.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-stoplight:
+        id: r7nd1bat8aft8
+  /public_api/v1/configurations/agent/action_center_expiration/set:
+    description: |
+      Updates the action center expiration configuration for the tenant. Changes take effect immediately.
+
+      Requires appropriate RBAC permissions for agent settings management.
+    post:
+      tags:
+        - Agent Configurations
+      summary: Update action center expiration settings
+      description: |-
+        Updates the action center expiration settings for authorized actions. Timeout values are specified in hours. Changes take effect immediately.
+
+        Requires appropriate RBAC permissions for agent settings management.
+      operationId: setActionCenterExpiration
+      requestBody:
+        required: true
+        description: Action center expiration settings to update.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetActionCenterExpirationRequest'
+      responses:
+        '200':
+          description: Successful response indicating the configuration was updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                reply: true
+        '400':
+          description: Bad request. The request was malformed or contained invalid parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized. Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden. The API key does not have the required permissions.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-stoplight:
+        id: fxtov77v470vg
+  /public_api/v1/configurations/agent/critical_environment_versions:
+    description: |
+      Retrieve or update the critical environment versions configuration for the tenant, controlling
+      version enforcement for agents in critical environments.
+    get:
+      tags:
+        - Agent Configurations
+      summary: Retrieve critical environment versions settings
+      description: |-
+        Returns the current configuration for critical environment version monitoring.
+
+        Requires appropriate RBAC permissions for agent settings management.
+      operationId: getCriticalEnvironmentVersions
+      responses:
+        '200':
+          description: Successful response containing the current critical environment versions configuration.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CriticalEnvironmentVersionsResponse'
+              example:
+                enabled_critical_environment_versions: true
+        '400':
+          description: Bad request. The request was malformed or contained invalid parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized. Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden. The API key does not have the required permissions.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-stoplight:
+        id: cbcooyyyfqsl6
+  /public_api/v1/configurations/agent/critical_environment_versions/set:
+    description: |
+      Updates the critical environment versions configuration for the tenant. Changes take effect immediately.
+
+      Requires appropriate RBAC permissions for agent settings management.
+    post:
+      tags:
+        - Agent Configurations
+      summary: Update critical environment versions settings
+      description: |-
+        Updates the configuration for critical environment version monitoring. Changes take effect immediately.
+
+        Requires appropriate RBAC permissions for agent settings management.
+      operationId: setCriticalEnvironmentVersions
+      requestBody:
+        required: true
+        description: Critical environment versions configuration to update.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetCriticalEnvironmentVersionsRequest'
+      responses:
+        '200':
+          description: Successful response indicating the configuration was updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                reply: true
+        '400':
+          description: Bad request. The request was malformed or contained invalid parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized. Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden. The API key does not have the required permissions.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-stoplight:
+        id: 32omn6r5vg036
+  /public_api/v1/configurations/agent/advanced_analysis:
+    description: |
+      Retrieve or update the advanced analysis configuration for the tenant, including
+      automatic upload and exception application settings.
+    get:
+      tags:
+        - Agent Configurations
+      summary: Retrieve advanced analysis settings
+      description: |-
+        Returns the current advanced analysis configuration for the tenant, including automatic file upload and exception application settings.
+
+        Requires appropriate RBAC permissions for agent settings management.
+      operationId: getAdvancedAnalysis
+      responses:
+        '200':
+          description: Successful response containing the current advanced analysis configuration.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdvancedAnalysisResponse'
+              example:
+                automatically_upload_defined_issue_data_files: true
+                automatically_apply_advanced_analysis_exceptions: false
+        '400':
+          description: Bad request. The request was malformed or contained invalid parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized. Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden. The API key does not have the required permissions.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-stoplight:
+        id: vah6qaj1a70jr
+  /public_api/v1/configurations/agent/advanced_analysis/set:
+    description: |
+      Updates the advanced analysis configuration for the tenant. Changes take effect immediately.
+
+      Requires appropriate RBAC permissions for agent settings management.
+    post:
+      tags:
+        - Agent Configurations
+      summary: Update advanced analysis settings
+      description: |-
+        Updates the advanced analysis configuration for the tenant. Changes to file upload and exception settings take effect immediately.
+
+        Requires appropriate RBAC permissions for agent settings management.
+      operationId: setAdvancedAnalysis
+      requestBody:
+        required: true
+        description: Advanced analysis configuration settings to update.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetAdvancedAnalysisRequest'
+      responses:
+        '200':
+          description: Successful response indicating the configuration was updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                reply: true
+        '400':
+          description: Bad request. The request was malformed or contained invalid parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized. Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden. The API key does not have the required permissions.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-stoplight:
+        id: jrr4ijwcvf14s
+  /public_api/v1/configurations/agent/endpoint_administration_cleanup:
+    description: |
+      Retrieve or update the endpoint administration cleanup configuration for the tenant,
+      including periodic duplicate cleanup settings and matching criteria.
+    get:
+      tags:
+        - Agent Configurations
+      summary: Retrieve endpoint administration cleanup settings
+      description: |-
+        Returns the current endpoint administration cleanup configuration, including periodic duplicate cleanup settings and matching criteria.
+
+        Requires appropriate RBAC permissions for agent settings management.
+      operationId: getEndpointAdministrationCleanup
+      responses:
+        '200':
+          description: Successful response containing the current cleanup configuration.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EndpointAdministrationCleanupResponse'
+              example:
+                periodic_duplicate_cleanup: true
+                host_name: true
+                ip: true
+                mac: false
+                time_interval_hours: 24
+        '400':
+          description: Bad request. The request was malformed or contained invalid parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized. Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden. The API key does not have the required permissions.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-stoplight:
+        id: qtq3jq7ed3rz0
+  /public_api/v1/configurations/agent/endpoint_administration_cleanup/set:
+    description: |
+      Updates the endpoint administration cleanup configuration for the tenant. Changes take effect immediately.
+
+      Requires appropriate RBAC permissions for agent settings management.
+    post:
+      tags:
+        - Agent Configurations
+      summary: Update endpoint administration cleanup settings
+      description: |-
+        Updates the endpoint administration cleanup configuration. Changes to duplicate cleanup settings take effect immediately.
+
+        Requires appropriate RBAC permissions for agent settings management.
+      operationId: setEndpointAdministrationCleanup
+      requestBody:
+        required: true
+        description: Endpoint administration cleanup configuration to update.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SetEndpointAdministrationCleanupRequest'
+      responses:
+        '200':
+          description: Successful response indicating the configuration was updated.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BaseResponse'
+              example:
+                reply: true
+        '400':
+          description: Bad request. The request was malformed or contained invalid parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized. Authentication credentials are missing or invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden. The API key does not have the required permissions.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-stoplight:
+        id: 7me0b0pyc7dho
+components:
+  securitySchemes:
+    api-key-header-x-xdr-auth-id:
+      type: apiKey
+      name: x-xdr-auth-id
+      in: header
+      description: The API key ID.
+    api-key-header-authorization:
+      type: apiKey
+      name: Authorization
+      in: header
+      description: The API key.
+  schemas:
+    ErrorResponse:
+      type: object
+      description: Standard error response returned when a request fails.
+      properties:
+        reply:
+          type: object
+          description: Error details container.
+          example:
+            err_code: 500
+            err_msg: Internal server error
+            err_extra: Additional error context
+          properties:
+            err_code:
+              type: integer
+              description: Numeric error code identifying the type of error.
+              example: 500
+            err_msg:
+              type: string
+              description: Human-readable error message describing what went wrong.
+              example: Internal server error
+            err_extra:
+              type: string
+              description: 'Additional context about the error, if available.'
+              example: Additional error context
+      x-stoplight:
+        id: oxk2labn9tvp4
+    BaseResponse:
+      type: object
+      description: Standard success response for configuration update operations.
+      properties:
+        reply:
+          type: boolean
+          description: Indicates whether the operation completed successfully.
+          example: true
+      x-stoplight:
+        id: bywme0uphg11m
+    ContentManagementResponse:
+      type: object
+      description: Current content management configuration settings.
+      properties:
+        enable_bandwidth_control:
+          type: boolean
+          description: Indicates whether bandwidth control is currently enabled for content downloads.
+          example: true
+        bandwidth_in_mbps:
+          type: integer
+          description: The current maximum bandwidth in megabits per second allocated for content downloads.
+          example: 100
+        enable_minor_content_version_updates:
+          type: boolean
+          description: Indicates whether automatic minor content version updates are currently enabled.
+          example: true
+      x-stoplight:
+        id: wdaavb82fwx86
+    SetContentManagementRequest:
+      type: object
+      description: Request payload for updating content management configuration.
+      required:
+        - enable_bandwidth_control
+        - bandwidth_in_mbps
+      properties:
+        enable_bandwidth_control:
+          type: boolean
+          description: Set to `true` to enable bandwidth control for content downloads.
+          example: true
+        bandwidth_in_mbps:
+          type: integer
+          minimum: 1
+          description: Specify the desired maximum bandwidth in megabits per second for content downloads. Must be at least 1.
+          example: 100
+        enable_minor_content_version_updates:
+          type: boolean
+          description: Set to `true` to enable automatic minor content version updates.
+          example: true
+      x-stoplight:
+        id: 7oscrtn5dld48
+    AgentStatusResponse:
+      type: object
+      description: Current agent status timeout configuration.
+      properties:
+        license_revocation_after_lost_connection:
+          type: integer
+          description: The current number of days after which the license is revoked when an agent loses connection.
+          example: 30
+        agent_deletion_retention:
+          type: integer
+          description: The current number of days agent data is retained before automatic deletion after disconnection.
+          example: 90
+      x-stoplight:
+        id: sokcaf0ta18r4
+    SetAgentStatusRequest:
+      type: object
+      description: Request payload for updating agent status timeout configuration.
+      required:
+        - license_revocation_after_lost_connection
+        - agent_deletion_retention
+      properties:
+        license_revocation_after_lost_connection:
+          type: integer
+          description: Specify the number of days after which the license should be revoked when an agent loses connection.
+          example: 30
+        agent_deletion_retention:
+          type: integer
+          description: Specify the number of days to retain agent data before automatic deletion after disconnection.
+          example: 90
+      x-stoplight:
+        id: oqorc65y7jpka
+    AgentAutoUpgradeResponse:
+      type: object
+      description: Current agent auto-upgrade configuration.
+      properties:
+        amount_of_parallel_upgrades:
+          type: integer
+          description: The current maximum number of agents that can be upgraded simultaneously.
+          example: 10
+      x-stoplight:
+        id: oaacjrmodcbl6
+    SetAgentAutoUpgradeRequest:
+      type: object
+      description: Request payload for updating agent auto-upgrade configuration.
+      required:
+        - amount_of_parallel_upgrades
+      properties:
+        amount_of_parallel_upgrades:
+          type: integer
+          description: Specify the desired maximum number of agents to upgrade simultaneously.
+          example: 10
+      x-stoplight:
+        id: dhlzm5l3yv4rb
+    WildfireAnalysisResponse:
+      type: object
+      description: Current WildFire analysis configuration.
+      properties:
+        enable_wildfire_analysis_scoring_for_benign_verdicts:
+          type: boolean
+          description: Indicates whether WildFire analysis scoring is currently applied to files that received a benign verdict.
+          example: false
+      x-stoplight:
+        id: uveo7hk82xa7h
+    SetWildfireAnalysisRequest:
+      type: object
+      description: Request payload for updating WildFire analysis configuration.
+      required:
+        - enable_wildfire_analysis_scoring_for_benign_verdicts
+      properties:
+        enable_wildfire_analysis_scoring_for_benign_verdicts:
+          type: boolean
+          description: Set to `true` to enable WildFire analysis scoring for files that received a benign verdict.
+          example: false
+      x-stoplight:
+        id: fruhfq7zo4qbf
+    InformativeBTPIssuesResponse:
+      type: object
+      description: Current informative BTP issues display configuration.
+      properties:
+        display_unique_and_informative_btp_rules:
+          type: boolean
+          description: Indicates whether unique and informative Behavioral Threat Protection (BTP) rules are currently displayed in the console.
+          example: true
+      x-stoplight:
+        id: kykqalf931zb7
+    SetInformativeBTPIssuesRequest:
+      type: object
+      description: Request payload for updating informative BTP issues display configuration.
+      required:
+        - display_unique_and_informative_btp_rules
+      properties:
+        display_unique_and_informative_btp_rules:
+          type: boolean
+          description: Set to `true` to display unique and informative Behavioral Threat Protection (BTP) rules in the console.
+          example: true
+      x-stoplight:
+        id: j9zcvqdez8f0l
+    LogCollectionResponse:
+      type: object
+      description: Current Cortex XDR log collection configuration.
+      properties:
+        allow_logs_collection:
+          type: boolean
+          description: Indicates whether agents are currently allowed to collect and send diagnostic logs.
+          example: true
+      x-stoplight:
+        id: 4y226frjd62uz
+    SetLogCollectionRequest:
+      type: object
+      description: Request payload for updating Cortex XDR log collection configuration.
+      required:
+        - allow_logs_collection
+      properties:
+        allow_logs_collection:
+          type: boolean
+          description: Set to `true` to allow agents to collect and send diagnostic logs.
+          example: true
+      x-stoplight:
+        id: 4jneapgb9aebj
+    ActionCenterExpirationResponse:
+      type: object
+      description: Current action center expiration settings. Keys represent action types and values represent the current expiration durations in hours.
+      additionalProperties:
+        type: integer
+        description: The current expiration duration in hours for the specified action type.
+        example: 72
+      example:
+        isolate: 72
+        scan: 24
+      x-stoplight:
+        id: i0p9a0owhiwho
+    SetActionCenterExpirationRequest:
+      type: object
+      description: Request payload for updating action center expiration settings. Specify action types as keys and desired expiration durations in hours as values.
+      additionalProperties:
+        type: integer
+        description: Specify the desired expiration duration in hours for the action type.
+        example: 72
+      example:
+        isolate: 72
+        scan: 24
+      x-stoplight:
+        id: 0mimbj5kwdlsn
+    CriticalEnvironmentVersionsResponse:
+      type: object
+      description: Current critical environment versions configuration.
+      properties:
+        enabled_critical_environment_versions:
+          type: boolean
+          description: Indicates whether version enforcement is currently enabled for agents in critical environments.
+          example: true
+      x-stoplight:
+        id: k6oovvf68aix6
+    SetCriticalEnvironmentVersionsRequest:
+      type: object
+      description: Request payload for updating critical environment versions configuration.
+      required:
+        - enabled_critical_environment_versions
+      properties:
+        enabled_critical_environment_versions:
+          type: boolean
+          description: Set to `true` to enable version enforcement for agents in critical environments.
+          example: true
+      x-stoplight:
+        id: elwdqfzfagj9t
+    AdvancedAnalysisResponse:
+      type: object
+      description: Current advanced analysis configuration.
+      properties:
+        automatically_upload_defined_issue_data_files:
+          type: boolean
+          description: Indicates whether defined issue data files are currently uploaded automatically for analysis.
+          example: true
+        automatically_apply_advanced_analysis_exceptions:
+          type: boolean
+          description: Indicates whether advanced analysis exceptions are currently applied automatically.
+          example: false
+      x-stoplight:
+        id: kdi4ne9a1637b
+    SetAdvancedAnalysisRequest:
+      type: object
+      description: Request payload for updating advanced analysis configuration.
+      required:
+        - automatically_upload_defined_issue_data_files
+        - automatically_apply_advanced_analysis_exceptions
+      properties:
+        automatically_upload_defined_issue_data_files:
+          type: boolean
+          description: Set to `true` to automatically upload defined issue data files for analysis.
+          example: true
+        automatically_apply_advanced_analysis_exceptions:
+          type: boolean
+          description: Set to `true` to automatically apply advanced analysis exceptions.
+          example: false
+      x-stoplight:
+        id: 7gxb649wvwnur
+    EndpointAdministrationCleanupResponse:
+      type: object
+      description: Current endpoint administration cleanup configuration.
+      properties:
+        periodic_duplicate_cleanup:
+          type: boolean
+          description: Indicates whether periodic cleanup of duplicate endpoints is currently enabled.
+          example: true
+        host_name:
+          type: boolean
+          nullable: true
+          description: Indicates whether hostname is currently used as a criterion for identifying duplicate endpoints. Null when periodic cleanup is disabled.
+          example: true
+        ip:
+          type: boolean
+          nullable: true
+          description: Indicates whether IP address is currently used as a criterion for identifying duplicate endpoints. Null when periodic cleanup is disabled.
+          example: true
+        mac:
+          type: boolean
+          nullable: true
+          description: Indicates whether MAC address is currently used as a criterion for identifying duplicate endpoints. Null when periodic cleanup is disabled.
+          example: false
+        time_interval_hours:
+          type: integer
+          enum:
+            - 1
+            - 6
+            - 24
+            - 168
+          nullable: true
+          description: |
+            The current time interval in hours between cleanup runs. Null when periodic cleanup is disabled.
+            Valid values: `1` (hourly), `6` (every 6 hours), `24` (daily), `168` (weekly).
+          example: 24
+      x-stoplight:
+        id: 7aj31agyfiwin
+    SetEndpointAdministrationCleanupRequest:
+      type: object
+      description: Request payload for updating endpoint administration cleanup configuration.
+      required:
+        - periodic_duplicate_cleanup
+      properties:
+        periodic_duplicate_cleanup:
+          type: boolean
+          description: Set to `true` to enable periodic cleanup of duplicate endpoints.
+          example: true
+        host_name:
+          type: boolean
+          nullable: true
+          description: Set to `true` to use hostname as a criterion for identifying duplicate endpoints. Set to null to ignore this criterion.
+          example: true
+        ip:
+          type: boolean
+          nullable: true
+          description: Set to `true` to use IP address as a criterion for identifying duplicate endpoints. Set to null to ignore this criterion.
+          example: true
+        mac:
+          type: boolean
+          nullable: true
+          description: Set to `true` to use MAC address as a criterion for identifying duplicate endpoints. Set to null to ignore this criterion.
+          example: false
+        time_interval_hours:
+          type: integer
+          enum:
+            - 1
+            - 6
+            - 24
+            - 168
+          nullable: true
+          description: |
+            Specify the desired time interval in hours between cleanup runs. Set to null when disabling periodic cleanup.
+            Valid values: `1` (hourly), `6` (every 6 hours), `24` (daily), `168` (weekly).
+          example: 24
+      x-stoplight:
+        id: rsa1arg3i57mk

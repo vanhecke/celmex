@@ -1,0 +1,2225 @@
+{
+    "openapi": "3.1.0",
+    "x-stoplight": {
+        "id": "4okij2mkux8o5"
+    },
+    "info": {
+        "title": "Policies",
+        "version": "Cortex XSIAM 3.4",
+        "contact": {
+            "email": "docs-cortex@paloaltonetworks.com",
+            "name": "Cortex Documentation Team",
+            "url": "https://docs-cortex.paloaltonetworks.com/"
+        },
+        "description": "Manage security policies that define which rules apply to which assets. Policies control how security findings are evaluated across your cloud environment.\n\n**Required license:** This feature is included with a Cortex XSIAM Premium license. It is also included with any other Cortex XSIAM product that has the Cloud Runtime Security or Cloud Posture Security add-ons."
+    },
+    "servers": [
+        {
+            "url": "/"
+        }
+    ],
+    "tags": [
+        {
+            "name": "Policy Service Public APIs",
+            "description": "Public APIs for operations related to policies"
+        }
+    ],
+    "paths": {
+        "/public_api/v1/policy": {
+            "post": {
+                "tags": [
+                    "Policy Service Public APIs"
+                ],
+                "summary": "Create Public Policy",
+                "description": "Public API to create a new policy.",
+                "operationId": "create_public_policy_public_api_v1_policy_post",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PublicPolicyCreateRequest"
+                            },
+                            "examples": {
+                                "createPolicyWithRuleFilter": {
+                                    "summary": "API Request with rule_matching_type RULE_FILTER",
+                                    "value": {
+                                        "name": "API Request with rule_matching_type RULE_FILTER",
+                                        "description": "API Request with rule_matching_type RULE_FILTER",
+                                        "labels": [
+                                            "vm_automation"
+                                        ],
+                                        "rule_matching_type": "RULE_FILTER",
+                                        "associated_rule_filter": {
+                                            "AND": [
+                                                {
+                                                    "OR": [
+                                                        {
+                                                            "SEARCH_FIELD": "severity",
+                                                            "SEARCH_TYPE": "EQ",
+                                                            "SEARCH_VALUE": "low"
+                                                        },
+                                                        {
+                                                            "SEARCH_FIELD": "severity",
+                                                            "SEARCH_TYPE": "EQ",
+                                                            "SEARCH_VALUE": "medium"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "OR": [
+                                                        {
+                                                            "SEARCH_FIELD": "cloudType",
+                                                            "SEARCH_TYPE": "EQ",
+                                                            "SEARCH_VALUE": "aws"
+                                                        },
+                                                        {
+                                                            "SEARCH_FIELD": "cloudType",
+                                                            "SEARCH_TYPE": "EQ",
+                                                            "SEARCH_VALUE": "azure"
+                                                        }
+                                                    ]
+                                                },
+                                                {
+                                                    "SEARCH_FIELD": "labels",
+                                                    "SEARCH_TYPE": "ARRAY_CONTAINS",
+                                                    "SEARCH_VALUE": "test"
+                                                },
+                                                {
+                                                    "SEARCH_FIELD": "complianceStandards",
+                                                    "SEARCH_TYPE": "ARRAY_CONTAINS",
+                                                    "SEARCH_VALUE": "Australian Energy Sector Cyber Security Framework (AESCSF)"
+                                                }
+                                            ]
+                                        },
+                                        "asset_matching_type": "ALL_ASSETS",
+                                        "enabled": true
+                                    }
+                                },
+                                "API Request with rule_matching_type RULES and asset_matching_type ALL_ASSETS": {
+                                    "summary": "API Request with rule_matching_type RULES and asset_matching_type ALL_ASSETS",
+                                    "value": {
+                                        "name": "IBM-alert-rule-with-custom-and-default-policy-prisma_cloud_copy",
+                                        "description": "",
+                                        "labels": [
+                                            "prisma_cloud_alert_rule_copy"
+                                        ],
+                                        "rule_matching_type": "RULES",
+                                        "associated_rule_ids": [
+                                            "67b8ea9e-1409-4c5a-9c56-1289b48acc1b",
+                                            "20c1f067-447f-4d1a-af21-bc404ae66b94",
+                                            "5a4fcc81-5481-4d37-b96b-eb87333d3b32",
+                                            "f2d2945d-a509-44d8-abbc-12566ae7962d"
+                                        ],
+                                        "asset_matching_type": "ALL_ASSETS",
+                                        "enabled": true
+                                    }
+                                },
+                                "API Request with rule_matching_type ALL_RULES and asset_matching_type ASSET_GROUPS": {
+                                    "summary": "API Request with rule_matching_type ALL_RULES and asset_matching_type ASSET_GROUPS",
+                                    "value": {
+                                        "name": "test-all-policies-prisma_cloud_copy",
+                                        "description": "Test policy rule filter with asset groups",
+                                        "labels": [
+                                            "prisma_cloud_alert_rule_copy"
+                                        ],
+                                        "rule_matching_type": "ALL_RULES",
+                                        "asset_matching_type": "ASSET_GROUPS",
+                                        "associated_asset_group_ids": [
+                                            52
+                                        ]
+                                    }
+                                },
+                                "API Request with rule_matching_type RULES and asset_matching_type CLOUD_ACCOUNTS": {
+                                    "summary": "API Request with rule_matching_type RULES and asset_matching_type CLOUD_ACCOUNTS",
+                                    "value": {
+                                        "name": "Automation policy rule filter with all assets",
+                                        "description": "Test policy rule filter with all assets",
+                                        "labels": [
+                                            "vm_automation"
+                                        ],
+                                        "rule_matching_type": "RULES",
+                                        "associated_rule_ids": [
+                                            "f1dd78f2-7667-4b69-8a3e-af257e5d4cf6"
+                                        ],
+                                        "asset_matching_type": "CLOUD_ACCOUNTS",
+                                        "associated_cloud_account_ids": [
+                                            "2866778037"
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Policy created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PolicyResponse"
+                                },
+                                "examples": {
+                                    "API response with rule_matching_type RULE_FILTER": {
+                                        "summary": "API response with matching type RULE_FILTER",
+                                        "value": {
+                                            "id": "5988e7f2-ed6a-40cf-98b4-a05175f0db53",
+                                            "name": "Automation policy rule filter with all assets",
+                                            "description": "Test policy rule filter with all assets",
+                                            "labels": [
+                                                "vm_automation"
+                                            ],
+                                            "rule_matching_type": "RULE_FILTER",
+                                            "associated_rule_filter": {
+                                                "AND": [
+                                                    {
+                                                        "OR": [
+                                                            {
+                                                                "SEARCH_FIELD": "severity",
+                                                                "SEARCH_TYPE": "EQ",
+                                                                "SEARCH_VALUE": "low"
+                                                            },
+                                                            {
+                                                                "SEARCH_FIELD": "severity",
+                                                                "SEARCH_TYPE": "EQ",
+                                                                "SEARCH_VALUE": "medium"
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        "OR": [
+                                                            {
+                                                                "SEARCH_FIELD": "cloudType",
+                                                                "SEARCH_TYPE": "EQ",
+                                                                "SEARCH_VALUE": "aws"
+                                                            },
+                                                            {
+                                                                "SEARCH_FIELD": "cloudType",
+                                                                "SEARCH_TYPE": "EQ",
+                                                                "SEARCH_VALUE": "azure"
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        "SEARCH_FIELD": "labels",
+                                                        "SEARCH_TYPE": "ARRAY_CONTAINS",
+                                                        "SEARCH_VALUE": "test"
+                                                    }
+                                                ]
+                                            },
+                                            "asset_matching_type": "ALL_ASSETS",
+                                            "enabled": true,
+                                            "mode": "CUSTOM",
+                                            "creation_time": 1678886400000,
+                                            "created_by": "mock_user",
+                                            "modification_time": 1678886400000,
+                                            "modified_by": "mock_user"
+                                        }
+                                    },
+                                    "API response with rule_matching_type RULES and asset_matching_type ALL_ASSETS": {
+                                        "value": {
+                                            "id": "b98a6839-6215-42c8-bd1e-65b49d93e224",
+                                            "name": "IBM-alert-rule-with-custom-and-default-policy-prisma_cloud_copy",
+                                            "description": "",
+                                            "labels": [
+                                                "prisma_cloud_alert_rule_copy"
+                                            ],
+                                            "rule_matching_type": "RULES",
+                                            "associated_rule_ids": [
+                                                "67b8ea9e-1409-4c5a-9c56-1289b48acc1b",
+                                                "20c1f067-447f-4d1a-af21-bc404ae66b94",
+                                                "5a4fcc81-5481-4d37-b96b-eb87333d3b32",
+                                                "f2d2945d-a509-44d8-abbc-12566ae7962d"
+                                            ],
+                                            "asset_matching_type": "ALL_ASSETS",
+                                            "enabled": true,
+                                            "mode": "CUSTOM",
+                                            "creation_time": 1678886400000,
+                                            "created_by": "mock_user",
+                                            "modification_time": 1678886400000,
+                                            "modified_by": "mock_user"
+                                        }
+                                    },
+                                    "API response with rule_matching_type ALL_RULES and asset_matching_type ASSET_GROUPS": {
+                                        "value": {
+                                            "id": "569ce82b-f3b2-42d9-a6e8-1bc6339893d1",
+                                            "name": "test-all-policies-prisma_cloud_copy",
+                                            "description": "Test policy rule filter with asset groups",
+                                            "labels": [
+                                                "prisma_cloud_alert_rule_copy"
+                                            ],
+                                            "rule_matching_type": "ALL_RULES",
+                                            "asset_matching_type": "ASSET_GROUPS",
+                                            "associated_asset_group_ids": [
+                                                52
+                                            ],
+                                            "mode": "CUSTOM",
+                                            "creation_time": 1678886400000,
+                                            "created_by": "mock_user",
+                                            "modification_time": 1678886400000,
+                                            "modified_by": "mock_user"
+                                        }
+                                    },
+                                    "API response with rule_matching_type RULES and asset_matching_type CLOUD_ACCOUNTS": {
+                                        "value": {
+                                            "id": "002a7844-fe11-43af-876a-f9ad91b79f23",
+                                            "name": "Automation policy rule filter with all assets",
+                                            "description": "Test policy rule filter with all assets",
+                                            "labels": [
+                                                "vm_automation"
+                                            ],
+                                            "rule_matching_type": "RULES",
+                                            "associated_rule_ids": [
+                                                "f1dd78f2-7667-4b69-8a3e-af257e5d4cf6"
+                                            ],
+                                            "asset_matching_type": "CLOUD_ACCOUNTS",
+                                            "associated_cloud_account_ids": [
+                                                "286677803794946164413015306518444191290"
+                                            ],
+                                            "enabled": true,
+                                            "mode": "CUSTOM",
+                                            "creation_time": 1678886400000,
+                                            "created_by": "mock_user",
+                                            "modification_time": 1678886400000,
+                                            "modified_by": "mock_user"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Invalid parameters Examples": {
+                                        "summary": "Invalid parameters Examples",
+                                        "value": {
+                                            "err_msg": "The request contains invalid parameters",
+                                            "metadata": {
+                                                "err_extra": [
+                                                    {
+                                                        "field": "rule_matching_type",
+                                                        "message": "Input should be 'ALL_RULES', 'RULES' or 'RULE_FILTER'"
+                                                    },
+                                                    {
+                                                        "field": "associated_rule_filter",
+                                                        "message": "Value error, Invalid filter format: missing SEARCH_FIELD, SEARCH_TYPE, SEARCH_VALUE or logical operator (AND/OR)"
+                                                    },
+                                                    {
+                                                        "field": "asset_matching_type",
+                                                        "message": "Input should be 'ALL_ASSETS', 'ASSET_GROUPS' or 'CLOUD_ACCOUNTS'"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "Missing parameters Examples": {
+                                        "summary": "Missing parameters Examples",
+                                        "value": {
+                                            "err_msg": "The request contains invalid parameters",
+                                            "metadata": {
+                                                "err_extra": [
+                                                    {
+                                                        "field": "asset_matching_type",
+                                                        "message": "Field required"
+                                                    },
+                                                    {
+                                                        "field": "body",
+                                                        "message": "Value error, associated_asset_group_ids is required when asset_matching_type is ASSET_GROUPS"
+                                                    },
+                                                    {
+                                                        "field": "body",
+                                                        "message": "Value error, associated_rule_filter is required when rule_matching_type is RULE_FILTER"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/PolicyErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "The request contains conflicts": {
+                                        "summary": "Conflict detected",
+                                        "value": {
+                                            "err_msg": "The request contains fields that already exists",
+                                            "metadata": {
+                                                "err_extra": [
+                                                    {
+                                                        "field": "name",
+                                                        "message": "Policy with the same name already exists"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Content"
+                    },
+                    "429": {
+                        "description": "Too Many Requests"
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Internal Server Error": {
+                                        "summary": "Internal Server Error",
+                                        "value": {
+                                            "err_msg": "Internal Server Error",
+                                            "metadata": {
+                                                "err_extra": [
+                                                    {
+                                                        "message": "Internal Server Error"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/PolicyErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "502": {
+                        "description": "Bad Gateway"
+                    },
+                    "503": {
+                        "description": "Service Unavailable"
+                    }
+                },
+                "x-stoplight": {
+                    "id": "abpjo6blt07oq"
+                }
+            }
+        },
+        "/public_api/v1/policy/search": {
+            "post": {
+                "tags": [
+                    "Policy Service Public APIs"
+                ],
+                "summary": "List Public Policies",
+                "description": "Public API to get all policies.",
+                "operationId": "list_public_policies_public_api_v1_policy_search_post",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PolicyListRequest"
+                            },
+                            "examples": {
+                                "listPoliciesExample": {
+                                    "summary": "List Policies Example",
+                                    "value": {
+                                        "filter": {
+                                            "AND": [
+                                                {
+                                                    "SEARCH_FIELD": "id",
+                                                    "SEARCH_TYPE": "CONTAINS",
+                                                    "SEARCH_VALUE": "b2b1279e-8760-44a8-8dca-bcc4508f8ce7"
+                                                },
+                                                {
+                                                    "SEARCH_FIELD": "name",
+                                                    "SEARCH_TYPE": "CONTAINS",
+                                                    "SEARCH_VALUE": "Cloud Posture Security"
+                                                }
+                                            ]
+                                        },
+                                        "search_from": 0,
+                                        "search_to": 50,
+                                        "sort": [
+                                            {
+                                                "FIELD": "name",
+                                                "ORDER": "ASC"
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PolicyListResponse"
+                                },
+                                "examples": {
+                                    "API response with List of Policies": {
+                                        "summary": "API response with List of Policies",
+                                        "value": {
+                                            "data": [
+                                                {
+                                                    "id": "b2b1279e-8760-44a8-8dca-bcc4508f8ce7",
+                                                    "name": "Default Cloud Posture Security Policy",
+                                                    "description": "Comprehensive default security policy that identifies risks across you entire cloud security estate. It leverages best practices to scan and detect attack paths, misconfigurations, vulnerabilities, identity risks, data risks, network exposures, and other security gaps across your cloud infrastructure and applications, enabling proactive management and mitigation of cloud security risks.",
+                                                    "labels": [
+                                                        "prisma_cloud"
+                                                    ],
+                                                    "rule_matching_type": "RULE_FILTER",
+                                                    "associated_rule_filter": {
+                                                        "OR": [
+                                                            {
+                                                                "AND": [
+                                                                    {
+                                                                        "SEARCH_FIELD": "severity",
+                                                                        "SEARCH_TYPE": "EQ",
+                                                                        "SEARCH_VALUE": "critical"
+                                                                    }
+                                                                ]
+                                                            },
+                                                            {
+                                                                "AND": [
+                                                                    {
+                                                                        "SEARCH_FIELD": "severity",
+                                                                        "SEARCH_TYPE": "EQ",
+                                                                        "SEARCH_VALUE": "high"
+                                                                    }
+                                                                ]
+                                                            }
+                                                        ]
+                                                    },
+                                                    "asset_matching_type": "ALL_ASSETS",
+                                                    "enabled": true,
+                                                    "mode": "DEFAULT",
+                                                    "creation_time": 1732557301240,
+                                                    "created_by": "Palo Alto Networks",
+                                                    "modification_time": 1732557301240,
+                                                    "modified_by": "Palo Alto Networks"
+                                                }
+                                            ],
+                                            "metadata": {
+                                                "total_count": 5,
+                                                "filter_count": 1
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "The request contains invalid parameters": {
+                                        "summary": "The request contains invalid parameters",
+                                        "value": {
+                                            "err_msg": "The request contains invalid parameters",
+                                            "metadata": {
+                                                "err_extra": [
+                                                    {
+                                                        "field": "SEARCH_TYPE",
+                                                        "message": "SEARCH_TYPE 'EBQ' is not supported. Allowed values: EQ, CONTAINS, NCONTAINS, NEQ"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/PolicyErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    },
+                    "422": {
+                        "description": "Unprocessable Content"
+                    },
+                    "429": {
+                        "description": "Too Many Requests"
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Internal Server Error": {
+                                        "summary": "Internal Server Error",
+                                        "value": {
+                                            "err_msg": "Internal Server Error",
+                                            "metadata": {
+                                                "err_extra": [
+                                                    {
+                                                        "message": "Internal Server Error"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/PolicyErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "502": {
+                        "description": "Bad Gateway"
+                    },
+                    "503": {
+                        "description": "Service Unavailable"
+                    }
+                },
+                "x-stoplight": {
+                    "id": "tjaiap5qlpntc"
+                }
+            }
+        },
+        "/public_api/v1/policy/{policy_id}": {
+            "get": {
+                "tags": [
+                    "Policy Service Public APIs"
+                ],
+                "summary": "Get Public Policy",
+                "description": "Public API to get a policy by ID.",
+                "operationId": "get_public_policy_public_api_v1_policy__policy_id__get",
+                "parameters": [
+                    {
+                        "name": "policy_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Policy Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PolicyResponse"
+                                },
+                                "examples": {
+                                    "API response with rule_matching_type RULE_FILTER": {
+                                        "summary": "API response with matching type RULE_FILTER",
+                                        "value": {
+                                            "id": "b2b1279e-8760-44a8-8dca-bcc4508f8ce7",
+                                            "name": "Default Cloud Posture Security Policy",
+                                            "description": "Comprehensive default security policy that identifies risks across you entire cloud security estate. It leverages best practices to scan and detect attack paths, misconfigurations, vulnerabilities, identity risks, data risks, network exposures, and other security gaps across your cloud infrastructure and applications, enabling proactive management and mitigation of cloud security risks.",
+                                            "labels": [
+                                                "prisma_cloud"
+                                            ],
+                                            "rule_matching_type": "RULE_FILTER",
+                                            "associated_rule_filter": {
+                                                "OR": [
+                                                    {
+                                                        "AND": [
+                                                            {
+                                                                "SEARCH_FIELD": "severity",
+                                                                "SEARCH_TYPE": "EQ",
+                                                                "SEARCH_VALUE": "critical"
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        "AND": [
+                                                            {
+                                                                "SEARCH_FIELD": "severity",
+                                                                "SEARCH_TYPE": "EQ",
+                                                                "SEARCH_VALUE": "high"
+                                                            }
+                                                        ]
+                                                    }
+                                                ]
+                                            },
+                                            "asset_matching_type": "ALL_ASSETS",
+                                            "enabled": true,
+                                            "mode": "DEFAULT",
+                                            "creation_time": 1732557301240,
+                                            "created_by": "Palo Alto Networks",
+                                            "modification_time": 1732557301240,
+                                            "modified_by": "Palo Alto Networks"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Policy not found with id": {
+                                        "summary": "Policy not found with id",
+                                        "value": {
+                                            "err_msg": "Policy not found",
+                                            "metadata": {
+                                                "err_extra": [
+                                                    {
+                                                        "field": "id",
+                                                        "message": "No policy found with the specified ID"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/PolicyErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Content"
+                    },
+                    "429": {
+                        "description": "Too Many Requests"
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Internal Server Error": {
+                                        "summary": "Internal Server Error",
+                                        "value": {
+                                            "err_msg": "Internal Server Error",
+                                            "metadata": {
+                                                "err_extra": [
+                                                    {
+                                                        "message": "Internal Server Error"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/PolicyErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "502": {
+                        "description": "Bad Gateway"
+                    },
+                    "503": {
+                        "description": "Service Unavailable"
+                    }
+                },
+                "x-stoplight": {
+                    "id": "gj2npcxz7wrpq"
+                }
+            },
+            "patch": {
+                "tags": [
+                    "Policy Service Public APIs"
+                ],
+                "summary": "Update Public Policy",
+                "description": "Public API to modify an existing policy by ID.",
+                "operationId": "update_public_policy_public_api_v1_policy__policy_id__patch",
+                "parameters": [
+                    {
+                        "name": "policy_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Policy Id"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PolicyModifyRequest"
+                            },
+                            "examples": {
+                                "update Policy Example Request Payload": {
+                                    "summary": "API Request with rule_matching_type RULES",
+                                    "value": {
+                                        "name": "API Request with rule_matching_type RULES",
+                                        "description": "API Request with rule_matching_type RULES",
+                                        "labels": [
+                                            "prisma_cloud"
+                                        ],
+                                        "rule_matching_type": "RULES",
+                                        "associated_rule_ids": [
+                                            "60cf2495-32a5-401f-ba56-6bbbf80fe1e2",
+                                            "3c16e31e-1421-4a25-854e-e5870093c99f"
+                                        ],
+                                        "asset_matching_type": "CLOUD_ACCOUNTS",
+                                        "associated_cloud_account_ids": [
+                                            "hvenkatesan-2",
+                                            "883588134481"
+                                        ],
+                                        "enabled": false
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PolicyResponse"
+                                },
+                                "examples": {
+                                    "API response with rule_matching_type RULES": {
+                                        "summary": "API response with matching type RULES",
+                                        "value": {
+                                            "id": "b2b1279e-8760-44a8-8dca-bcc4508f8ce6",
+                                            "name": "API Request with rule_matching_type RULES",
+                                            "description": "API Request with rule_matching_type RULES",
+                                            "labels": [
+                                                "prisma_cloud"
+                                            ],
+                                            "rule_matching_type": "RULES",
+                                            "associated_rule_ids": [
+                                                "60cf2495-32a5-401f-ba56-6bbbf80fe1e2",
+                                                "3c16e31e-1421-4a25-854e-e5870093c99f"
+                                            ],
+                                            "asset_matching_type": "CLOUD_ACCOUNTS",
+                                            "associated_cloud_account_ids": [
+                                                "hvenkatesan-2",
+                                                "883588134481"
+                                            ],
+                                            "enabled": false,
+                                            "mode": "DEFAULT",
+                                            "creation_time": 1732557301240,
+                                            "created_by": "Palo Alto Networks",
+                                            "modification_time": 1732557301240,
+                                            "modified_by": "Palo Alto Networks"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "The request contains invalid or missing parameters": {
+                                        "summary": "The request contains invalid or missing parameters",
+                                        "value": {
+                                            "err_msg": "The request contains invalid or missing parameters",
+                                            "metadata": {
+                                                "err_extra": [
+                                                    {
+                                                        "field": "name",
+                                                        "message": "Cannot modify 'name' for system default policy. Only 'labels' can be updated."
+                                                    },
+                                                    {
+                                                        "field": "description",
+                                                        "message": "Cannot modify 'description' for system default policy. Only 'labels' can be updated."
+                                                    },
+                                                    {
+                                                        "field": "rule_matching_type",
+                                                        "message": "Cannot modify 'rule_matching_type' for system default policy. Only 'labels' can be updated."
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "Cannot update system default policy": {
+                                        "summary": "Cannot update system default policy",
+                                        "value": {
+                                            "err_msg": "Cannot update system default policy",
+                                            "metadata": {
+                                                "err_extra": [
+                                                    {
+                                                        "field": "system_default",
+                                                        "message": "System default policy are managed by the platform and cannot be modified"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/PolicyErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Policy not found with id": {
+                                        "summary": "Policy not found with id",
+                                        "value": {
+                                            "err_msg": "Policy not found",
+                                            "metadata": {
+                                                "err_extra": [
+                                                    {
+                                                        "field": "id",
+                                                        "message": "No policy found with the specified ID"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/PolicyErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "The request contains conflicts": {
+                                        "summary": "Conflict detected",
+                                        "value": {
+                                            "err_msg": "The request contains fields that already exists",
+                                            "metadata": {
+                                                "err_extra": [
+                                                    {
+                                                        "field": "name",
+                                                        "message": "Policy with the same name already exists"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Content"
+                    },
+                    "429": {
+                        "description": "Too Many Requests"
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Internal Server Error": {
+                                        "summary": "Internal Server Error",
+                                        "value": {
+                                            "err_msg": "Internal Server Error",
+                                            "metadata": {
+                                                "err_extra": [
+                                                    {
+                                                        "message": "Internal Server Error"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/PolicyErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "502": {
+                        "description": "Bad Gateway"
+                    },
+                    "503": {
+                        "description": "Service Unavailable"
+                    }
+                },
+                "x-stoplight": {
+                    "id": "dyhc6yi47x06p"
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Policy Service Public APIs"
+                ],
+                "summary": "Delete Public Policy",
+                "description": "Public API to delete an existing policy by ID.",
+                "operationId": "delete_public_policy_public_api_v1_policy__policy_id__delete",
+                "parameters": [
+                    {
+                        "name": "policy_id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Policy Id"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Successful Response"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Invalid Parameters": {
+                                        "summary": "Invalid Parameters Example",
+                                        "value": {
+                                            "err_msg": "The request contains invalid parameters",
+                                            "metadata": {
+                                                "err_extra": [
+                                                    {
+                                                        "field": "policy_id",
+                                                        "message": "Invalid policy ID format"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/PolicyErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Cannot delete system default policy": {
+                                        "summary": "Cannot delete system default policy",
+                                        "value": {
+                                            "err_msg": "Cannot delete system default policy",
+                                            "metadata": {
+                                                "err_extra": [
+                                                    {
+                                                        "field": "system_default",
+                                                        "message": "System default policy are managed by the platform and cannot be deleted"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/PolicyErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Policy not found with id": {
+                                        "summary": "Policy not found with id",
+                                        "value": {
+                                            "err_msg": "Policy not found",
+                                            "metadata": {
+                                                "err_extra": [
+                                                    {
+                                                        "field": "id",
+                                                        "message": "No policy found with the specified ID"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/PolicyErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Content"
+                    },
+                    "429": {
+                        "description": "Too Many Requests"
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "content": {
+                            "application/json": {
+                                "examples": {
+                                    "Internal Server Error": {
+                                        "summary": "Internal Server Error",
+                                        "value": {
+                                            "err_msg": "Internal Server Error",
+                                            "metadata": {
+                                                "err_extra": [
+                                                    {
+                                                        "message": "Internal Server Error"
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/PolicyErrorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "502": {
+                        "description": "Bad Gateway"
+                    },
+                    "503": {
+                        "description": "Service Unavailable"
+                    }
+                },
+                "x-stoplight": {
+                    "id": "fjei0c5na3tth"
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "AndPredicate-Input": {
+                "properties": {
+                    "AND": {
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/components/schemas/AndPredicate-Input"
+                                },
+                                {
+                                    "$ref": "#/components/schemas/OrPredicate-Input"
+                                },
+                                {
+                                    "$ref": "#/components/schemas/Filter"
+                                }
+                            ]
+                        },
+                        "type": "array",
+                        "title": "And"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "AND"
+                ],
+                "title": "AndPredicate",
+                "x-stoplight": {
+                    "id": "75jaccjy7iq2q"
+                }
+            },
+            "AndPredicate-Output": {
+                "properties": {
+                    "AND": {
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/components/schemas/AndPredicate-Output"
+                                },
+                                {
+                                    "$ref": "#/components/schemas/OrPredicate-Output"
+                                },
+                                {
+                                    "$ref": "#/components/schemas/Filter"
+                                }
+                            ]
+                        },
+                        "type": "array",
+                        "title": "And"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "AND"
+                ],
+                "title": "AndPredicate",
+                "x-stoplight": {
+                    "id": "0ow0hldr0hpad"
+                }
+            },
+            "AssetMatchingType-Output": {
+                "type": "string",
+                "enum": [
+                    "ASSET_GROUPS",
+                    "ALL_ASSETS",
+                    "CLOUD_ACCOUNTS"
+                ],
+                "title": "AssetMatchingType",
+                "x-stoplight": {
+                    "id": "kekebp6qftdnv"
+                }
+            },
+            "ErrorExtra": {
+                "properties": {
+                    "field": {
+                        "type": "string",
+                        "title": "Field"
+                    },
+                    "message": {
+                        "type": "string",
+                        "title": "Message"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "field",
+                    "message"
+                ],
+                "title": "ErrorExtra",
+                "x-stoplight": {
+                    "id": "aua4ip7gjdnfk"
+                }
+            },
+            "ErrorMetadata": {
+                "properties": {
+                    "err_extra": {
+                        "anyOf": [
+                            {
+                                "items": {
+                                    "$ref": "#/components/schemas/ErrorExtra"
+                                },
+                                "type": "array"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Err Extra"
+                    }
+                },
+                "type": "object",
+                "title": "ErrorMetadata",
+                "x-stoplight": {
+                    "id": "llhtr2lbcetgi"
+                }
+            },
+            "Filter": {
+                "properties": {
+                    "SEARCH_FIELD": {
+                        "type": "string",
+                        "title": "Search Field"
+                    },
+                    "SEARCH_TYPE": {
+                        "$ref": "#/components/schemas/SearchType"
+                    },
+                    "SEARCH_VALUE": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "boolean"
+                            },
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "items": {
+                                    "type": "string"
+                                },
+                                "type": "array"
+                            },
+                            {
+                                "$ref": "#/components/schemas/Range"
+                            },
+                            {
+                                "$ref": "#/components/schemas/KeyValue"
+                            }
+                        ],
+                        "title": "Search Value"
+                    },
+                    "AGGREGATED_COLUMN": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/AggregatedColumn"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "SEARCH_FIELD",
+                    "SEARCH_TYPE",
+                    "SEARCH_VALUE"
+                ],
+                "title": "Filter",
+                "x-stoplight": {
+                    "id": "5umudz54hc24h"
+                }
+            },
+            "KeyValue": {
+                "properties": {
+                    "key": {
+                        "type": "string",
+                        "title": "Key"
+                    },
+                    "value": {
+                        "type": "string",
+                        "title": "Value"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "key",
+                    "value"
+                ],
+                "title": "KeyValue",
+                "x-stoplight": {
+                    "id": "5fxc2a7zuem1b"
+                }
+            },
+            "Metadata": {
+                "properties": {
+                    "total_count": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "title": "Total Count"
+                    },
+                    "filter_count": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "title": "Filter Count"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "total_count",
+                    "filter_count"
+                ],
+                "title": "Metadata",
+                "x-stoplight": {
+                    "id": "q4k8s8hoz3xcv"
+                }
+            },
+            "OrPredicate-Input": {
+                "properties": {
+                    "OR": {
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/components/schemas/AndPredicate-Input"
+                                },
+                                {
+                                    "$ref": "#/components/schemas/OrPredicate-Input"
+                                },
+                                {
+                                    "$ref": "#/components/schemas/Filter"
+                                }
+                            ]
+                        },
+                        "type": "array",
+                        "title": "Or"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "OR"
+                ],
+                "title": "OrPredicate",
+                "x-stoplight": {
+                    "id": "udi63dhnitq1c"
+                }
+            },
+            "OrPredicate-Output": {
+                "properties": {
+                    "OR": {
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/components/schemas/AndPredicate-Output"
+                                },
+                                {
+                                    "$ref": "#/components/schemas/OrPredicate-Output"
+                                },
+                                {
+                                    "$ref": "#/components/schemas/Filter"
+                                }
+                            ]
+                        },
+                        "type": "array",
+                        "title": "Or"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "OR"
+                ],
+                "title": "OrPredicate",
+                "x-stoplight": {
+                    "id": "lyde7ib0c9fl5"
+                }
+            },
+            "Order": {
+                "type": "string",
+                "enum": [
+                    "ASC",
+                    "DESC"
+                ],
+                "title": "Order",
+                "x-stoplight": {
+                    "id": "v1lrup3lmkkub"
+                }
+            },
+            "PolicyListRequest": {
+                "properties": {
+                    "filter": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/AndPredicate-Input"
+                            },
+                            {
+                                "$ref": "#/components/schemas/OrPredicate-Input"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Filter",
+                        "description": "Filter for policies"
+                    },
+                    "search_from": {
+                        "type": "integer",
+                        "title": "Search From",
+                        "description": "Start index for pagination",
+                        "default": 0
+                    },
+                    "search_to": {
+                        "type": "integer",
+                        "title": "Search To",
+                        "description": "End index for pagination",
+                        "default": 50
+                    },
+                    "sort": {
+                        "items": {
+                            "$ref": "#/components/schemas/Sort"
+                        },
+                        "type": "array",
+                        "title": "Sort"
+                    }
+                },
+                "type": "object",
+                "title": "PolicyListRequest",
+                "x-stoplight": {
+                    "id": "gsb3ameeergyb"
+                }
+            },
+            "PolicyMode": {
+                "type": "string",
+                "enum": [
+                    "DEFAULT",
+                    "CUSTOM"
+                ],
+                "title": "PolicyMode",
+                "x-stoplight": {
+                    "id": "vhcdeyz55f1ws"
+                }
+            },
+            "PolicyModifyRequest": {
+                "properties": {
+                    "name": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Name"
+                    },
+                    "description": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Description"
+                    },
+                    "labels": {
+                        "anyOf": [
+                            {
+                                "items": {
+                                    "type": "string"
+                                },
+                                "type": "array",
+                                "uniqueItems": true
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Labels"
+                    },
+                    "rule_matching_type": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/InternalRuleMatchingType"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "description": "method of selecting the applicable rules for this policy"
+                    },
+                    "associated_rule_filter": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/AndPredicate-Input"
+                            },
+                            {
+                                "$ref": "#/components/schemas/OrPredicate-Input"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Associated Rule Filter",
+                        "description": "required if Rule Matching Type is `RULE_FILTER`"
+                    },
+                    "associated_rule_ids": {
+                        "anyOf": [
+                            {
+                                "items": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                },
+                                "type": "array",
+                                "maxItems": 500,
+                                "uniqueItems": true
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Associated Rule Ids",
+                        "description": "required if Rule Matching Type is `RULES`"
+                    },
+                    "asset_matching_type": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/InternalAssetMatchingType"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "description": "method of selecting the assets in scope for this policy"
+                    },
+                    "associated_asset_group_ids": {
+                        "anyOf": [
+                            {
+                                "items": {
+                                    "type": "integer"
+                                },
+                                "type": "array",
+                                "maxItems": 10,
+                                "uniqueItems": true
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Associated Asset Group Ids",
+                        "description": "required if Asset Matching Type is `ASSET_GROUPS`"
+                    },
+                    "associated_cloud_account_ids": {
+                        "anyOf": [
+                            {
+                                "items": {
+                                    "type": "string"
+                                },
+                                "type": "array",
+                                "uniqueItems": true
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Associated Cloud Account Ids",
+                        "description": "required if Asset Matching Type is `CLOUD_ACCOUNTS`"
+                    },
+                    "enabled": {
+                        "anyOf": [
+                            {
+                                "type": "boolean"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Enabled"
+                    }
+                },
+                "additionalProperties": false,
+                "type": "object",
+                "title": "PolicyModifyRequest",
+                "x-stoplight": {
+                    "id": "6c7hp3e3dtnxq"
+                }
+            },
+            "PolicyResponse": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "Id"
+                    },
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "description": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Description"
+                    },
+                    "labels": {
+                        "anyOf": [
+                            {
+                                "items": {
+                                    "type": "string"
+                                },
+                                "type": "array",
+                                "uniqueItems": true
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Labels"
+                    },
+                    "rule_matching_type": {
+                        "$ref": "#/components/schemas/RuleMatchingType-Output",
+                        "description": "method of selecting the applicable rules for this policy"
+                    },
+                    "associated_rule_filter": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/AndPredicate-Output"
+                            },
+                            {
+                                "$ref": "#/components/schemas/OrPredicate-Output"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Associated Rule Filter",
+                        "description": "present if Rule Matching Type is `RULE_FILTER`"
+                    },
+                    "associated_rule_ids": {
+                        "anyOf": [
+                            {
+                                "items": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                },
+                                "type": "array",
+                                "uniqueItems": true
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Associated Rule Ids",
+                        "description": "present if Rule Matching Type is `RULES`"
+                    },
+                    "asset_matching_type": {
+                        "$ref": "#/components/schemas/AssetMatchingType-Output",
+                        "description": "method of selecting the assets in scope for this policy"
+                    },
+                    "associated_asset_group_ids": {
+                        "anyOf": [
+                            {
+                                "items": {
+                                    "type": "integer"
+                                },
+                                "type": "array",
+                                "uniqueItems": true
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Associated Asset Group Ids",
+                        "description": "present if Asset Matching Type is `ASSET_GROUPS`"
+                    },
+                    "associated_cloud_account_ids": {
+                        "anyOf": [
+                            {
+                                "items": {
+                                    "type": "string"
+                                },
+                                "type": "array",
+                                "uniqueItems": true
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Associated Cloud Account Ids",
+                        "description": "present if Asset Matching Type is `CLOUD_ACCOUNTS`"
+                    },
+                    "enabled": {
+                        "type": "boolean",
+                        "title": "Enabled"
+                    },
+                    "mode": {
+                        "$ref": "#/components/schemas/PolicyMode",
+                        "description": "whether the policy is built-in (`DEFAULT`) or user-created (`CUSTOM`)"
+                    },
+                    "creation_time": {
+                        "type": "integer",
+                        "title": "Creation Time",
+                        "description": "in Unix epoch milliseconds"
+                    },
+                    "created_by": {
+                        "type": "string",
+                        "title": "Created By"
+                    },
+                    "modification_time": {
+                        "type": "integer",
+                        "title": "Modification Time",
+                        "description": "in Unix epoch milliseconds"
+                    },
+                    "modified_by": {
+                        "type": "string",
+                        "title": "Modified By"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id",
+                    "name",
+                    "rule_matching_type",
+                    "asset_matching_type",
+                    "enabled",
+                    "mode",
+                    "creation_time",
+                    "created_by",
+                    "modification_time",
+                    "modified_by"
+                ],
+                "title": "PolicyResponse",
+                "x-stoplight": {
+                    "id": "j1foss21bmpp0"
+                }
+            },
+            "PublicPolicyCreateRequest": {
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "title": "Name",
+                        "description": "Name of the policy"
+                    },
+                    "description": {
+                        "type": "string",
+                        "title": "Description",
+                        "description": "Description of the policy"
+                    },
+                    "labels": {
+                        "anyOf": [
+                            {
+                                "items": {
+                                    "type": "string"
+                                },
+                                "type": "array"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Labels",
+                        "description": "Labels associated with the policy"
+                    },
+                    "rule_matching_type": {
+                        "$ref": "#/components/schemas/PublicRuleMatchingType",
+                        "description": "Type of rule matching for the policy"
+                    },
+                    "associated_rule_filter": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/AndPredicate-Input"
+                            },
+                            {
+                                "$ref": "#/components/schemas/OrPredicate-Input"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Associated Rule Filter",
+                        "description": "Rule filter for the policy, required if rule_matching_type is RULE_FILTER"
+                    },
+                    "associated_rule_ids": {
+                        "anyOf": [
+                            {
+                                "items": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                },
+                                "type": "array",
+                                "maxItems": 500
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Associated Rule Ids",
+                        "description": "List of rule IDs, required if rule_matching_type is RULES"
+                    },
+                    "asset_matching_type": {
+                        "$ref": "#/components/schemas/PublicAssetMatchingType",
+                        "description": "Type of asset matching for the policy"
+                    },
+                    "associated_asset_group_ids": {
+                        "anyOf": [
+                            {
+                                "items": {
+                                    "type": "integer"
+                                },
+                                "type": "array",
+                                "maxItems": 10
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Associated Asset Group Ids",
+                        "description": "List of asset group IDs, required if asset_matching_type is ASSET_GROUPS"
+                    },
+                    "associated_cloud_account_ids": {
+                        "anyOf": [
+                            {
+                                "items": {
+                                    "type": "string"
+                                },
+                                "type": "array"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Associated Cloud Account Ids",
+                        "description": "List of cloud account IDs associated with the policy"
+                    },
+                    "enabled": {
+                        "type": "boolean",
+                        "title": "Enabled",
+                        "description": "Whether the policy is enabled or not",
+                        "default": true
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "name",
+                    "description",
+                    "rule_matching_type",
+                    "asset_matching_type"
+                ],
+                "title": "PublicPolicyCreateRequest",
+                "x-stoplight": {
+                    "id": "hh6yti8fciz1u"
+                }
+            },
+            "PublicPolicyModifyRequest": {
+                "properties": {
+                    "name": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Name",
+                        "description": "Name of the policy"
+                    },
+                    "description": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Description",
+                        "description": "Description of the policy"
+                    },
+                    "labels": {
+                        "anyOf": [
+                            {
+                                "items": {
+                                    "type": "string"
+                                },
+                                "type": "array"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Labels",
+                        "description": "Labels associated with the policy"
+                    },
+                    "rule_matching_type": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/PublicRuleMatchingType"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "description": "Type of rule matching for the policy"
+                    },
+                    "associated_rule_filter": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/AndPredicate-Input"
+                            },
+                            {
+                                "$ref": "#/components/schemas/OrPredicate-Input"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Associated Rule Filter",
+                        "description": "Rule filter for the policy, required if rule_matching_type is RULE_FILTER"
+                    },
+                    "associated_rule_ids": {
+                        "anyOf": [
+                            {
+                                "items": {
+                                    "type": "string",
+                                    "format": "uuid"
+                                },
+                                "type": "array",
+                                "maxItems": 500
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Associated Rule Ids",
+                        "description": "List of rule IDs, required if rule_matching_type is RULES"
+                    },
+                    "asset_matching_type": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/PublicAssetMatchingType"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "description": "Type of asset matching for the policy"
+                    },
+                    "associated_asset_group_ids": {
+                        "anyOf": [
+                            {
+                                "items": {
+                                    "type": "integer"
+                                },
+                                "type": "array",
+                                "maxItems": 10
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Associated Asset Group Ids",
+                        "description": "List of asset group IDs, required if asset_matching_type is ASSET_GROUPS"
+                    },
+                    "associated_cloud_account_ids": {
+                        "anyOf": [
+                            {
+                                "items": {
+                                    "type": "string"
+                                },
+                                "type": "array"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Associated Cloud Account Ids",
+                        "description": "List of cloud account IDs associated with the policy"
+                    },
+                    "enabled": {
+                        "anyOf": [
+                            {
+                                "type": "boolean"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "title": "Enabled",
+                        "description": "Whether the policy is enabled or not"
+                    }
+                },
+                "type": "object",
+                "title": "PublicPolicyModifyRequest",
+                "x-stoplight": {
+                    "id": "w8ifvrtqwn9i0"
+                }
+            },
+            "Range": {
+                "properties": {
+                    "from": {
+                        "type": "integer",
+                        "title": "From"
+                    },
+                    "to": {
+                        "type": "integer",
+                        "title": "To"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "from",
+                    "to"
+                ],
+                "title": "Range",
+                "x-stoplight": {
+                    "id": "2914rdebq65hh"
+                }
+            },
+            "RuleMatchingType-Output": {
+                "type": "string",
+                "enum": [
+                    "RULE_FILTER",
+                    "RULES",
+                    "ALL_RULES"
+                ],
+                "title": "RuleMatchingType",
+                "x-stoplight": {
+                    "id": "cneb3xk6a78oi"
+                }
+            },
+            "SearchType": {
+                "type": "string",
+                "enum": [
+                    "CONTAINS",
+                    "NCONTAINS",
+                    "CONTAINS_IN_LIST",
+                    "NOT_CONTAINS_IN_LIST",
+                    "WILDCARD",
+                    "WILDCARD_NOT",
+                    "EQ",
+                    "NEQ",
+                    "IS_EMPTY",
+                    "NIS_EMPTY",
+                    "RANGE",
+                    "IN",
+                    "NIN",
+                    "RELATIVE_TIMESTAMP",
+                    "JSON_WILDCARD",
+                    "JSON_WILDCARD_NOT",
+                    "ARRAY_CONTAINS",
+                    "ARRAY_NOT_CONTAINS"
+                ],
+                "title": "SearchType",
+                "x-stoplight": {
+                    "id": "2w3mlgdnf7nt5"
+                }
+            },
+            "Sort": {
+                "properties": {
+                    "FIELD": {
+                        "type": "string",
+                        "title": "Field"
+                    },
+                    "ORDER": {
+                        "$ref": "#/components/schemas/Order"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "FIELD",
+                    "ORDER"
+                ],
+                "title": "Sort",
+                "x-stoplight": {
+                    "id": "lje70puoi0x6d"
+                }
+            },
+            "PolicyErrorResponse": {
+                "properties": {
+                    "err_msg": {
+                        "type": "string",
+                        "title": "Err Msg"
+                    },
+                    "metadata": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/ErrorMetadata"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "err_msg"
+                ],
+                "title": "ErrorResponse",
+                "x-stoplight": {
+                    "id": "3ko7fmfdsdjo4"
+                }
+            },
+            "PolicyListResponse": {
+                "properties": {
+                    "data": {
+                        "items": {
+                            "$ref": "#/components/schemas/PolicyResponse"
+                        },
+                        "type": "array",
+                        "title": "Data",
+                        "default": []
+                    },
+                    "metadata": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/Metadata"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ]
+                    }
+                },
+                "type": "object",
+                "title": "ViewDataResponse",
+                "x-stoplight": {
+                    "id": "f18r57b2hfk40"
+                }
+            },
+            "PublicAssetMatchingType": {
+                "type": "string",
+                "enum": [
+                    "ALL_ASSETS",
+                    "ASSET_GROUPS",
+                    "CLOUD_ACCOUNTS"
+                ],
+                "title": "AssetMatchingType",
+                "x-stoplight": {
+                    "id": "u15yjzydinhj7"
+                }
+            },
+            "PublicRuleMatchingType": {
+                "type": "string",
+                "enum": [
+                    "ALL_RULES",
+                    "RULES",
+                    "RULE_FILTER"
+                ],
+                "title": "RuleMatchingType",
+                "x-stoplight": {
+                    "id": "hr04bm0dcyg0v"
+                }
+            },
+            "InternalAssetMatchingType": {
+                "type": "string",
+                "enum": [
+                    "ASSET_GROUPS",
+                    "ALL_ASSETS",
+                    "CLOUD_ACCOUNTS"
+                ],
+                "title": "AssetMatchingType",
+                "x-stoplight": {
+                    "id": "wbptlshmy8g50"
+                }
+            },
+            "InternalRuleMatchingType": {
+                "type": "string",
+                "enum": [
+                    "RULE_FILTER",
+                    "RULES",
+                    "ALL_RULES"
+                ],
+                "title": "RuleMatchingType",
+                "x-stoplight": {
+                    "id": "9tj14sotq4q0p"
+                }
+            }
+        }
+    }
+}

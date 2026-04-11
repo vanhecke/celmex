@@ -1,0 +1,2560 @@
+{
+    "openapi": "3.1.0",
+    "x-stoplight": {
+        "id": "p33kkp4bzrel1"
+    },
+    "info": {
+        "title": "Vulnerability Management APIs",
+        "version": "Cortex XSIAM 3.4",
+        "contact": {
+            "email": "docs-cortex@paloaltonetworks.com",
+            "name": "Cortex Documentation Team",
+            "url": "https://docs-cortex.paloaltonetworks.com/"
+        },
+        "description": "You can export the OpenAPI specs in the [Cortex Stoplight instance](https://cortex-panw.stoplight.io/docs/cortex-xsiam-3-x/p33kkp4bzrel1-vulnerability-management-ap-is). \n\nManaging vulnerabilities effectively is crucial to proactively maintaining the security, integrity, and availability of IT infrastructure. Cortex Cloud provides a comprehensive vulnerability management platform, helping you identify, assess, prioritize, and remediate security vulnerabilities across your entire IT infrastructure including endpoints, code, and cloud.\n\n**Required license:** Cortex Cloud Runtime Security or Cortex Cloud Posture Management"
+    },
+    "servers": [
+        {
+            "url": "https://api-yourfqdn",
+            "description": ""
+        }
+    ],
+    "security": [],
+    "tags": [
+        {
+            "name": "Vulnerability Management",
+            "description": "Public APIs for vulnerability policy management"
+        }
+    ],
+    "paths": {
+        "/public_api/uvm_public/v1/list_policies": {
+            "post": {
+                "summary": "Get Policies List",
+                "description": "Retrieve a paginated list of vulnerability management policies with optional filtering and sorting capabilities. This endpoint allows you to search through policies based on various criteria such as name, status, priority, and other attributes.\n\n**Required license:** Cortex Cloud Runtime Security or Cortex Cloud Posture Management",
+                "tags": [
+                    "Vulnerability Management"
+                ],
+                "operationId": "get_policies_list_public_api_uvm_public_v1_list_policies_post",
+                "parameters": [
+                    {
+                        "name": "x-xdr-auth-id",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "integer"
+                                },
+                                {
+                                    "type": "string"
+                                }
+                            ],
+                            "default": "",
+                            "title": "X-Xdr-Auth-Id"
+                        }
+                    },
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "default": "",
+                            "title": "Authorization"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Request payload containing filter, sort, and pagination options for listing policies",
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/GetDataRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GetDataResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-stoplight": {
+                    "id": "ncgmzjn8dcak9"
+                }
+            }
+        },
+        "/public_api/uvm_public/v1/create_policy": {
+            "post": {
+                "summary": "Create Policy Public",
+                "description": "Create a new vulnerability management policy for issue creation, kubernetes runtime protection, or prevention actions.\n\n**Required license:** Cortex Cloud Runtime Security or Cortex Cloud Posture Management",
+                "tags": [
+                    "Vulnerability Management"
+                ],
+                "operationId": "create_policy_public_public_api_uvm_public_v1_create_policy_post",
+                "parameters": [
+                    {
+                        "name": "x-xdr-auth-id",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "integer"
+                                },
+                                {
+                                    "type": "string"
+                                }
+                            ],
+                            "default": "",
+                            "title": "X-Xdr-Auth-Id"
+                        }
+                    },
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "default": "",
+                            "title": "Authorization"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Request payload containing the policy configuration to create",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreatePolicy"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CreatePolicyResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-stoplight": {
+                    "id": "b4my0zl4v1j0a"
+                }
+            }
+        },
+        "/public_api/uvm_public/v1/update_policy/{id}": {
+            "put": {
+                "summary": "Update Policy",
+                "description": "Update an existing vulnerability management policy by providing its unique identifier.\n\n**Required license:** Cortex Cloud Runtime Security or Cortex Cloud Posture Management",
+                "tags": [
+                    "Vulnerability Management"
+                ],
+                "operationId": "update_policy_public_api_uvm_public_v1_update_policy__id__put",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Id"
+                        }
+                    },
+                    {
+                        "name": "x-xdr-auth-id",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "integer"
+                                },
+                                {
+                                    "type": "string"
+                                }
+                            ],
+                            "default": "",
+                            "title": "X-Xdr-Auth-Id"
+                        }
+                    },
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "default": "",
+                            "title": "Authorization"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Request payload containing the updated policy configuration",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreatePolicy"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CreatePolicyResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-stoplight": {
+                    "id": "dp8eeju2jvi8l"
+                }
+            }
+        },
+        "/public_api/uvm_public/v1/get_policy/{id}": {
+            "get": {
+                "summary": "Get Policy By ID",
+                "description": "Retrieve a specific vulnerability management policy by its unique identifier.\n\n**Required license:** Cortex Cloud Runtime Security or Cortex Cloud Posture Management",
+                "tags": [
+                    "Vulnerability Management"
+                ],
+                "operationId": "get_policy_by_id_public_api_uvm_public_v1_get_policy__id__get",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Id"
+                        }
+                    },
+                    {
+                        "name": "x-xdr-auth-id",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "integer"
+                                },
+                                {
+                                    "type": "string"
+                                }
+                            ],
+                            "default": "",
+                            "title": "X-Xdr-Auth-Id"
+                        }
+                    },
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "default": "",
+                            "title": "Authorization"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PolicyView"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-stoplight": {
+                    "id": "s26q7yz2v5ty3"
+                }
+            }
+        },
+        "/public_api/uvm_public/v1/delete_policy/{id}": {
+            "delete": {
+                "summary": "Delete Policy",
+                "tags": [
+                    "Vulnerability Management"
+                ],
+                "description": "Delete an existing vulnerability management policy using a policy ID.\n\n**Required license:** Cortex Cloud Runtime Security or Cortex Cloud Posture Management",
+                "operationId": "delete_policy_public_api_uvm_public_v1_delete_policy__id__delete",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid",
+                            "title": "Id"
+                        }
+                    },
+                    {
+                        "name": "x-xdr-auth-id",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "integer"
+                                },
+                                {
+                                    "type": "string"
+                                }
+                            ],
+                            "default": "",
+                            "title": "X-Xdr-Auth-Id"
+                        }
+                    },
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "default": "",
+                            "title": "Authorization"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "boolean",
+                                    "title": "Response Delete Policy Public Api Uvm Public V1 Delete Policy  Id  Delete"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-stoplight": {
+                    "id": "ljtb0u5bczwwe"
+                }
+            }
+        },
+        "/public_api/vulnerability-management/v1/scan": {
+            "post": {
+                "summary": "Trigger Scan for an AssetId",
+                "description": "Trigger On demand Scan based on AssetId on one of CORTEX_NETWORK_SCANNER, CORTEX_XDR_AGENT, CORTEX_XDR_AGENTLESS scanners.\n\n**Required license:** Cortex Cloud Runtime Security or Cortex Cloud Posture Management",
+                "tags": [
+                    "Vulnerability Management"
+                ],
+                "operationId": "trigger_scan_public_api_vulnerability_management_v1_scan_post",
+                "parameters": [
+                    {
+                        "name": "x-xdr-auth-id",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "anyOf": [
+                                {
+                                    "type": "integer"
+                                },
+                                {
+                                    "type": "string"
+                                }
+                            ],
+                            "title": "X-Xdr-Auth-Id"
+                        }
+                    },
+                    {
+                        "name": "Authorization",
+                        "in": "header",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "default": "",
+                            "title": "Authorization"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "description": "Request payload containing the asset ID and scanner type for triggering a scan",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ScanRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful Response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ScanResponse"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation Error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/HTTPValidationError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-stoplight": {
+                    "id": "triggerscan001"
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "ADVANCED_IP_MATCH_RANGE": {
+                "properties": {
+                    "SEARCH_FIELD": {
+                        "type": "string",
+                        "title": "Search Field"
+                    },
+                    "SEARCH_TYPE": {
+                        "type": "string",
+                        "const": "ADVANCED_IP_MATCH_RANGE",
+                        "title": "Search Type"
+                    },
+                    "SEARCH_VALUE": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/FromTo_IPv4Address_"
+                            },
+                            {
+                                "$ref": "#/components/schemas/FromTo_IPv6Address_"
+                            }
+                        ],
+                        "title": "Search Value"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "SEARCH_FIELD",
+                    "SEARCH_TYPE",
+                    "SEARCH_VALUE"
+                ],
+                "title": "ADVANCED_IP_MATCH_RANGE",
+                "x-stoplight": {
+                    "id": "onjczj3chh9mo"
+                }
+            },
+            "ADVANCED_NIP_MATCH_RANGE": {
+                "properties": {
+                    "SEARCH_FIELD": {
+                        "type": "string",
+                        "title": "Search Field"
+                    },
+                    "SEARCH_TYPE": {
+                        "type": "string",
+                        "const": "ADVANCED_NIP_MATCH_RANGE",
+                        "title": "Search Type"
+                    },
+                    "SEARCH_VALUE": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/FromTo_IPv4Address_"
+                            },
+                            {
+                                "$ref": "#/components/schemas/FromTo_IPv6Address_"
+                            }
+                        ],
+                        "title": "Search Value"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "SEARCH_FIELD",
+                    "SEARCH_TYPE",
+                    "SEARCH_VALUE"
+                ],
+                "title": "ADVANCED_NIP_MATCH_RANGE",
+                "x-stoplight": {
+                    "id": "zoboegdz2babf"
+                }
+            },
+            "AND-Input": {
+                "properties": {
+                    "AND": {
+                        "items": {
+                            "oneOf": [
+                                {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/EQ"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/NEQ"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/IS_NOT"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/IN"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/NIN"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/CONTAINS"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/NCONTAINS"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/CONTAINS_IN_LIST"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/NOT_CONTAINS_IN_LIST"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/GT"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/LT"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/GTE"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/LTE"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/IS_EMPTY"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/NIS_EMPTY"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/WILDCARD"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/WILDCARD_NOT"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/LIKE_ANY"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/RELATIVE_TIMESTAMP"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/RANGE"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/REGEX"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/REGEX_NOT"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/ADVANCED_IP_MATCH_RANGE"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/ADVANCED_NIP_MATCH_RANGE"
+                                        }
+                                    ],
+                                    "discriminator": {
+                                        "propertyName": "SEARCH_TYPE",
+                                        "mapping": {
+                                            "ADVANCED_IP_MATCH_RANGE": "#/components/schemas/ADVANCED_IP_MATCH_RANGE",
+                                            "ADVANCED_NIP_MATCH_RANGE": "#/components/schemas/ADVANCED_NIP_MATCH_RANGE",
+                                            "CONTAINS": "#/components/schemas/CONTAINS",
+                                            "CONTAINS_IN_LIST": "#/components/schemas/CONTAINS_IN_LIST",
+                                            "EQ": "#/components/schemas/EQ",
+                                            "GT": "#/components/schemas/GT",
+                                            "GTE": "#/components/schemas/GTE",
+                                            "IN": "#/components/schemas/IN",
+                                            "IS_EMPTY": "#/components/schemas/IS_EMPTY",
+                                            "IS_NOT": "#/components/schemas/IS_NOT",
+                                            "LIKE_ANY": "#/components/schemas/LIKE_ANY",
+                                            "LT": "#/components/schemas/LT",
+                                            "LTE": "#/components/schemas/LTE",
+                                            "NCONTAINS": "#/components/schemas/NCONTAINS",
+                                            "NEQ": "#/components/schemas/NEQ",
+                                            "NIN": "#/components/schemas/NIN",
+                                            "NIS_EMPTY": "#/components/schemas/NIS_EMPTY",
+                                            "NOT_CONTAINS_IN_LIST": "#/components/schemas/NOT_CONTAINS_IN_LIST",
+                                            "RANGE": "#/components/schemas/RANGE",
+                                            "REGEX": "#/components/schemas/REGEX",
+                                            "REGEX_NOT": "#/components/schemas/REGEX_NOT",
+                                            "RELATIVE_TIMESTAMP": "#/components/schemas/RELATIVE_TIMESTAMP",
+                                            "WILDCARD": "#/components/schemas/WILDCARD",
+                                            "WILDCARD_NOT": "#/components/schemas/WILDCARD_NOT"
+                                        }
+                                    }
+                                },
+                                {
+                                    "$ref": "#/components/schemas/OR-Input"
+                                },
+                                {
+                                    "$ref": "#/components/schemas/AND-Input"
+                                },
+                                {
+                                    "$ref": "#/components/schemas/EMPTY"
+                                }
+                            ]
+                        },
+                        "type": "array",
+                        "title": "And"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "AND"
+                ],
+                "title": "AND",
+                "x-stoplight": {
+                    "id": "bdyc1e70sqhak"
+                }
+            },
+            "AND-Output": {
+                "properties": {
+                    "AND": {
+                        "items": {
+                            "oneOf": [
+                                {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/EQ"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/NEQ"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/IS_NOT"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/IN"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/NIN"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/CONTAINS"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/NCONTAINS"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/CONTAINS_IN_LIST"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/NOT_CONTAINS_IN_LIST"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/GT"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/LT"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/GTE"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/LTE"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/IS_EMPTY"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/NIS_EMPTY"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/WILDCARD"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/WILDCARD_NOT"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/LIKE_ANY"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/RELATIVE_TIMESTAMP"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/RANGE"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/REGEX"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/REGEX_NOT"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/ADVANCED_IP_MATCH_RANGE"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/ADVANCED_NIP_MATCH_RANGE"
+                                        }
+                                    ],
+                                    "discriminator": {
+                                        "propertyName": "SEARCH_TYPE",
+                                        "mapping": {
+                                            "ADVANCED_IP_MATCH_RANGE": "#/components/schemas/ADVANCED_IP_MATCH_RANGE",
+                                            "ADVANCED_NIP_MATCH_RANGE": "#/components/schemas/ADVANCED_NIP_MATCH_RANGE",
+                                            "CONTAINS": "#/components/schemas/CONTAINS",
+                                            "CONTAINS_IN_LIST": "#/components/schemas/CONTAINS_IN_LIST",
+                                            "EQ": "#/components/schemas/EQ",
+                                            "GT": "#/components/schemas/GT",
+                                            "GTE": "#/components/schemas/GTE",
+                                            "IN": "#/components/schemas/IN",
+                                            "IS_EMPTY": "#/components/schemas/IS_EMPTY",
+                                            "IS_NOT": "#/components/schemas/IS_NOT",
+                                            "LIKE_ANY": "#/components/schemas/LIKE_ANY",
+                                            "LT": "#/components/schemas/LT",
+                                            "LTE": "#/components/schemas/LTE",
+                                            "NCONTAINS": "#/components/schemas/NCONTAINS",
+                                            "NEQ": "#/components/schemas/NEQ",
+                                            "NIN": "#/components/schemas/NIN",
+                                            "NIS_EMPTY": "#/components/schemas/NIS_EMPTY",
+                                            "NOT_CONTAINS_IN_LIST": "#/components/schemas/NOT_CONTAINS_IN_LIST",
+                                            "RANGE": "#/components/schemas/RANGE",
+                                            "REGEX": "#/components/schemas/REGEX",
+                                            "REGEX_NOT": "#/components/schemas/REGEX_NOT",
+                                            "RELATIVE_TIMESTAMP": "#/components/schemas/RELATIVE_TIMESTAMP",
+                                            "WILDCARD": "#/components/schemas/WILDCARD",
+                                            "WILDCARD_NOT": "#/components/schemas/WILDCARD_NOT"
+                                        }
+                                    }
+                                },
+                                {
+                                    "$ref": "#/components/schemas/OR-Output"
+                                },
+                                {
+                                    "$ref": "#/components/schemas/AND-Output"
+                                },
+                                {
+                                    "$ref": "#/components/schemas/EMPTY"
+                                }
+                            ]
+                        },
+                        "type": "array",
+                        "title": "And"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "AND"
+                ],
+                "title": "AND",
+                "x-stoplight": {
+                    "id": "6qcyk6j8ck0y3"
+                }
+            },
+            "ActionCategory": {
+                "type": "string",
+                "enum": [
+                    "BLOCK",
+                    "CREATE_ISSUE"
+                ],
+                "title": "ActionCategory",
+                "x-stoplight": {
+                    "id": "uwusry7h91m1h"
+                }
+            },
+            "BlockBuild": {
+                "properties": {
+                    "action_type": {
+                        "type": "string",
+                        "const": "BLOCK_BUILD",
+                        "title": "Action Type",
+                        "default": "BLOCK_BUILD"
+                    },
+                    "take_action": {
+                        "type": "boolean",
+                        "title": "Take Action",
+                        "default": true
+                    },
+                    "category": {
+                        "type": "string",
+                        "const": "BLOCK",
+                        "title": "Category",
+                        "default": "BLOCK"
+                    }
+                },
+                "type": "object",
+                "title": "BlockBuild",
+                "x-stoplight": {
+                    "id": "voxrwfe21cgkm"
+                }
+            },
+            "BlockDeploy": {
+                "properties": {
+                    "action_type": {
+                        "type": "string",
+                        "const": "BLOCK_DEPLOY",
+                        "title": "Action Type",
+                        "default": "BLOCK_DEPLOY"
+                    },
+                    "take_action": {
+                        "type": "boolean",
+                        "title": "Take Action",
+                        "default": true
+                    },
+                    "category": {
+                        "type": "string",
+                        "const": "BLOCK",
+                        "title": "Category",
+                        "default": "BLOCK"
+                    }
+                },
+                "type": "object",
+                "title": "BlockDeploy",
+                "x-stoplight": {
+                    "id": "zc81uny06ou48"
+                }
+            },
+            "CONTAINS": {
+                "properties": {
+                    "SEARCH_FIELD": {
+                        "type": "string",
+                        "title": "Search Field"
+                    },
+                    "SEARCH_TYPE": {
+                        "type": "string",
+                        "const": "CONTAINS",
+                        "title": "Search Type"
+                    },
+                    "SEARCH_VALUE": {
+                        "type": "string",
+                        "title": "Search Value"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "SEARCH_FIELD",
+                    "SEARCH_TYPE",
+                    "SEARCH_VALUE"
+                ],
+                "title": "CONTAINS",
+                "x-stoplight": {
+                    "id": "yqvoz5611yaxj"
+                }
+            },
+            "CONTAINS_IN_LIST": {
+                "properties": {
+                    "SEARCH_FIELD": {
+                        "type": "string",
+                        "title": "Search Field"
+                    },
+                    "SEARCH_TYPE": {
+                        "type": "string",
+                        "const": "CONTAINS_IN_LIST",
+                        "title": "Search Type"
+                    },
+                    "SEARCH_VALUE": {
+                        "type": "string",
+                        "title": "Search Value"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "SEARCH_FIELD",
+                    "SEARCH_TYPE",
+                    "SEARCH_VALUE"
+                ],
+                "title": "CONTAINS_IN_LIST",
+                "x-stoplight": {
+                    "id": "lwb4l0qemjt20"
+                }
+            },
+            "CreateIssue": {
+                "properties": {
+                    "action_type": {
+                        "type": "string",
+                        "const": "CREATE_ISSUE",
+                        "title": "Action Type",
+                        "default": "CREATE_ISSUE"
+                    },
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "take_action": {
+                        "type": "boolean",
+                        "title": "Take Action",
+                        "default": true
+                    },
+                    "category": {
+                        "type": "string",
+                        "const": "CREATE_ISSUE",
+                        "title": "Category",
+                        "default": "CREATE_ISSUE"
+                    }
+                },
+                "type": "object",
+                "title": "CreateIssue",
+                "x-stoplight": {
+                    "id": "kbzrzh1pgs2v3"
+                }
+            },
+            "CreatePolicy": {
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "description": {
+                        "type": "string",
+                        "title": "Description"
+                    },
+                    "priority": {
+                        "type": "integer",
+                        "title": "Priority"
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/PolicyStatus"
+                            }
+                        ],
+                        "default": "DISABLED"
+                    },
+                    "match_criteria": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/AND-Input"
+                            },
+                            {
+                                "$ref": "#/components/schemas/OR-Input"
+                            },
+                            {
+                                "$ref": "#/components/schemas/EMPTY"
+                            }
+                        ],
+                        "title": "Match Criteria"
+                    },
+                    "exclusion_criteria": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/EMPTY"
+                            },
+                            {
+                                "$ref": "#/components/schemas/AND-Input"
+                            },
+                            {
+                                "$ref": "#/components/schemas/OR-Input"
+                            }
+                        ],
+                        "title": "Exclusion Criteria"
+                    },
+                    "action": {
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/components/schemas/BlockBuild"
+                                },
+                                {
+                                    "$ref": "#/components/schemas/BlockDeploy"
+                                },
+                                {
+                                    "$ref": "#/components/schemas/CreateIssue"
+                                }
+                            ]
+                        },
+                        "type": "array",
+                        "title": "Action"
+                    },
+                    "action_category": {
+                        "$ref": "#/components/schemas/ActionCategory"
+                    },
+                    "issue_type": {
+                        "type": "string",
+                        "title": "Issue Type"
+                    },
+                    "severity": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/IssueSeverity"
+                            }
+                        ],
+                        "title": "Severity"
+                    },
+                    "asset_group_scope": {
+                        "items": {
+                            "type": "integer"
+                        },
+                        "type": "array",
+                        "title": "Asset Group Scope"
+                    },
+                    "policy_type": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/PolicyType"
+                            }
+                        ],
+                        "default": "STANDARD_POLICY"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "name",
+                    "priority",
+                    "match_criteria",
+                    "action",
+                    "action_category",
+                    "asset_group_scope"
+                ],
+                "title": "CreatePolicy",
+                "x-stoplight": {
+                    "id": "p8xoxhtn1jrxk"
+                }
+            },
+            "CreatePolicyResponse": {
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "Id"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "id"
+                ],
+                "title": "CreatePolicyResponse",
+                "x-stoplight": {
+                    "id": "b4x2j5a23c4ta"
+                }
+            },
+            "EMPTY": {
+                "properties": {},
+                "additionalProperties": false,
+                "type": "object",
+                "title": "EMPTY",
+                "x-stoplight": {
+                    "id": "zotrmiyxx9ie9"
+                }
+            },
+            "EQ": {
+                "properties": {
+                    "SEARCH_FIELD": {
+                        "type": "string",
+                        "title": "Search Field"
+                    },
+                    "SEARCH_TYPE": {
+                        "type": "string",
+                        "const": "EQ",
+                        "title": "Search Type"
+                    },
+                    "SEARCH_VALUE": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "type": "boolean"
+                            }
+                        ],
+                        "title": "Search Value"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "SEARCH_FIELD",
+                    "SEARCH_TYPE",
+                    "SEARCH_VALUE"
+                ],
+                "title": "EQ",
+                "x-stoplight": {
+                    "id": "1timqdcqhqxwb"
+                }
+            },
+            "Filter-Input": {
+                "properties": {
+                    "filter": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/AND-Input"
+                            },
+                            {
+                                "$ref": "#/components/schemas/OR-Input"
+                            },
+                            {
+                                "$ref": "#/components/schemas/EMPTY"
+                            }
+                        ],
+                        "title": "Filter"
+                    },
+                    "sort": {
+                        "items": {
+                            "$ref": "#/components/schemas/Sort"
+                        },
+                        "type": "array",
+                        "title": "Sort"
+                    },
+                    "paging": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/Page"
+                            }
+                        ],
+                        "title": "Paging"
+                    },
+                    "locked": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/AND-Input"
+                            },
+                            {
+                                "$ref": "#/components/schemas/OR-Input"
+                            },
+                            {
+                                "$ref": "#/components/schemas/EMPTY"
+                            }
+                        ],
+                        "title": "Locked",
+                        "description": "\nFilter passed in from the application that is not intended to be modified by the user.\nBe aware that this field is not guaranteed to not be modified by the user.\n        "
+                    }
+                },
+                "type": "object",
+                "title": "Filter",
+                "x-stoplight": {
+                    "id": "ijqiesu76hl07"
+                }
+            },
+            "FromTo_IPv4Address_": {
+                "properties": {
+                    "from": {
+                        "type": "string",
+                        "format": "ipv4",
+                        "title": "From"
+                    },
+                    "to": {
+                        "type": "string",
+                        "format": "ipv4",
+                        "title": "To"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "from",
+                    "to"
+                ],
+                "title": "FromTo[IPv4Address]",
+                "x-stoplight": {
+                    "id": "ikqt3f8d8k1vy"
+                }
+            },
+            "FromTo_IPv6Address_": {
+                "properties": {
+                    "from": {
+                        "type": "string",
+                        "format": "ipv6",
+                        "title": "From"
+                    },
+                    "to": {
+                        "type": "string",
+                        "format": "ipv6",
+                        "title": "To"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "from",
+                    "to"
+                ],
+                "title": "FromTo[IPv6Address]",
+                "x-stoplight": {
+                    "id": "ku0rj4gegff94"
+                }
+            },
+            "FromTo_float_": {
+                "properties": {
+                    "from": {
+                        "type": "number",
+                        "title": "From"
+                    },
+                    "to": {
+                        "type": "number",
+                        "title": "To"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "from",
+                    "to"
+                ],
+                "title": "FromTo[float]",
+                "x-stoplight": {
+                    "id": "jpnpwjuw2igol"
+                }
+            },
+            "FromTo_int_": {
+                "properties": {
+                    "from": {
+                        "type": "integer",
+                        "title": "From"
+                    },
+                    "to": {
+                        "type": "integer",
+                        "title": "To"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "from",
+                    "to"
+                ],
+                "title": "FromTo[int]",
+                "x-stoplight": {
+                    "id": "0jgfk5m3zxlj6"
+                }
+            },
+            "GT": {
+                "properties": {
+                    "SEARCH_FIELD": {
+                        "type": "string",
+                        "title": "Search Field"
+                    },
+                    "SEARCH_TYPE": {
+                        "type": "string",
+                        "const": "GT",
+                        "title": "Search Type"
+                    },
+                    "SEARCH_VALUE": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "number"
+                            }
+                        ],
+                        "title": "Search Value"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "SEARCH_FIELD",
+                    "SEARCH_TYPE",
+                    "SEARCH_VALUE"
+                ],
+                "title": "GT",
+                "x-stoplight": {
+                    "id": "8at2lm72bd5om"
+                }
+            },
+            "GTE": {
+                "properties": {
+                    "SEARCH_FIELD": {
+                        "type": "string",
+                        "title": "Search Field"
+                    },
+                    "SEARCH_TYPE": {
+                        "type": "string",
+                        "const": "GTE",
+                        "title": "Search Type"
+                    },
+                    "SEARCH_VALUE": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "number"
+                            }
+                        ],
+                        "title": "Search Value"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "SEARCH_FIELD",
+                    "SEARCH_TYPE",
+                    "SEARCH_VALUE"
+                ],
+                "title": "GTE",
+                "x-stoplight": {
+                    "id": "0vztdiez7a853"
+                }
+            },
+            "GetDataRequest": {
+                "properties": {
+                    "filter_data": {
+                        "$ref": "#/components/schemas/Filter-Input"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "filter_data"
+                ],
+                "title": "GetDataRequest",
+                "x-stoplight": {
+                    "id": "qeqaicaxume2f"
+                }
+            },
+            "GetDataResponse": {
+                "properties": {
+                    "DATA": {
+                        "items": {},
+                        "type": "array",
+                        "title": "Data"
+                    },
+                    "FILTER_COUNT": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "title": "Filter Count"
+                    },
+                    "TOTAL_COUNT": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "title": "Total Count"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "DATA",
+                    "FILTER_COUNT",
+                    "TOTAL_COUNT"
+                ],
+                "title": "GetDataResponse",
+                "x-stoplight": {
+                    "id": "9ar07skuol15a"
+                }
+            },
+            "HTTPValidationError": {
+                "properties": {
+                    "detail": {
+                        "items": {
+                            "$ref": "#/components/schemas/ValidationError"
+                        },
+                        "type": "array",
+                        "title": "Detail"
+                    }
+                },
+                "type": "object",
+                "title": "HTTPValidationError",
+                "x-stoplight": {
+                    "id": "4qrq5f89gln2l"
+                }
+            },
+            "IN": {
+                "properties": {
+                    "SEARCH_FIELD": {
+                        "type": "string",
+                        "title": "Search Field"
+                    },
+                    "SEARCH_TYPE": {
+                        "type": "string",
+                        "const": "IN",
+                        "title": "Search Type"
+                    },
+                    "SEARCH_VALUE": {
+                        "anyOf": [
+                            {
+                                "items": {
+                                    "type": "string"
+                                },
+                                "type": "array"
+                            },
+                            {
+                                "items": {
+                                    "type": "integer"
+                                },
+                                "type": "array"
+                            },
+                            {
+                                "items": {
+                                    "type": "number"
+                                },
+                                "type": "array"
+                            },
+                            {
+                                "items": {
+                                    "type": "boolean"
+                                },
+                                "type": "array"
+                            }
+                        ],
+                        "title": "Search Value"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "SEARCH_FIELD",
+                    "SEARCH_TYPE",
+                    "SEARCH_VALUE"
+                ],
+                "title": "IN",
+                "x-stoplight": {
+                    "id": "t93siz3qbsd9c"
+                }
+            },
+            "IS_EMPTY": {
+                "properties": {
+                    "SEARCH_FIELD": {
+                        "type": "string",
+                        "title": "Search Field"
+                    },
+                    "SEARCH_TYPE": {
+                        "type": "string",
+                        "const": "IS_EMPTY",
+                        "title": "Search Type"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "SEARCH_FIELD",
+                    "SEARCH_TYPE"
+                ],
+                "title": "IS_EMPTY",
+                "x-stoplight": {
+                    "id": "cxvboe1avgdeg"
+                }
+            },
+            "IS_NOT": {
+                "properties": {
+                    "SEARCH_FIELD": {
+                        "type": "string",
+                        "title": "Search Field"
+                    },
+                    "SEARCH_TYPE": {
+                        "type": "string",
+                        "const": "IS_NOT",
+                        "title": "Search Type"
+                    },
+                    "SEARCH_VALUE": {
+                        "type": "boolean",
+                        "title": "Search Value"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "SEARCH_FIELD",
+                    "SEARCH_TYPE",
+                    "SEARCH_VALUE"
+                ],
+                "title": "IS_NOT",
+                "x-stoplight": {
+                    "id": "uund6qbh39qew"
+                }
+            },
+            "IssueSeverity": {
+                "type": "string",
+                "enum": [
+                    "CRITICAL",
+                    "HIGH",
+                    "MEDIUM",
+                    "LOW",
+                    "INFO",
+                    "UNKNOWN",
+                    "USE_CVE_SEVERITY"
+                ],
+                "title": "IssueSeverity",
+                "x-stoplight": {
+                    "id": "52925mx179jll"
+                }
+            },
+            "LIKE_ANY": {
+                "properties": {
+                    "SEARCH_FIELD": {
+                        "type": "string",
+                        "title": "Search Field"
+                    },
+                    "SEARCH_TYPE": {
+                        "type": "string",
+                        "const": "LIKE_ANY",
+                        "title": "Search Type"
+                    },
+                    "SEARCH_VALUE": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array",
+                        "title": "Search Value"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "SEARCH_FIELD",
+                    "SEARCH_TYPE",
+                    "SEARCH_VALUE"
+                ],
+                "title": "LIKE_ANY",
+                "x-stoplight": {
+                    "id": "85wv6euubz767"
+                }
+            },
+            "LT": {
+                "properties": {
+                    "SEARCH_FIELD": {
+                        "type": "string",
+                        "title": "Search Field"
+                    },
+                    "SEARCH_TYPE": {
+                        "type": "string",
+                        "const": "LT",
+                        "title": "Search Type"
+                    },
+                    "SEARCH_VALUE": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "number"
+                            }
+                        ],
+                        "title": "Search Value"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "SEARCH_FIELD",
+                    "SEARCH_TYPE",
+                    "SEARCH_VALUE"
+                ],
+                "title": "LT",
+                "x-stoplight": {
+                    "id": "ykmu3st6vfua1"
+                }
+            },
+            "LTE": {
+                "properties": {
+                    "SEARCH_FIELD": {
+                        "type": "string",
+                        "title": "Search Field"
+                    },
+                    "SEARCH_TYPE": {
+                        "type": "string",
+                        "const": "LTE",
+                        "title": "Search Type"
+                    },
+                    "SEARCH_VALUE": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "number"
+                            }
+                        ],
+                        "title": "Search Value"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "SEARCH_FIELD",
+                    "SEARCH_TYPE",
+                    "SEARCH_VALUE"
+                ],
+                "title": "LTE",
+                "x-stoplight": {
+                    "id": "1jix93mp0sxks"
+                }
+            },
+            "NCONTAINS": {
+                "properties": {
+                    "SEARCH_FIELD": {
+                        "type": "string",
+                        "title": "Search Field"
+                    },
+                    "SEARCH_TYPE": {
+                        "type": "string",
+                        "const": "NCONTAINS",
+                        "title": "Search Type"
+                    },
+                    "SEARCH_VALUE": {
+                        "type": "string",
+                        "title": "Search Value"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "SEARCH_FIELD",
+                    "SEARCH_TYPE",
+                    "SEARCH_VALUE"
+                ],
+                "title": "NCONTAINS",
+                "x-stoplight": {
+                    "id": "ol7mch4f9xezs"
+                }
+            },
+            "NEQ": {
+                "properties": {
+                    "SEARCH_FIELD": {
+                        "type": "string",
+                        "title": "Search Field"
+                    },
+                    "SEARCH_TYPE": {
+                        "type": "string",
+                        "const": "NEQ",
+                        "title": "Search Type"
+                    },
+                    "SEARCH_VALUE": {
+                        "anyOf": [
+                            {
+                                "type": "string"
+                            },
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "number"
+                            },
+                            {
+                                "type": "boolean"
+                            }
+                        ],
+                        "title": "Search Value"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "SEARCH_FIELD",
+                    "SEARCH_TYPE",
+                    "SEARCH_VALUE"
+                ],
+                "title": "NEQ",
+                "x-stoplight": {
+                    "id": "mex9tidupi5vo"
+                }
+            },
+            "NIN": {
+                "properties": {
+                    "SEARCH_FIELD": {
+                        "type": "string",
+                        "title": "Search Field"
+                    },
+                    "SEARCH_TYPE": {
+                        "type": "string",
+                        "const": "NIN",
+                        "title": "Search Type"
+                    },
+                    "SEARCH_VALUE": {
+                        "anyOf": [
+                            {
+                                "items": {
+                                    "type": "string"
+                                },
+                                "type": "array"
+                            },
+                            {
+                                "items": {
+                                    "type": "integer"
+                                },
+                                "type": "array"
+                            },
+                            {
+                                "items": {
+                                    "type": "number"
+                                },
+                                "type": "array"
+                            },
+                            {
+                                "items": {
+                                    "type": "boolean"
+                                },
+                                "type": "array"
+                            }
+                        ],
+                        "title": "Search Value"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "SEARCH_FIELD",
+                    "SEARCH_TYPE",
+                    "SEARCH_VALUE"
+                ],
+                "title": "NIN",
+                "x-stoplight": {
+                    "id": "b5kcskgj38371"
+                }
+            },
+            "NIS_EMPTY": {
+                "properties": {
+                    "SEARCH_FIELD": {
+                        "type": "string",
+                        "title": "Search Field"
+                    },
+                    "SEARCH_TYPE": {
+                        "type": "string",
+                        "const": "NIS_EMPTY",
+                        "title": "Search Type"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "SEARCH_FIELD",
+                    "SEARCH_TYPE"
+                ],
+                "title": "NIS_EMPTY",
+                "x-stoplight": {
+                    "id": "kkvmz30xu36r8"
+                }
+            },
+            "NOT_CONTAINS_IN_LIST": {
+                "properties": {
+                    "SEARCH_FIELD": {
+                        "type": "string",
+                        "title": "Search Field"
+                    },
+                    "SEARCH_TYPE": {
+                        "type": "string",
+                        "const": "NOT_CONTAINS_IN_LIST",
+                        "title": "Search Type"
+                    },
+                    "SEARCH_VALUE": {
+                        "type": "string",
+                        "title": "Search Value"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "SEARCH_FIELD",
+                    "SEARCH_TYPE",
+                    "SEARCH_VALUE"
+                ],
+                "title": "NOT_CONTAINS_IN_LIST",
+                "x-stoplight": {
+                    "id": "a6cuwc48yy8fi"
+                }
+            },
+            "OR-Input": {
+                "properties": {
+                    "OR": {
+                        "items": {
+                            "oneOf": [
+                                {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/EQ"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/NEQ"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/IS_NOT"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/IN"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/NIN"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/CONTAINS"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/NCONTAINS"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/CONTAINS_IN_LIST"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/NOT_CONTAINS_IN_LIST"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/GT"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/LT"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/GTE"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/LTE"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/IS_EMPTY"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/NIS_EMPTY"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/WILDCARD"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/WILDCARD_NOT"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/LIKE_ANY"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/RELATIVE_TIMESTAMP"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/RANGE"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/REGEX"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/REGEX_NOT"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/ADVANCED_IP_MATCH_RANGE"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/ADVANCED_NIP_MATCH_RANGE"
+                                        }
+                                    ],
+                                    "discriminator": {
+                                        "propertyName": "SEARCH_TYPE",
+                                        "mapping": {
+                                            "ADVANCED_IP_MATCH_RANGE": "#/components/schemas/ADVANCED_IP_MATCH_RANGE",
+                                            "ADVANCED_NIP_MATCH_RANGE": "#/components/schemas/ADVANCED_NIP_MATCH_RANGE",
+                                            "CONTAINS": "#/components/schemas/CONTAINS",
+                                            "CONTAINS_IN_LIST": "#/components/schemas/CONTAINS_IN_LIST",
+                                            "EQ": "#/components/schemas/EQ",
+                                            "GT": "#/components/schemas/GT",
+                                            "GTE": "#/components/schemas/GTE",
+                                            "IN": "#/components/schemas/IN",
+                                            "IS_EMPTY": "#/components/schemas/IS_EMPTY",
+                                            "IS_NOT": "#/components/schemas/IS_NOT",
+                                            "LIKE_ANY": "#/components/schemas/LIKE_ANY",
+                                            "LT": "#/components/schemas/LT",
+                                            "LTE": "#/components/schemas/LTE",
+                                            "NCONTAINS": "#/components/schemas/NCONTAINS",
+                                            "NEQ": "#/components/schemas/NEQ",
+                                            "NIN": "#/components/schemas/NIN",
+                                            "NIS_EMPTY": "#/components/schemas/NIS_EMPTY",
+                                            "NOT_CONTAINS_IN_LIST": "#/components/schemas/NOT_CONTAINS_IN_LIST",
+                                            "RANGE": "#/components/schemas/RANGE",
+                                            "REGEX": "#/components/schemas/REGEX",
+                                            "REGEX_NOT": "#/components/schemas/REGEX_NOT",
+                                            "RELATIVE_TIMESTAMP": "#/components/schemas/RELATIVE_TIMESTAMP",
+                                            "WILDCARD": "#/components/schemas/WILDCARD",
+                                            "WILDCARD_NOT": "#/components/schemas/WILDCARD_NOT"
+                                        }
+                                    }
+                                },
+                                {
+                                    "$ref": "#/components/schemas/OR-Input"
+                                },
+                                {
+                                    "$ref": "#/components/schemas/AND-Input"
+                                },
+                                {
+                                    "$ref": "#/components/schemas/EMPTY"
+                                }
+                            ]
+                        },
+                        "type": "array",
+                        "title": "Or"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "OR"
+                ],
+                "title": "OR",
+                "x-stoplight": {
+                    "id": "ujv10rk0nkx6l"
+                }
+            },
+            "OR-Output": {
+                "properties": {
+                    "OR": {
+                        "items": {
+                            "oneOf": [
+                                {
+                                    "oneOf": [
+                                        {
+                                            "$ref": "#/components/schemas/EQ"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/NEQ"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/IS_NOT"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/IN"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/NIN"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/CONTAINS"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/NCONTAINS"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/CONTAINS_IN_LIST"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/NOT_CONTAINS_IN_LIST"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/GT"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/LT"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/GTE"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/LTE"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/IS_EMPTY"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/NIS_EMPTY"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/WILDCARD"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/WILDCARD_NOT"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/LIKE_ANY"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/RELATIVE_TIMESTAMP"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/RANGE"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/REGEX"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/REGEX_NOT"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/ADVANCED_IP_MATCH_RANGE"
+                                        },
+                                        {
+                                            "$ref": "#/components/schemas/ADVANCED_NIP_MATCH_RANGE"
+                                        }
+                                    ],
+                                    "discriminator": {
+                                        "propertyName": "SEARCH_TYPE",
+                                        "mapping": {
+                                            "ADVANCED_IP_MATCH_RANGE": "#/components/schemas/ADVANCED_IP_MATCH_RANGE",
+                                            "ADVANCED_NIP_MATCH_RANGE": "#/components/schemas/ADVANCED_NIP_MATCH_RANGE",
+                                            "CONTAINS": "#/components/schemas/CONTAINS",
+                                            "CONTAINS_IN_LIST": "#/components/schemas/CONTAINS_IN_LIST",
+                                            "EQ": "#/components/schemas/EQ",
+                                            "GT": "#/components/schemas/GT",
+                                            "GTE": "#/components/schemas/GTE",
+                                            "IN": "#/components/schemas/IN",
+                                            "IS_EMPTY": "#/components/schemas/IS_EMPTY",
+                                            "IS_NOT": "#/components/schemas/IS_NOT",
+                                            "LIKE_ANY": "#/components/schemas/LIKE_ANY",
+                                            "LT": "#/components/schemas/LT",
+                                            "LTE": "#/components/schemas/LTE",
+                                            "NCONTAINS": "#/components/schemas/NCONTAINS",
+                                            "NEQ": "#/components/schemas/NEQ",
+                                            "NIN": "#/components/schemas/NIN",
+                                            "NIS_EMPTY": "#/components/schemas/NIS_EMPTY",
+                                            "NOT_CONTAINS_IN_LIST": "#/components/schemas/NOT_CONTAINS_IN_LIST",
+                                            "RANGE": "#/components/schemas/RANGE",
+                                            "REGEX": "#/components/schemas/REGEX",
+                                            "REGEX_NOT": "#/components/schemas/REGEX_NOT",
+                                            "RELATIVE_TIMESTAMP": "#/components/schemas/RELATIVE_TIMESTAMP",
+                                            "WILDCARD": "#/components/schemas/WILDCARD",
+                                            "WILDCARD_NOT": "#/components/schemas/WILDCARD_NOT"
+                                        }
+                                    }
+                                },
+                                {
+                                    "$ref": "#/components/schemas/OR-Output"
+                                },
+                                {
+                                    "$ref": "#/components/schemas/AND-Output"
+                                },
+                                {
+                                    "$ref": "#/components/schemas/EMPTY"
+                                }
+                            ]
+                        },
+                        "type": "array",
+                        "title": "Or"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "OR"
+                ],
+                "title": "OR",
+                "x-stoplight": {
+                    "id": "xo80zi5u6i5iz"
+                }
+            },
+            "Page": {
+                "properties": {
+                    "from": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "title": "From"
+                    },
+                    "to": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "title": "To"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "from",
+                    "to"
+                ],
+                "title": "Page",
+                "x-stoplight": {
+                    "id": "y0t74jsv2phqw"
+                }
+            },
+            "PolicyStatus": {
+                "type": "string",
+                "enum": [
+                    "ENABLED",
+                    "DISABLED"
+                ],
+                "title": "PolicyStatus",
+                "x-stoplight": {
+                    "id": "2l7pwrh5v4wwm"
+                }
+            },
+            "PolicyType": {
+                "type": "string",
+                "enum": [
+                    "GLOBAL_EXCLUSION",
+                    "STANDARD_POLICY"
+                ],
+                "title": "PolicyType",
+                "x-stoplight": {
+                    "id": "9p47r0oc9mcpi"
+                }
+            },
+            "PolicyView": {
+                "properties": {
+                    "PRIORITY": {
+                        "type": "integer",
+                        "title": "Priority"
+                    },
+                    "ID": {
+                        "type": "string",
+                        "format": "uuid",
+                        "title": "Id"
+                    },
+                    "NAME": {
+                        "type": "string",
+                        "title": "Name"
+                    },
+                    "STATUS": {
+                        "type": "string",
+                        "title": "Status"
+                    },
+                    "MATCH_CRITERIA": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/EMPTY"
+                            },
+                            {
+                                "$ref": "#/components/schemas/AND-Output"
+                            },
+                            {
+                                "$ref": "#/components/schemas/OR-Output"
+                            }
+                        ],
+                        "title": "Match Criteria"
+                    },
+                    "EXCLUSIONS": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/EMPTY"
+                            },
+                            {
+                                "$ref": "#/components/schemas/AND-Output"
+                            },
+                            {
+                                "$ref": "#/components/schemas/OR-Output"
+                            }
+                        ],
+                        "title": "Exclusions"
+                    },
+                    "SEVERITY": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/IssueSeverity"
+                            }
+                        ],
+                        "title": "Severity"
+                    },
+                    "OPEN_ISSUES": {
+                        "type": "integer",
+                        "title": "Open Issues"
+                    },
+                    "ESTIMATED_MATCH_COUNT": {
+                        "type": "integer",
+                        "title": "Estimated Match Count"
+                    },
+                    "DESCRIPTION": {
+                        "type": "string",
+                        "title": "Description"
+                    },
+                    "MODIFIED_BY": {
+                        "type": "string",
+                        "title": "Modified By"
+                    },
+                    "MODIFIED_TIMESTAMP": {
+                        "type": "string",
+                        "format": "date-time",
+                        "title": "Modified Timestamp"
+                    },
+                    "ACTION": {
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "$ref": "#/components/schemas/BlockBuild"
+                                },
+                                {
+                                    "$ref": "#/components/schemas/BlockDeploy"
+                                },
+                                {
+                                    "$ref": "#/components/schemas/CreateIssue"
+                                }
+                            ]
+                        },
+                        "type": "array",
+                        "title": "Action"
+                    },
+                    "ACTION_CATEGORY": {
+                        "$ref": "#/components/schemas/ActionCategory"
+                    },
+                    "ASSET_GROUP_SCOPE": {
+                        "items": {
+                            "type": "integer"
+                        },
+                        "type": "array",
+                        "title": "Asset Group Scope"
+                    },
+                    "POLICY_TYPE": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/PolicyType"
+                            }
+                        ],
+                        "default": "STANDARD_POLICY"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "PRIORITY",
+                    "ID",
+                    "NAME",
+                    "STATUS",
+                    "MATCH_CRITERIA",
+                    "EXCLUSIONS",
+                    "OPEN_ISSUES",
+                    "ESTIMATED_MATCH_COUNT",
+                    "DESCRIPTION",
+                    "MODIFIED_BY",
+                    "MODIFIED_TIMESTAMP",
+                    "ACTION",
+                    "ACTION_CATEGORY"
+                ],
+                "title": "PolicyView",
+                "x-stoplight": {
+                    "id": "q84og7r5qqaqk"
+                }
+            },
+            "RANGE": {
+                "properties": {
+                    "SEARCH_FIELD": {
+                        "type": "string",
+                        "title": "Search Field"
+                    },
+                    "SEARCH_TYPE": {
+                        "type": "string",
+                        "const": "RANGE",
+                        "title": "Search Type"
+                    },
+                    "SEARCH_VALUE": {
+                        "anyOf": [
+                            {
+                                "$ref": "#/components/schemas/FromTo_int_"
+                            },
+                            {
+                                "$ref": "#/components/schemas/FromTo_float_"
+                            }
+                        ],
+                        "title": "Search Value"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "SEARCH_FIELD",
+                    "SEARCH_TYPE",
+                    "SEARCH_VALUE"
+                ],
+                "title": "RANGE",
+                "x-stoplight": {
+                    "id": "i9m56of7a36vn"
+                }
+            },
+            "ScanRequest": {
+                "description": "Request model for triggering a vulnerability scan",
+                "properties": {
+                    "asset_id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "title": "Asset Id",
+                        "description": "The unique identifier of the asset to scan"
+                    },
+                    "scanner_type": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/ScannerType"
+                            }
+                        ],
+                        "description": "The type of scanner to use for the scan"
+                    },
+                    "cve_id": {
+                        "type": "string",
+                        "title": "Cve Id",
+                        "description": "CVE identifier (e.g., 'CVE-2024-1234'). Required when scanner_type is CORTEX_NETWORK_SCANNER, optional for other scanner types."
+                    },
+                    "scan_target": {
+                        "type": "string",
+                        "enum": [
+                            "CONTAINER",
+                            "HOST",
+                            "IMAGE"
+                        ],
+                        "title": "Scan Target",
+                        "description": "Scan Target  (e.g., 'CONTAINER' or 'HOST' or 'IMAGE'). Required when scanner_type is CORTEX_XDR_AGENT and its Linux endpoint, optional for other scanner types."
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "asset_id",
+                    "scanner_type"
+                ],
+                "title": "ScanRequest",
+                "x-stoplight": {
+                    "id": "scanrequest001"
+                }
+            },
+            "ScanResponse": {
+                "description": "Response model for scan trigger operation",
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "title": "Message"
+                    },
+                    "scan_id": {
+                        "type": "integer",
+                        "title": "Scan Id"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "message"
+                ],
+                "title": "ScanResponse",
+                "x-stoplight": {
+                    "id": "scanresponse001"
+                }
+            },
+            "ScannerType": {
+                "description": "Type of vulnerability scanner",
+                "type": "string",
+                "enum": [
+                    "CORTEX_NETWORK_SCANNER",
+                    "CORTEX_XDR_AGENT",
+                    "CORTEX_XDR_AGENTLESS"
+                ],
+                "title": "ScannerType",
+                "x-stoplight": {
+                    "id": "scannertype001"
+                }
+            },
+            "REGEX": {
+                "properties": {
+                    "SEARCH_FIELD": {
+                        "type": "string",
+                        "title": "Search Field"
+                    },
+                    "SEARCH_TYPE": {
+                        "type": "string",
+                        "const": "REGEX",
+                        "title": "Search Type"
+                    },
+                    "SEARCH_VALUE": {
+                        "type": "string",
+                        "title": "Search Value"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "SEARCH_FIELD",
+                    "SEARCH_TYPE",
+                    "SEARCH_VALUE"
+                ],
+                "title": "REGEX",
+                "x-stoplight": {
+                    "id": "pwa36uel56u7y"
+                }
+            },
+            "REGEX_NOT": {
+                "properties": {
+                    "SEARCH_FIELD": {
+                        "type": "string",
+                        "title": "Search Field"
+                    },
+                    "SEARCH_TYPE": {
+                        "type": "string",
+                        "const": "REGEX_NOT",
+                        "title": "Search Type"
+                    },
+                    "SEARCH_VALUE": {
+                        "type": "string",
+                        "title": "Search Value"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "SEARCH_FIELD",
+                    "SEARCH_TYPE",
+                    "SEARCH_VALUE"
+                ],
+                "title": "REGEX_NOT",
+                "x-stoplight": {
+                    "id": "qv2mgpolpmf4j"
+                }
+            },
+            "RELATIVE_TIMESTAMP": {
+                "properties": {
+                    "SEARCH_FIELD": {
+                        "type": "string",
+                        "title": "Search Field"
+                    },
+                    "SEARCH_TYPE": {
+                        "type": "string",
+                        "const": "RELATIVE_TIMESTAMP",
+                        "title": "Search Type"
+                    },
+                    "SEARCH_VALUE": {
+                        "type": "integer",
+                        "title": "Search Value"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "SEARCH_FIELD",
+                    "SEARCH_TYPE",
+                    "SEARCH_VALUE"
+                ],
+                "title": "RELATIVE_TIMESTAMP",
+                "description": "The value is after or equal to the server time minus the SEARCH_VALUE.\n\nThe server uses its current UTC time in milliseconds when evaluating.\nThis means repeated evaluation of the same message can\ntheoretically produce different results if they fall within\na millisecond window.",
+                "x-stoplight": {
+                    "id": "c6yr1u0bzi9n6"
+                }
+            },
+            "Sort": {
+                "properties": {
+                    "FIELD": {
+                        "type": "string",
+                        "title": "Field"
+                    },
+                    "ORDER": {
+                        "type": "string",
+                        "enum": [
+                            "ASC",
+                            "DESC"
+                        ],
+                        "title": "Order"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "FIELD",
+                    "ORDER"
+                ],
+                "title": "Sort",
+                "x-stoplight": {
+                    "id": "kf6ao13b53oi2"
+                }
+            },
+            "ValidationError": {
+                "properties": {
+                    "loc": {
+                        "items": {
+                            "anyOf": [
+                                {
+                                    "type": "string"
+                                },
+                                {
+                                    "type": "integer"
+                                }
+                            ]
+                        },
+                        "type": "array",
+                        "title": "Location"
+                    },
+                    "msg": {
+                        "type": "string",
+                        "title": "Message"
+                    },
+                    "type": {
+                        "type": "string",
+                        "title": "Error Type"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "loc",
+                    "msg",
+                    "type"
+                ],
+                "title": "ValidationError",
+                "x-stoplight": {
+                    "id": "2na6b6oolq633"
+                }
+            },
+            "WILDCARD": {
+                "properties": {
+                    "SEARCH_FIELD": {
+                        "type": "string",
+                        "title": "Search Field"
+                    },
+                    "SEARCH_TYPE": {
+                        "type": "string",
+                        "const": "WILDCARD",
+                        "title": "Search Type"
+                    },
+                    "SEARCH_VALUE": {
+                        "type": "string",
+                        "title": "Search Value"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "SEARCH_FIELD",
+                    "SEARCH_TYPE",
+                    "SEARCH_VALUE"
+                ],
+                "title": "WILDCARD",
+                "x-stoplight": {
+                    "id": "vlw4lkp9tovz5"
+                }
+            },
+            "WILDCARD_NOT": {
+                "properties": {
+                    "SEARCH_FIELD": {
+                        "type": "string",
+                        "title": "Search Field"
+                    },
+                    "SEARCH_TYPE": {
+                        "type": "string",
+                        "const": "WILDCARD_NOT",
+                        "title": "Search Type"
+                    },
+                    "SEARCH_VALUE": {
+                        "type": "string",
+                        "title": "Search Value"
+                    }
+                },
+                "type": "object",
+                "required": [
+                    "SEARCH_FIELD",
+                    "SEARCH_TYPE",
+                    "SEARCH_VALUE"
+                ],
+                "title": "WILDCARD_NOT",
+                "x-stoplight": {
+                    "id": "t3ntsk386ytxg"
+                }
+            }
+        }
+    }
+}

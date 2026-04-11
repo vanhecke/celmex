@@ -1,0 +1,2348 @@
+{
+    "openapi": "3.0.2",
+    "info": {
+        "contact": {
+            "email": "docs-cortex@paloaltonetworks.com",
+            "name": "Cortex Documentation Team",
+            "url": "https://docs-cortex.paloaltonetworks.com/p/"
+        },
+        "title": "Cortex Platform IAM APIs",
+        "description": "Identity and Access Management (IAM) APIs for the Cortex platform. These APIs enable programmatic management of roles, user groups, users, API keys, and scope-based access control (SBAC) configurations. With these endpoints, you can create, read, update, and delete IAM entities, manage permissions and access controls, and configure security scopes for users, groups, and API keys. These APIs are intended to be accessed via API keys. Therefore, the key must have the RBAC permission 'access_management_view' for list & read operations and permission 'access_management_action' for create, edit, & delete operations.",
+        "version": "Cortex XSIAM 3.4"
+    },
+    "servers": [
+        {
+            "url": "https://api-{{fqdn}}"
+        }
+    ],
+    "tags": [
+        {
+            "name": "API Keys",
+            "description": "Operations for managing API keys including retrieving and editing API key configurations."
+        },
+        {
+            "name": "Roles",
+            "description": "Operations for managing roles including creation, editing, deletion, and listing roles."
+        },
+        {
+            "name": "Scopes",
+            "description": "Operations for managing Scope-Based Access Control (SBAC) configurations for users, groups, and API keys."
+        },
+        {
+            "name": "User",
+            "description": "Operations for managing users including listing users and editing user configurations."
+        },
+        {
+            "name": "User Groups",
+            "description": "Operations for managing user groups including creation, editing, deletion, and listing user groups."
+        }
+    ],
+    "paths": {
+        "/platform/iam/v1/role": {
+            "get": {
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "List all roles",
+                "description": "This endpoint retrieves a list of roles and returns their attributes. This API does not list permissions for said roles. To receive that information, please leverage the existing Get Roles API (https://docs-cortex.paloaltonetworks.com/r/Cortex-XSIAM-REST-API/Get-Roles). Note: 'role_id' refers to the immutable role ID, while 'pretty_name' refers to the display name.",
+                "operationId": "listRoles",
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved roles",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "metadata": {
+                                            "$ref": "#/components/schemas/Metadata"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                },
+                                "example": {
+                                    "data": [
+                                        {
+                                            "role_id": "test_role_01",
+                                            "pretty_name": "Test Role Pretty Name 01",
+                                            "description": "Complete description",
+                                            "is_custom": true,
+                                            "created_by": "User 01",
+                                            "created_ts": 1661171650679,
+                                            "updated_ts": 1661171650679
+                                        },
+                                        {
+                                            "role_id": "test_role_02",
+                                            "pretty_name": "Test Role Pretty Name 02",
+                                            "description": "Complete description",
+                                            "is_custom": true,
+                                            "created_by": "User 02",
+                                            "created_ts": 1661171650679,
+                                            "updated_ts": 1661171650679
+                                        }
+                                    ],
+                                    "metadata": {
+                                        "total_count": 2
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/UnauthorizedImproperPermissions"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalError"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "Create a new role",
+                "description": "To identify all potential permissions that can be entered into the 'component_permissions' field, please utilize the 'GET /platform/iam/v1/role/permission-config' endpoint and utilize the 'view_name' and 'action_name' properties. Note: if you input an 'action' permission, then the relevant 'view' permission will be added for you. There will also be checks done on sub-permissions, ensuring that the main 'action' permissions are present as well. The available datasets can also be found by utilizing the 'GET /platform/iam/v1/role/permission-config' endpoint. Any dataset related permissions are not permissible in the 'component_permissions' field (an error will be thrown). The 'permissions' field in the entry for 'dataset_permissions' refers to dataset names for said dataset category.It is important to note that the 'access_all' field will only grant the role access to all datasets in said category that the API key has access to.",
+                "operationId": "createRole",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RoleCreateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "$ref": "#/components/responses/RoleCreatedSuccess"
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/RoleCreatedBadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/UnauthorizedImproperPermissions"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalError"
+                    }
+                }
+            }
+        },
+        "/platform/iam/v1/role/{role_id}": {
+            "delete": {
+                "tags": [
+                    "Roles"
+                ],
+                "parameters": [
+                    {
+                        "name": "role_id",
+                        "in": "path",
+                        "description": "Full role id of the custom role",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "summary": "Delete an existing role",
+                "description": "Delete an existing Role",
+                "operationId": "deleteRole",
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/RoleDeletedSuccess"
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/RoleDeletedBadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/UnauthorizedImproperPermissions"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalError"
+                    }
+                }
+            }
+        },
+        "/platform/iam/v1/role/permission-config": {
+            "get": {
+                "tags": [
+                    "Roles"
+                ],
+                "summary": "List all permission configs",
+                "description": "Returns the current list of permissions available for the specified tenant. \nEach permission includes:\n- **name:** Display name of the permission as shown in the UI.  \n- **view_name:** Permission key for the \"View\" option, used in role creation APIs.  \n- **action_name:** Permission key for the \"View/Edit\" option, used in role creation APIs.  \n\n**Intended use:**  Use this endpoint to identify the correct permission keys corresponding to the display names visible in the UI.  \nNote - The response mirrors how permissions are organized and displayed in the UI (by category and subcategory).",
+                "operationId": "listPermissionConfigs",
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved permission configs",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "metadata": {
+                                            "$ref": "#/components/schemas/Metadata"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                },
+                                "example": {
+                                    "data": {
+                                        "rbac_permissions": [
+                                            {
+                                                "category_name": "Dashboards & Reports",
+                                                "sub_categories": [
+                                                    {
+                                                        "sub_category_name": null,
+                                                        "permissions": [
+                                                            {
+                                                                "name": "Dashboards",
+                                                                "view_name": "dashboard_view",
+                                                                "action_name": "dashboard_action",
+                                                                "sub_permissions": []
+                                                            },
+                                                            {
+                                                                "name": "Reports",
+                                                                "view_name": "reports_view",
+                                                                "action_name": "reports_action",
+                                                                "sub_permissions": []
+                                                            }
+                                                        ]
+                                                    }
+                                                ]
+                                            },
+                                            {
+                                                "category_name": "Investigation & Response",
+                                                "sub_categories": [
+                                                    {
+                                                        "sub_category_name": "Search",
+                                                        "permissions": [
+                                                            {
+                                                                "name": "Query Center",
+                                                                "view_name": "investigation_query_view",
+                                                                "action_name": "investigation_query_action",
+                                                                "sub_permissions": []
+                                                            }
+                                                        ]
+                                                    },
+                                                    {
+                                                        "sub_category_name": "Response",
+                                                        "permissions": [
+                                                            {
+                                                                "name": "Action Center",
+                                                                "view_name": "actions_center",
+                                                                "action_name": "actions_center_action",
+                                                                "sub_permissions": [
+                                                                    {
+                                                                        "action_name": "isolate",
+                                                                        "name": "Isolate"
+                                                                    },
+                                                                    {
+                                                                        "action_name": "quarantine",
+                                                                        "name": "Quarantine"
+                                                                    }
+                                                                ]
+                                                            }
+                                                        ]
+                                                    }
+                                                ]
+                                            }
+                                        ],
+                                        "datasetGroups": [
+                                            {
+                                                "datasets": [
+                                                    "alerts",
+                                                    "cases",
+                                                    "endpoints",
+                                                    "incidents"
+                                                ],
+                                                "dataset_category": "System"
+                                            },
+                                            {
+                                                "datasets": [],
+                                                "dataset_category": "Lookup"
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/UnauthorizedImproperPermissions"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalError"
+                    }
+                }
+            }
+        },
+        "/platform/iam/v1/user-group": {
+            "get": {
+                "tags": [
+                    "User Groups"
+                ],
+                "summary": "List all user groups",
+                "description": "This endpoint retrieves a list of user groups and returns their attributes. For possible 'group_type' values, please refer to the enum documentation for 'GroupType'. Also, 'nested_groups' refers to the list of direct child groups of the given user group. Similarly, 'idp_groups' refers to the identifiers of associated identity provider groups to the given user group.",
+                "operationId": "listUserGroups",
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved user groups",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "metadata": {
+                                            "$ref": "#/components/schemas/Metadata"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                },
+                                "example": {
+                                    "data": [
+                                        {
+                                            "group_id": "test_group1",
+                                            "group_name": "Group2",
+                                            "description": null,
+                                            "role_id": "role_name01",
+                                            "pretty_role_name": "Role Name 01",
+                                            "created_by": "user1@test.com",
+                                            "created_ts": 1661170832341,
+                                            "updated_ts": 1661171650679,
+                                            "users": [
+                                                "user1@test.com",
+                                                "user2@test.com",
+                                                "user3@test.com",
+                                                "user4@test.com",
+                                                "user5@test.com"
+                                            ],
+                                            "group_type": "custom",
+                                            "nested_groups": [
+                                                {
+                                                    "group_id": "abc_123",
+                                                    "group_name": "child-group-name1"
+                                                }
+                                            ],
+                                            "idp_groups": [
+                                                "test_idp_group_name"
+                                            ]
+                                        }
+                                    ],
+                                    "metadata": {
+                                        "total_count": 1
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/UnauthorizedImproperPermissions"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalError"
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "User Groups"
+                ],
+                "summary": "Create a new user group",
+                "description": "This endpoint creates a new user group with the specified configuration. You can assign a role, add users, configure nested groups, and link identity provider groups. All fields except 'group_name' are optional.",
+                "operationId": "createUserGroup",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UserGroupCreateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "$ref": "#/components/responses/UserGroupCreatedSuccess"
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/UserGroupCreatedBadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/UnauthorizedImproperPermissions"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalError"
+                    }
+                }
+            }
+        },
+        "/platform/iam/v1/user-group/{group_id}": {
+            "patch": {
+                "tags": [
+                    "User Groups"
+                ],
+                "summary": "Edit an existing user group",
+                "description": "This endpoint allows modification of an existing user group by providing the group_id in the path and the update details in the request body. Only specified fields will be updated. Please note that to remove attributes, you must provide either an empty string or empty list as the value of the respective field in the request body.",
+                "operationId": "editUserGroup",
+                "parameters": [
+                    {
+                        "name": "group_id",
+                        "in": "path",
+                        "description": "Full user group id",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "7f8a9b2c-4d5e-4f6a-8b9c-1d2e3f4a5b6c_123"
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UserGroupEditRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/UserGroupEditedSuccess"
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/UserGroupEditedBadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/UnauthorizedImproperPermissions"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalError"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "User Groups"
+                ],
+                "operationId": "deleteUserGroup",
+                "parameters": [
+                    {
+                        "name": "group_id",
+                        "in": "path",
+                        "description": "Full user group id",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "example": "7f8a9b2c-4d5e-4f6a-8b9c-1d2e3f4a5b6c_123"
+                    }
+                ],
+                "summary": "Delete an existing user group",
+                "description": "Delete an existing user group. Note: upon deletion of a user group, its nested groups are not deleted; the relationships are simply removed.",
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/UserGroupDeletedSuccess"
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/UserGroupDeletedBadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/UnauthorizedImproperPermissions"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalError"
+                    }
+                }
+            }
+        },
+        "/platform/iam/v1/scope/{entity_type}/{entity_id}": {
+            "get": {
+                "tags": [
+                    "Scopes"
+                ],
+                "summary": "Retrieve an existing scope",
+                "description": "This API endpoint allows retrieving the scope details for a specific entity type and entity ID. For possible 'mode' and 'entity_type' values, please refer to the enum documentation for 'ModeType' and 'EntityType'.",
+                "operationId": "getScope",
+                "parameters": [
+                    {
+                        "name": "entity_type",
+                        "in": "path",
+                        "description": "Full name of the entity's type",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/EntityType"
+                        }
+                    },
+                    {
+                        "name": "entity_id",
+                        "in": "path",
+                        "description": "Full id of the entity",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved scope",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "metadata": {
+                                            "$ref": "#/components/schemas/Metadata"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                },
+                                "example": {
+                                    "data": {
+                                        "assets": {
+                                            "mode": "scope",
+                                            "asset_groups": [
+                                                {
+                                                    "asset_group_id": 1,
+                                                    "asset_group_name": "Asset Test Group 1"
+                                                },
+                                                {
+                                                    "asset_group_id": 2,
+                                                    "asset_group_name": "Asset Test Group 2"
+                                                },
+                                                {
+                                                    "asset_group_id": 3,
+                                                    "asset_group_name": "Asset Test Group 3"
+                                                }
+                                            ]
+                                        },
+                                        "datasets_rows": {
+                                            "default_filter_mode": "no_scope",
+                                            "filters": [
+                                                {
+                                                    "dataset": "dataset_1",
+                                                    "filter": "_collector_name = filter_collector_1"
+                                                },
+                                                {
+                                                    "dataset": "dataset_2",
+                                                    "filter": "_collector_name = filter_collector_2"
+                                                }
+                                            ]
+                                        },
+                                        "endpoints": {
+                                            "endpoint_groups": {
+                                                "mode": "scope",
+                                                "tags": [
+                                                    {
+                                                        "tag_id": "EG:1",
+                                                        "tag_name": "test-eg-1"
+                                                    }
+                                                ]
+                                            },
+                                            "endpoint_tags": {
+                                                "mode": "any",
+                                                "tags": [
+                                                    {
+                                                        "tag_id": null,
+                                                        "tag_name": "Any"
+                                                    }
+                                                ]
+                                            }
+                                        },
+                                        "cases_issues": {
+                                            "mode": "scope",
+                                            "tags": [
+                                                {
+                                                    "tag_id": "DOM:4",
+                                                    "tag_name": "Health"
+                                                },
+                                                {
+                                                    "tag_id": "DOM:3",
+                                                    "tag_name": "IT"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/UnauthorizedImproperPermissions"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalError"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Scopes"
+                ],
+                "summary": "Edit an existing scope",
+                "operationId": "editScope",
+                "description": "This API endpoint allows editing the scope details for a specific entity type and entity ID. For possible 'mode' and 'entity_type' values, please refer to the enum documentation for 'ModeType' and 'EntityType'. Please note that the 'datasets_rows' field can only be passed in to the request body if the dataset scope config is enabled.",
+                "parameters": [
+                    {
+                        "name": "entity_type",
+                        "in": "path",
+                        "description": "Full name of the entity's type",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/components/schemas/EntityType"
+                        }
+                    },
+                    {
+                        "name": "entity_id",
+                        "in": "path",
+                        "description": "Full id of the entity",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ScopeEditRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/ScopeEditedSuccess"
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/ScopeEditedBadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/UnauthorizedImproperPermissions"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalError"
+                    }
+                }
+            }
+        },
+        "/platform/iam/v1/user": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "List all users",
+                "description": "This endpoint retrieves a list of all users and their respective properties.  Note: the 'role_name' field refers to the 'pretty_name' attribute from the Roles APIs and the direct role assigned to the user, not roles inherited through groups.",
+                "operationId": "listUsers",
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved users",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "metadata": {
+                                            "$ref": "#/components/schemas/Metadata"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                },
+                                "example": {
+                                    "data": [
+                                        {
+                                            "user_email": "user1@test.com",
+                                            "user_first_name": "<first name>",
+                                            "user_last_name": "<last name>",
+                                            "phone_number": "408-753-4000",
+                                            "role_name": "Investigator",
+                                            "status": "Active",
+                                            "last_logged_in": 1640024700241,
+                                            "is_hidden": true,
+                                            "user_type": "CSP",
+                                            "groups": [
+                                                {
+                                                    "group_id": 123,
+                                                    "group_name": "usergroup1"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "user_email": "user2@test.com",
+                                            "user_first_name": "<first name>",
+                                            "user_last_name": "<last name>",
+                                            "phone_number": "408-753-4000",
+                                            "status": "Active",
+                                            "role_name": "Investigator",
+                                            "last_logged_in": 1640024700241,
+                                            "is_hidden": true,
+                                            "user_type": "CSP",
+                                            "groups": [
+                                                {
+                                                    "group_id": 123,
+                                                    "group_name": "usergroup2"
+                                                }
+                                            ]
+                                        }
+                                    ],
+                                    "metadata": {
+                                        "total_count": 2
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/UnauthorizedImproperPermissions"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalError"
+                    }
+                }
+            }
+        },
+        "/platform/iam/v1/user/{user_email}": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Get user",
+                "description": "This endpoint retrieves a user and its respective properties. Note: the 'role_name' field refers to the 'pretty_name' attribute from the Roles APIs, not the unique role identifier.",
+                "parameters": [
+                    {
+                        "name": "user_email",
+                        "in": "path",
+                        "description": "Full email of the user",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "operationId": "getUserByEmail",
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved user",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "metadata": {
+                                            "$ref": "#/components/schemas/Metadata"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                },
+                                "example": {
+                                    "data": {
+                                        "user_email": "user@test.com",
+                                        "user_first_name": "<first name>",
+                                        "user_last_name": "<last name>",
+                                        "phone_number": "408-753-4000",
+                                        "status": "Active",
+                                        "role_name": "Account Admin",
+                                        "last_logged_in": 1640024700241,
+                                        "is_hidden": true,
+                                        "user_type": "CSP",
+                                        "groups": [
+                                            {
+                                                "group_id": "unique_group_id",
+                                                "group_name": "usergroup"
+                                            }
+                                        ]
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/UnauthorizedImproperPermissions"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalError"
+                    }
+                }
+            },
+            "patch": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Edit an existing user",
+                "description": "This endpoint allows updating various user details. Please note that you must pass an empty string for the 'role_id' field if you are attempting to remove a role from a user. For the 'user_groups' field, please pass an empty list to remove user group associations for the provided user.",
+                "operationId": "editUser",
+                "parameters": [
+                    {
+                        "name": "user_email",
+                        "in": "path",
+                        "description": "Full email of the user",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UserEditRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/UserEditedSuccess"
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/UserEditedBadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/UnauthorizedImproperPermissions"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalError"
+                    }
+                }
+            }
+        },
+        "/platform/iam/v1/api-key/{api_key_id}": {
+            "get": {
+                "tags": [
+                    "API Keys"
+                ],
+                "summary": "Get API Key",
+                "description": "This endpoint retrieves an API key and its respective properties. Note: the 'roles' field refers to the 'pretty_name' attributes from the Roles APIs, not the unique role identifiers. For possible 'security_level' values, please refer to the enum documentation for 'SecurityLevel'.",
+                "parameters": [
+                    {
+                        "name": "api_key_id",
+                        "in": "path",
+                        "description": "Full API key ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "operationId": "getApiKeyById",
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved API key",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "metadata": {
+                                            "$ref": "#/components/schemas/Metadata"
+                                        }
+                                    },
+                                    "required": [
+                                        "data"
+                                    ]
+                                },
+                                "example": {
+                                    "data": {
+                                        "id": 123,
+                                        "creation_time": 1640024700241,
+                                        "created_by": "test user",
+                                        "user_name": "user_name",
+                                        "roles": [
+                                            "role 01"
+                                        ],
+                                        "security_level": "standard",
+                                        "comment": "useful comment",
+                                        "expiration": 1640024700241
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/ApiKeyFetchedBadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/UnauthorizedImproperPermissions"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalError"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "API Keys"
+                ],
+                "summary": "Edit an API key",
+                "operationId": "editAPIKey",
+                "description": "This endpoint allows for the editing of an existing API key. For possible 'security_level' values, please refer to the enum documentation for 'SecurityLevel'.",
+                "parameters": [
+                    {
+                        "name": "api_key_id",
+                        "in": "path",
+                        "description": "Full API key ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ApiKeyEditRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/ApiKeyEditedSuccess"
+                    },
+                    "400": {
+                        "$ref": "#/components/responses/ApiKeyEditedBadRequest"
+                    },
+                    "401": {
+                        "$ref": "#/components/responses/Unauthorized"
+                    },
+                    "403": {
+                        "$ref": "#/components/responses/UnauthorizedImproperPermissions"
+                    },
+                    "500": {
+                        "$ref": "#/components/responses/InternalError"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "RoleCreateRequest": {
+                "type": "object",
+                "required": [
+                    "request_data"
+                ],
+                "properties": {
+                    "request_data": {
+                        "type": "object",
+                        "required": [
+                            "component_permissions",
+                            "pretty_name"
+                        ],
+                        "properties": {
+                            "component_permissions": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "description": "List of component permissions for the role. Possible values can be found by using the permission configs API and referring to the `rbac_permissions` field.",
+                                "minItems": 1
+                            },
+                            "dataset_permissions": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object"
+                                },
+                                "description": "Optional list of dataset permissions. This must be a list of JSONs. The layout for this JSON can be found under the 'DatasetPermission' schema . Note: possible dataset values can be found by using the permission configs API and referring to the `datasetGroups` field.",
+                                "nullable": true
+                            },
+                            "pretty_name": {
+                                "type": "string",
+                                "description": "Name of the role",
+                                "minLength": 1
+                            },
+                            "description": {
+                                "type": "string",
+                                "description": "Optional description of the role",
+                                "nullable": true
+                            }
+                        }
+                    }
+                },
+                "additionalProperties": false,
+                "example": {
+                    "request_data": {
+                        "component_permissions": [
+                            "rules_action",
+                            "wf_verdict_change"
+                        ],
+                        "dataset_permissions": [
+                            {
+                                "category": "Lookup",
+                                "access_all": true,
+                                "permissions": []
+                            }
+                        ],
+                        "pretty_name": "CustomRoleName",
+                        "description": "A custom role with specific permissions"
+                    }
+                }
+            },
+            "UserGroupCreateRequest": {
+                "type": "object",
+                "required": [
+                    "request_data"
+                ],
+                "properties": {
+                    "request_data": {
+                        "type": "object",
+                        "required": [
+                            "group_name"
+                        ],
+                        "properties": {
+                            "group_name": {
+                                "type": "string",
+                                "description": "Name of the user group",
+                                "minLength": 1
+                            },
+                            "role_id": {
+                                "type": "string",
+                                "description": "Unique identifier of the role",
+                                "nullable": true
+                            },
+                            "description": {
+                                "type": "string",
+                                "description": "Optional description of the user group",
+                                "nullable": true
+                            },
+                            "users": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "description": "List of users for the user group",
+                                "nullable": true
+                            },
+                            "nested_group_ids": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "description": "List of nested groups",
+                                "nullable": true
+                            },
+                            "idp_groups": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "description": "List of idp groups",
+                                "nullable": true
+                            }
+                        }
+                    }
+                },
+                "additionalProperties": false,
+                "example": {
+                    "request_data": {
+                        "group_name": "test_group_name",
+                        "role_id": "role_name_123",
+                        "description": "Test Description",
+                        "users": [
+                            "user1@test.com"
+                        ],
+                        "nested_group_ids": [
+                            "7f3o5b2c-4d5e-4f6a-8b9c-1d3o5f4a5b6c_123"
+                        ],
+                        "idp_groups": [
+                            "test idp group"
+                        ]
+                    }
+                }
+            },
+            "UserGroupEditRequest": {
+                "type": "object",
+                "required": [
+                    "request_data"
+                ],
+                "properties": {
+                    "request_data": {
+                        "type": "object",
+                        "properties": {
+                            "group_name": {
+                                "type": "string",
+                                "description": "Name of the user group",
+                                "nullable": true
+                            },
+                            "role_id": {
+                                "type": "string",
+                                "description": "Unique identifier of the role",
+                                "nullable": true
+                            },
+                            "description": {
+                                "type": "string",
+                                "description": "Optional description of the user group",
+                                "nullable": true
+                            },
+                            "users": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "description": "List of users for the user group",
+                                "nullable": true
+                            },
+                            "nested_group_ids": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "description": "List of nested groups",
+                                "nullable": true
+                            },
+                            "idp_groups": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "description": "List of idp groups",
+                                "nullable": true
+                            }
+                        }
+                    }
+                },
+                "additionalProperties": false,
+                "example": {
+                    "request_data": {
+                        "group_name": "test_group_name",
+                        "role_id": "role_name_123",
+                        "description": "Test Updated Description",
+                        "users": [
+                            "test user"
+                        ],
+                        "nested_group_ids": [
+                            "7f3o5b2c-4d5e-4f6a-8b9c-1d3o5f4a5b6c_123"
+                        ],
+                        "idp_groups": [
+                            "test idp group"
+                        ]
+                    }
+                }
+            },
+            "ScopeEditRequest": {
+                "type": "object",
+                "required": [
+                    "request_data"
+                ],
+                "properties": {
+                    "request_data": {
+                        "type": "object",
+                        "properties": {
+                            "tags_scope": {
+                                "type": "object",
+                                "description": "Definition of tags scope configuration",
+                                "nullable": true
+                            },
+                            "tagless_scope": {
+                                "type": "object",
+                                "description": "Definition of tagless scope configuration",
+                                "nullable": true
+                            }
+                        }
+                    }
+                },
+                "additionalProperties": false,
+                "example": {
+                    "request_data": {
+                        "endpoints": {
+                            "endpoint_groups": {
+                                "names": [
+                                    "test-eg-1"
+                                ],
+                                "mode": "scope"
+                            },
+                            "endpoint_tags": {
+                                "names": [],
+                                "mode": "any"
+                            }
+                        },
+                        "cases_issues": {
+                            "mode": "scope",
+                            "names": [
+                                "Health",
+                                "IT"
+                            ]
+                        },
+                        "assets": {
+                            "mode": "scope",
+                            "asset_group_ids": [
+                                1,
+                                2,
+                                3
+                            ]
+                        },
+                        "datasets_rows": {
+                            "filters": [
+                                {
+                                    "dataset": "test-dataset-1",
+                                    "filter": "_collector_name = bu2_collector"
+                                },
+                                {
+                                    "dataset": "test-dataset-2",
+                                    "filter": "_collector_name = bu2_collector"
+                                }
+                            ],
+                            "default_filter_mode": "no_scope"
+                        }
+                    }
+                }
+            },
+            "UserEditRequest": {
+                "type": "object",
+                "required": [
+                    "request_data"
+                ],
+                "properties": {
+                    "request_data": {
+                        "type": "object",
+                        "properties": {
+                            "user_first_name": {
+                                "type": "string",
+                                "description": "User's first name",
+                                "nullable": true
+                            },
+                            "user_last_name": {
+                                "type": "string",
+                                "description": "User's last name",
+                                "nullable": true
+                            },
+                            "role_id": {
+                                "type": "string",
+                                "description": "User's assigned role. Note: this refers to the 'role_id' attribute from the Role APIs (the unique role identifier)",
+                                "nullable": true
+                            },
+                            "phone_number": {
+                                "type": "string",
+                                "description": "User's phone number",
+                                "nullable": true
+                            },
+                            "status": {
+                                "type": "string",
+                                "description": "User's status",
+                                "nullable": true
+                            },
+                            "is_hidden": {
+                                "type": "boolean",
+                                "description": "User's hidden status",
+                                "nullable": true
+                            },
+                            "user_groups": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "description": "User's assigned groups",
+                                "nullable": true
+                            }
+                        }
+                    }
+                },
+                "additionalProperties": false,
+                "example": {
+                    "request_data": {
+                        "phone_number": "408-753-4000",
+                        "status": "Active",
+                        "role_id": "role_name_123",
+                        "is_hidden": true,
+                        "user_groups": [
+                            "user_groups_123"
+                        ]
+                    }
+                }
+            },
+            "ApiKeyEditRequest": {
+                "type": "object",
+                "required": [
+                    "request_data"
+                ],
+                "properties": {
+                    "request_data": {
+                        "type": "object",
+                        "required": [
+                            "roles",
+                            "security_level"
+                        ],
+                        "properties": {
+                            "roles": {
+                                "type": "array",
+                                "items": {
+                                    "type": "string"
+                                },
+                                "description": "API Key's assigned roles. Note: this refers to the 'role_id' attributes from the Role APIs (the unique role identifiers)"
+                            },
+                            "security_level": {
+                                "type": "string",
+                                "description": "API Key's security level"
+                            },
+                            "comment": {
+                                "type": "string",
+                                "description": "API Key's comment",
+                                "nullable": true
+                            }
+                        }
+                    }
+                },
+                "additionalProperties": false,
+                "example": {
+                    "request_data": {
+                        "roles": [
+                            "role_name_123"
+                        ],
+                        "security_level": "standard",
+                        "comment": "useful comment"
+                    }
+                }
+            },
+            "DatasetPermission": {
+                "type": "object",
+                "required": [
+                    "category"
+                ],
+                "properties": {
+                    "category": {
+                        "type": "string",
+                        "description": "The dataset category name. Possible values can be found in the permission configs response."
+                    },
+                    "access_all": {
+                        "type": "boolean",
+                        "description": "If this flag is enabled, it grants access to all datasets associated with the specified category.",
+                        "nullable": true
+                    },
+                    "permissions": {
+                        "type": "array",
+                        "description": "This field should contain specific names of datasets under this category that the role will have access to.",
+                        "nullable": true
+                    }
+                },
+                "additionalProperties": false,
+                "example": {
+                    "category": "System",
+                    "access_all": false,
+                    "permissions": []
+                }
+            },
+            "GroupType": {
+                "type": "string",
+                "description": "The type of group - Possible values: custom (Refers to a user group that is created directly on the UI), ad_type (Refers to a user group that is imported and synchronized from Azure Active Directory)",
+                "enum": [
+                    "custom",
+                    "ad_type"
+                ]
+            },
+            "SecurityLevel": {
+                "type": "string",
+                "description": "The chosen security level - Possible values: standard (Refers to 'standard' security level that is offered from the UI when creating an API key), Advanced (Refers to 'advanced' security level that is offered from the UI when creating an API key)",
+                "enum": [
+                    "standard",
+                    "advanced"
+                ]
+            },
+            "EntityType": {
+                "type": "string",
+                "description": "The type of entity - Possible values: user (Signifies that the entity is a user), usergroup (Signifies that the entity is a custom or AD user group), apikey (Signifies that the entity is an API key)",
+                "enum": [
+                    "user",
+                    "user-group",
+                    "api-key"
+                ]
+            },
+            "ModeType": {
+                "type": "string",
+                "description": "The type of mode - Possible values: no_scope (Signifies no access to resources under a domain), see_all (Signifies full access to resources under a domain), scope (Signifies access only to the resources provided under the 'names' field for a domain), any (Signifies full access to resources with any tags for a domain. It is only allowed for 'endpoint_groups' and 'endpoint_tags'). Note: Datasets can only take 'no_scope' or 'see_all' values for the 'default_mode' attribute. For datasets, 'default_mode' signifies the default behavior for the datasets not present in the dataset filter list. ",
+                "enum": [
+                    "no_scope",
+                    "see_all",
+                    "scope",
+                    "any"
+                ]
+            },
+            "Metadata": {
+                "type": "object",
+                "description": "Metadata for the response",
+                "additionalProperties": true
+            }
+        },
+        "securitySchemes": {
+            "Authorization": {
+                "type": "apiKey",
+                "name": "x-api-key",
+                "in": "header"
+            },
+            "x-xdr-auth-id": {
+                "type": "apiKey",
+                "name": "x-api-key-id",
+                "in": "header"
+            }
+        },
+        "responses": {
+            "RoleCreatedSuccess": {
+                "description": "Role created successfully",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "description": "Success message indicating the role was created"
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            },
+                            "required": [
+                                "data"
+                            ]
+                        },
+                        "example": {
+                            "data": {
+                                "message": "role_id test_role01 created successfully."
+                            }
+                        }
+                    }
+                }
+            },
+            "RoleCreatedBadRequest": {
+                "description": "Bad request for role create call",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "err_msg": {
+                                            "type": "string",
+                                            "description": "Error message describing the issue"
+                                        },
+                                        "metadata": {
+                                            "type": "object",
+                                            "properties": {
+                                                "err_extra": {
+                                                    "type": "string",
+                                                    "description": "Additional error details"
+                                                },
+                                                "err_code": {
+                                                    "type": "integer",
+                                                    "description": "HTTP error code"
+                                                }
+                                            },
+                                            "required": [
+                                                "err_extra",
+                                                "err_code"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "err_msg",
+                                        "metadata"
+                                    ]
+                                }
+                            },
+                            "required": [
+                                "data"
+                            ]
+                        },
+                        "example": {
+                            "data": {
+                                "err_msg": "The request contains invalid or missing parameters.",
+                                "metadata": {
+                                    "err_extra": "The role name CustomRoleName is already utilized by another role.",
+                                    "err_code": 400
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "RoleEditedSuccess": {
+                "description": "Role edited successfully",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "description": "Success message indicating the role was edited"
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            },
+                            "required": [
+                                "data"
+                            ]
+                        },
+                        "example": {
+                            "data": {
+                                "message": "role_id test_role01 updated successfully."
+                            }
+                        }
+                    }
+                }
+            },
+            "RoleEditedBadRequest": {
+                "description": "Bad request for role edit call",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "err_msg": {
+                                            "type": "string",
+                                            "description": "Error message describing the issue"
+                                        },
+                                        "metadata": {
+                                            "type": "object",
+                                            "properties": {
+                                                "err_extra": {
+                                                    "type": "string",
+                                                    "description": "Additional error details"
+                                                },
+                                                "err_code": {
+                                                    "type": "integer",
+                                                    "description": "HTTP error code"
+                                                }
+                                            },
+                                            "required": [
+                                                "err_extra",
+                                                "err_code"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "err_msg",
+                                        "metadata"
+                                    ]
+                                }
+                            },
+                            "required": [
+                                "data"
+                            ]
+                        },
+                        "example": {
+                            "data": {
+                                "err_msg": "The request contains invalid or missing parameters.",
+                                "metadata": {
+                                    "err_extra": "The role name test_role_01 is already utilized by another role.",
+                                    "err_code": 400
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "RoleDeletedSuccess": {
+                "description": "Role deleted successfully",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "description": "Success message indicating the role was deleted"
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            },
+                            "required": [
+                                "data"
+                            ]
+                        },
+                        "example": {
+                            "data": {
+                                "message": "role_id test_role01 deleted successfully."
+                            }
+                        }
+                    }
+                }
+            },
+            "RoleDeletedBadRequest": {
+                "description": "Bad request for role delete call",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "err_msg": {
+                                            "type": "string",
+                                            "description": "Error message describing the issue"
+                                        },
+                                        "metadata": {
+                                            "type": "object",
+                                            "properties": {
+                                                "err_extra": {
+                                                    "type": "string",
+                                                    "description": "Additional error details"
+                                                },
+                                                "err_code": {
+                                                    "type": "integer",
+                                                    "description": "HTTP error code"
+                                                }
+                                            },
+                                            "required": [
+                                                "err_extra",
+                                                "err_code"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "err_msg",
+                                        "metadata"
+                                    ]
+                                }
+                            },
+                            "required": [
+                                "data"
+                            ]
+                        },
+                        "example": {
+                            "data": {
+                                "err_msg": "The request contains invalid or missing parameters.",
+                                "metadata": {
+                                    "err_extra": "Role name cannot be empty / Role name provided is not valid / Non-custom and account-level roles cannot be deleted / Role name provided is assigned to a user or user group and therefore cannot be deleted.",
+                                    "err_code": 400
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "UserGroupCreatedSuccess": {
+                "description": "User Group created successfully",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "description": "Success message indicating the user group was created"
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            },
+                            "required": [
+                                "data"
+                            ]
+                        },
+                        "example": {
+                            "data": {
+                                "message": "user group with group id 123-456 created successfully"
+                            }
+                        }
+                    }
+                }
+            },
+            "UserGroupCreatedBadRequest": {
+                "description": "Bad request for user group create call",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "err_msg": {
+                                            "type": "string",
+                                            "description": "Error message describing the issue"
+                                        },
+                                        "metadata": {
+                                            "type": "object",
+                                            "properties": {
+                                                "err_extra": {
+                                                    "type": "string",
+                                                    "description": "Additional error details"
+                                                },
+                                                "err_code": {
+                                                    "type": "integer",
+                                                    "description": "HTTP error code"
+                                                }
+                                            },
+                                            "required": [
+                                                "err_extra",
+                                                "err_code"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "err_msg",
+                                        "metadata"
+                                    ]
+                                }
+                            },
+                            "required": [
+                                "data"
+                            ]
+                        },
+                        "example": {
+                            "data": {
+                                "err_msg": "The request contains invalid or missing parameters.",
+                                "metadata": {
+                                    "err_extra": "This user group name is already being used in the tenant for existing_group_name.",
+                                    "err_code": 400
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "UserGroupEditedSuccess": {
+                "description": "User Group edited successfully",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "description": "Success message indicating the user group was edited"
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            },
+                            "required": [
+                                "data"
+                            ]
+                        },
+                        "example": {
+                            "data": {
+                                "message": "user group with group id 123-456 updated successfully"
+                            }
+                        }
+                    }
+                }
+            },
+            "UserGroupEditedBadRequest": {
+                "description": "Bad request for user group edit call",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "err_msg": {
+                                            "type": "string",
+                                            "description": "Error message describing the issue"
+                                        },
+                                        "metadata": {
+                                            "type": "object",
+                                            "properties": {
+                                                "err_extra": {
+                                                    "type": "string",
+                                                    "description": "Additional error details"
+                                                },
+                                                "err_code": {
+                                                    "type": "integer",
+                                                    "description": "HTTP error code"
+                                                }
+                                            },
+                                            "required": [
+                                                "err_extra",
+                                                "err_code"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "err_msg",
+                                        "metadata"
+                                    ]
+                                }
+                            },
+                            "required": [
+                                "data"
+                            ]
+                        },
+                        "example": {
+                            "data": {
+                                "err_msg": "The request contains invalid or missing parameters.",
+                                "metadata": {
+                                    "err_extra": "This user group name is already being used in the tenant for existing_group_name",
+                                    "err_code": 400
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "UserGroupDeletedSuccess": {
+                "description": "User Group deleted successfully",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "description": "Success message indicating the user group was deleted"
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            },
+                            "required": [
+                                "data"
+                            ]
+                        },
+                        "example": {
+                            "data": {
+                                "message": "user group with group id 7f8a9b2c-4d5e-4f6a-8b9c-1d2e3f4a5b6c_123 deleted successfully"
+                            }
+                        }
+                    }
+                }
+            },
+            "UserGroupDeletedBadRequest": {
+                "description": "Bad request for user group delete call",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "err_msg": {
+                                            "type": "string",
+                                            "description": "Error message describing the issue"
+                                        },
+                                        "metadata": {
+                                            "type": "object",
+                                            "properties": {
+                                                "err_extra": {
+                                                    "type": "string",
+                                                    "description": "Additional error details"
+                                                },
+                                                "err_code": {
+                                                    "type": "integer",
+                                                    "description": "HTTP error code"
+                                                }
+                                            },
+                                            "required": [
+                                                "err_extra",
+                                                "err_code"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "err_msg",
+                                        "metadata"
+                                    ]
+                                }
+                            },
+                            "required": [
+                                "data"
+                            ]
+                        },
+                        "example": {
+                            "data": {
+                                "err_msg": "The request contains invalid or missing parameters.",
+                                "metadata": {
+                                    "err_extra": "Could not find group for ['7f8a9b2c-4d5e-4f6a-8b9c-1d2e3f4a5b6c_123'] in tenant: tenant_name",
+                                    "err_code": 400
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "ScopeEditedSuccess": {
+                "description": "Scope edited successfully",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "description": "Success message indicating the scope was edited"
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            },
+                            "required": [
+                                "data"
+                            ]
+                        },
+                        "example": {
+                            "data": {
+                                "message": "Scope updated for user user@email.com successfully"
+                            }
+                        }
+                    }
+                }
+            },
+            "ScopeEditedBadRequest": {
+                "description": "Bad request for scope edit call",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "err_msg": {
+                                            "type": "string",
+                                            "description": "Error message describing the issue"
+                                        },
+                                        "metadata": {
+                                            "type": "object",
+                                            "properties": {
+                                                "err_extra": {
+                                                    "type": "string",
+                                                    "description": "Additional error details"
+                                                },
+                                                "err_code": {
+                                                    "type": "integer",
+                                                    "description": "HTTP error code"
+                                                }
+                                            },
+                                            "required": [
+                                                "err_extra",
+                                                "err_code"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "err_msg",
+                                        "metadata"
+                                    ]
+                                }
+                            },
+                            "required": [
+                                "data"
+                            ]
+                        },
+                        "example": {
+                            "data": {
+                                "err_msg": "The request contains invalid or missing parameters.",
+                                "metadata": {
+                                    "err_extra": "The scope name test_scope_01 does not exist.",
+                                    "err_code": 400
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "UserEditedSuccess": {
+                "description": "User edited successfully",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "description": "Success message indicating the user was edited"
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            },
+                            "required": [
+                                "data"
+                            ]
+                        },
+                        "example": {
+                            "data": {
+                                "message": "User updated successfully"
+                            }
+                        }
+                    }
+                }
+            },
+            "UserEditedBadRequest": {
+                "description": "Bad request for user edit call",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "err_msg": {
+                                            "type": "string",
+                                            "description": "Error message describing the issue"
+                                        },
+                                        "metadata": {
+                                            "type": "object",
+                                            "properties": {
+                                                "err_extra": {
+                                                    "type": "string",
+                                                    "description": "Additional error details"
+                                                },
+                                                "err_code": {
+                                                    "type": "integer",
+                                                    "description": "HTTP error code"
+                                                }
+                                            },
+                                            "required": [
+                                                "err_extra",
+                                                "err_code"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "err_msg",
+                                        "metadata"
+                                    ]
+                                }
+                            },
+                            "required": [
+                                "data"
+                            ]
+                        },
+                        "example": {
+                            "data": {
+                                "err_msg": "The request contains invalid or missing parameters.",
+                                "metadata": {
+                                    "err_extra": "No update performed. All fields are null or empty.",
+                                    "err_code": 400
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "ApiKeyFetchedBadRequest": {
+                "description": "Bad request for api key get call",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "err_msg": {
+                                            "type": "string",
+                                            "description": "Error message describing the issue"
+                                        },
+                                        "metadata": {
+                                            "type": "object",
+                                            "properties": {
+                                                "err_extra": {
+                                                    "type": "string",
+                                                    "description": "Additional error details"
+                                                },
+                                                "err_code": {
+                                                    "type": "integer",
+                                                    "description": "HTTP error code"
+                                                }
+                                            },
+                                            "required": [
+                                                "err_extra",
+                                                "err_code"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "err_msg",
+                                        "metadata"
+                                    ]
+                                }
+                            },
+                            "required": [
+                                "data"
+                            ]
+                        },
+                        "example": {
+                            "data": {
+                                "err_msg": "The request contains invalid or missing parameters.",
+                                "metadata": {
+                                    "err_extra": "Api Key fetch failed: api_key_id does not exist, id=1.",
+                                    "err_code": 400
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "ApiKeyEditedSuccess": {
+                "description": "API key edited successfully",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "description": "Success message indicating the API key was edited"
+                                        }
+                                    },
+                                    "required": [
+                                        "message"
+                                    ]
+                                }
+                            },
+                            "required": [
+                                "data"
+                            ]
+                        },
+                        "example": {
+                            "data": {
+                                "message": "API key updated successfully"
+                            }
+                        }
+                    }
+                }
+            },
+            "ApiKeyEditedBadRequest": {
+                "description": "Bad request for api key edit call",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "data": {
+                                    "type": "object",
+                                    "properties": {
+                                        "err_msg": {
+                                            "type": "string",
+                                            "description": "Error message describing the issue"
+                                        },
+                                        "metadata": {
+                                            "type": "object",
+                                            "properties": {
+                                                "err_extra": {
+                                                    "type": "string",
+                                                    "description": "Additional error details"
+                                                },
+                                                "err_code": {
+                                                    "type": "integer",
+                                                    "description": "HTTP error code"
+                                                }
+                                            },
+                                            "required": [
+                                                "err_extra",
+                                                "err_code"
+                                            ]
+                                        }
+                                    },
+                                    "required": [
+                                        "err_msg",
+                                        "metadata"
+                                    ]
+                                }
+                            },
+                            "required": [
+                                "data"
+                            ]
+                        },
+                        "example": {
+                            "data": {
+                                "err_msg": "The request contains invalid or missing parameters.",
+                                "metadata": {
+                                    "err_extra": "Invalid api_key_id",
+                                    "err_code": 400
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "BadRequest": {
+                "description": "Bad request",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string",
+                                    "example": "Invalid request data"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "Unauthorized": {
+                "description": "Unauthorized access",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "example": {
+                                "reply": {
+                                    "err_code": 401,
+                                    "err_msg": "Public API request unauthorized",
+                                    "err_extra": null
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "UnauthorizedImproperPermissions": {
+                "description": "Unauthorized access due to lack of sufficient permissions",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "reply": {
+                                    "type": "object",
+                                    "properties": {
+                                        "err_msg": {
+                                            "type": "string"
+                                        },
+                                        "err_extra": {
+                                            "type": "string"
+                                        },
+                                        "err_code": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "required": [
+                                        "err_msg",
+                                        "metadata"
+                                    ]
+                                }
+                            },
+                            "required": [
+                                "data"
+                            ],
+                            "example": {
+                                "data": {
+                                    "reply": {
+                                        "err_code": 403,
+                                        "err_msg": "Forbidden. Access was denied to this resource.",
+                                        "err_extra": "Insufficient permissions for api key"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "InternalError": {
+                "description": "Internal server error. A unified status for API communication type errors."
+            }
+        }
+    }
+}

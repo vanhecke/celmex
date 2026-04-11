@@ -1,0 +1,416 @@
+openapi: 3.0.3
+x-stoplight:
+  id: 9juhgm2ujs4tw
+info:
+  title: Get Asset Compliance Results API
+  description: |-
+    REST API for retrieving compliance results for an asset.
+
+    Required licenses: This feature is included with a Cortex XSIAM Premium license. It is also included with any other Cortex XSIAM product that has the Cloud Runtime Security or Cloud Posture Security add-ons.
+  version: 1.0.0
+  contact:
+    name: XDR Development Team
+servers:
+  - url: 'https://api-{fqdn}'
+    variables:
+      fqdn:
+        default: cortex.paloaltonetworks.com
+        description: fully qualified domain name for Cortex tenant
+paths:
+  /public_api/v1/compliance/get_asset:
+    post:
+      summary: Get asset compliance results
+      description: |-
+        Retrieve compliance standard and control results for a specific asset ID, with optional filtering, sorting and pagination.
+
+        Required params:
+        - `asset_id` (string) - The asset identifier
+        - `last_evaluation_time` (integer) - Unix timestamp in milliseconds for the evaluation time
+
+        **Filtering Support:**
+        - **String fields** (`standard`, `category`, `control`, `source`): `eq`, `neq`, `contains`, `not_contains`
+        - **Status fields** (`status`, `severity`): `eq`, `neq`
+        - Status valid values: [`FAILED`, `PASSED`, `NOT_ASSESSED`]
+        - Severity valid values: [`SEV_010_INFO`, `SEV_020_LOW`, `SEV_030_MEDIUM`, `SEV_040_HIGH`, `SEV_050_CRITICAL`]
+
+        **Sorting Support:**
+        - Available fields: `standard`, `category`, `control`, `severity`, `status`
+        - Sort orders: `asc`, `desc`
+        - Default: `standard` in ascending order
+
+        **Pagination:** (max number of elements is 100)
+      operationId: getAssetCompliance
+      tags:
+        - Control Findings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GetAssetComplianceRequest'
+            example:
+              request_data:
+                asset_id: eea3102e81bc8cf10b43168a7a1ff27cb539a7325428f3cd956240472335c6da
+                last_evaluation_time: 1763669115000
+                filters: []
+                sort: {}
+                search_from: 0
+                search_to: 100
+      responses:
+        '200':
+          description: Successfully retrieved control findings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssetComplianceResponse'
+              example:
+                reply:
+                  total_count: 5
+                  result_count: 5
+                  filter_count: 5
+                  assets:
+                    - STANDARD: Secure Controls Framework (SCF) v2024.2
+                      STANDARD_REVISION: '-3633352044114537559'
+                      CATEGORY: Continuous Monitoring
+                      CONTROL_REVISION: '5207648284675893530'
+                      CONTROL: 'MON-05.1:Real-Time Alerts of Event Logging Failure'
+                      SEVERITY: SEV_030_MEDIUM
+                      RULE_IDS:
+                        - ab0317ac-661a-4a7d-a28a-53f4fdf6d290
+                      LAST_EVALUATION_TIME: 1762718526
+                      STATUS: FAILED
+                      SOURCE: Finding
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      x-stoplight:
+        id: kxuo0cfg4wqxf
+components:
+  schemas:
+    GetAssetComplianceRequest:
+      type: object
+      description: 'Request payload for retrieving asset compliance data. Supports filtering, sorting, and pagination.'
+      required:
+        - request_data
+      properties:
+        request_data:
+          type: object
+          required:
+            - asset_id
+            - last_evaluation_time
+          properties:
+            asset_id:
+              type: string
+              description: Asset identifier for which to retrieve control findings
+              example: eea3102e81bc8cf10b43168a7a1ff27cb539a7325428f3cd956240472335c6da
+            last_evaluation_time:
+              type: integer
+              format: int64
+              description: Unix timestamp in milliseconds for the evaluation time
+              example: 1763669115000
+            filters:
+              type: array
+              items:
+                $ref: '#/components/schemas/FilterObject'
+              description: Array of filter objects for filtering control findings
+              default: []
+            sort:
+              allOf:
+                - $ref: '#/components/schemas/SortObject'
+              description: Sort configuration (defaults to standard asc)
+            search_from:
+              type: integer
+              minimum: 0
+              default: 0
+              description: Starting index for pagination
+            search_to:
+              type: integer
+              minimum: 1
+              maximum: 100
+              default: 100
+              description: Ending index for pagination
+      x-stoplight:
+        id: gp61otv0wpfiw
+    AssetComplianceResponse:
+      type: object
+      description: 'Response containing asset compliance data including compliance status, findings, and associated standards.'
+      properties:
+        reply:
+          type: object
+          required:
+            - total_count
+            - result_count
+            - filter_count
+            - assets
+          properties:
+            total_count:
+              type: integer
+              description: Total number of control findings available
+              example: 134
+            result_count:
+              type: integer
+              description: Number of control findings returned after filtering and pagination
+              example: 29
+            filter_count:
+              type: integer
+              description: Number of control findings matching the applied filters
+              example: 29
+            assets:
+              type: array
+              items:
+                $ref: '#/components/schemas/ControlFinding'
+              description: Array of control findings for the asset
+      x-stoplight:
+        id: k7exvyo9sstvl
+    ControlFinding:
+      type: object
+      description: Compliance control finding information
+      properties:
+        STANDARD:
+          type: string
+          description: Name of the compliance standard
+          example: Secure Controls Framework (SCF) v2024.2
+        STANDARD_REVISION:
+          type: string
+          description: Revision identifier of the compliance standard
+          example: '-3633352044114537559'
+        CATEGORY:
+          type: string
+          description: Control category or domain
+          example: Continuous Monitoring
+        CONTROL_REVISION:
+          type: string
+          description: Revision identifier of the specific control
+          example: '5207648284675893530'
+        CONTROL:
+          type: string
+          description: Control identifier and name
+          example: 'MON-05.1:Real-Time Alerts of Event Logging Failure'
+        SEVERITY:
+          type: string
+          enum:
+            - SEV_010_INFO
+            - SEV_020_LOW
+            - SEV_030_MEDIUM
+            - SEV_040_HIGH
+            - SEV_050_CRITICAL
+          description: Severity level of the control finding
+          example: SEV_030_MEDIUM
+        RULE_IDS:
+          type: array
+          items:
+            type: string
+          description: Array of rule identifiers associated with this finding
+          example:
+            - ab0317ac-661a-4a7d-a28a-53f4fdf6d290
+        LAST_EVALUATION_TIME:
+          type: integer
+          format: int64
+          description: Unix timestamp of the last evaluation
+          example: 1762718526
+        STATUS:
+          type: string
+          enum:
+            - FAILED
+            - PASSED
+            - NOT_ASSESSED
+          description: Assessment status of the control
+          example: FAILED
+        SOURCE:
+          type: string
+          description: Source of the control assessment
+          example: Finding
+      x-stoplight:
+        id: 20x9cqakqckl7
+    FilterObject:
+      type: object
+      description: |
+        Filter criteria for querying asset compliance data. Supports filtering by standard, control, severity, status, category, or source.
+
+        **Valid filter combinations:**
+
+        | Field | Operators | Value |
+        |-------|-----------|-------|
+        | `standard` | `eq`, `neq`, `contains`, `not_contains` | Standard name (e.g., "CIS AWS Foundations Benchmark") |
+        | `category` | `eq`, `neq`, `contains`, `not_contains` | Category name |
+        | `control` | `eq`, `neq`, `contains`, `not_contains` | Control ID (e.g., "1.1") |
+        | `source` | `eq`, `neq`, `contains`, `not_contains` | Source name |
+        | `severity` | `eq`, `neq` | `SEV_010_INFO`, `SEV_020_LOW`, `SEV_030_MEDIUM`, `SEV_040_HIGH`, `SEV_050_CRITICAL` |
+        | `status` | `eq`, `neq` | `FAILED`, `PASSED`, `NOT_ASSESSED` |
+
+        **Example filters:**
+        ```json
+        {"field": "severity", "operator": "eq", "value": "SEV_030_MEDIUM"}
+        {"field": "standard", "operator": "contains", "value": "CIS"}
+        {"field": "status", "operator": "eq", "value": "FAILED"}
+        ```
+      required:
+        - field
+        - operator
+        - value
+      properties:
+        field:
+          type: string
+          enum:
+            - standard
+            - category
+            - control
+            - severity
+            - status
+            - source
+          description: Field to filter on
+          example: severity
+        operator:
+          type: string
+          enum:
+            - eq
+            - neq
+            - contains
+            - not_contains
+          description: |
+            Filter operator to apply. Note: `contains` and `not_contains` are only valid for string fields (standard, category, control, source).
+          example: eq
+        value:
+          type: string
+          description: |
+            Value to filter by. For severity field, use: `SEV_010_INFO`, `SEV_020_LOW`, `SEV_030_MEDIUM`, `SEV_040_HIGH`, `SEV_050_CRITICAL`. For status field, use: `FAILED`, `PASSED`, `NOT_ASSESSED`.
+          example: SEV_030_MEDIUM
+      x-stoplight:
+        id: cq1ofdskyx9bw
+    SortObject:
+      type: object
+      description: Sorting criteria for query results. Specify field and direction.
+      properties:
+        field:
+          type: string
+          enum:
+            - standard
+            - category
+            - control
+            - severity
+            - status
+          description: Field to sort by
+          default: standard
+          example: standard
+        keyword:
+          type: string
+          enum:
+            - asc
+            - desc
+          default: asc
+          description: Sort direction
+          example: asc
+      x-stoplight:
+        id: 14sl3fnfq4a31
+    ErrorResponse:
+      type: object
+      description: Standard error response returned when the API request fails.
+      properties:
+        reply:
+          type: object
+          required:
+            - err_code
+            - err_msg
+          properties:
+            err_code:
+              type: integer
+              description: Error code
+            err_msg:
+              type: string
+              description: Error message describing what went wrong
+            err_extra:
+              type: object
+              description: Additional error details
+      x-stoplight:
+        id: 5tuzsznxnrf6t
+  responses:
+    BadRequest:
+      description: Bad request - invalid parameters or request format
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          examples:
+            missing_asset_id:
+              summary: Missing asset ID parameter
+              value:
+                reply:
+                  err_code: 400
+                  err_msg: 'Missing required parameter: asset_id'
+                  err_extra: {}
+            missing_evaluation_time:
+              summary: Missing evaluation time parameter
+              value:
+                reply:
+                  err_code: 400
+                  err_msg: 'Missing required parameter: last_evaluation_time'
+                  err_extra: {}
+            invalid_filter_field:
+              summary: Invalid filter field
+              value:
+                reply:
+                  err_code: 400
+                  err_msg: 'Invalid filter field. Allowed fields: standard, category, control, severity, status, source'
+                  err_extra: {}
+            invalid_severity_value:
+              summary: Invalid severity value
+              value:
+                reply:
+                  err_code: 400
+                  err_msg: 'Invalid severity value. Allowed values: SEV_010_INFO, SEV_020_LOW, SEV_030_MEDIUM, SEV_040_HIGH, SEV_050_CRITICAL'
+                  err_extra: {}
+    Unauthorized:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            reply:
+              err_code: 401
+              err_msg: Authentication credentials were not provided or are invalid
+              err_extra: {}
+    Forbidden:
+      description: Access denied - insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            reply:
+              err_code: 403
+              err_msg: You do not have permission to access control findings
+              err_extra: {}
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            reply:
+              err_code: 500
+              err_msg: Failed to retrieve control findings
+              err_extra: {}
+  securitySchemes:
+    XDRAuth:
+      type: apiKey
+      in: header
+      name: x-xdr-auth-id
+      description: XDR API Key ID for authentication
+    XDRAuthToken:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: XDR API Key for authentication
+security:
+  - XDRAuth: []
+    XDRAuthToken: []
+tags:
+  - name: Control Findings
+    description: Operations for retrieving compliance control findings and assessment results

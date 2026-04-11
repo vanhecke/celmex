@@ -1,0 +1,1033 @@
+{
+    "openapi": "3.0.3",
+    "x-stoplight": {
+        "id": "lysu63bcdhivk"
+    },
+    "tags": [
+        {
+            "name": "UnmanagedRegistryConnector",
+            "description": "Unmanaged Registry Connector."
+        }
+    ],
+    "info": {
+        "version": "Cortex XSIAM 3.4",
+        "title": "CWP Registry Connector APIs",
+        "description": "Public APIs to onboard third-party registry connectors (such as Docker Hub, GitLab, Harbor, JFrog, and\nOpenShift) and managing their instances.\n\n> **Required license:** \n>\n> Cortex Cloud Posture Management or Cortex Cloud Runtime Security.",
+        "contact": {
+            "email": "docs-cortex@paloaltonetworks.com",
+            "name": "Cortex Documentation Team",
+            "url": "https://docs-cortex.paloaltonetworks.com/"
+        }
+    },
+    "servers": [
+        {
+            "url": "https://api-yourfqdn"
+        }
+    ],
+    "paths": {
+        "/public_api/v1/cwp/registry_onboarding/instances": {
+            "post": {
+                "summary": "Create a registry connector",
+                "operationId": "createUnmanagedRegistryConnectorPublicAPI",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UnmanagedRegistryConnectorPublicAPIObject"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Connector details have been stored successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "connector_id": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "connector_id"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Client error",
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                },
+                                "example": {
+                                    "err_msg": "Bad Request",
+                                    "metadata": {
+                                        "code": "BAD_REQUEST"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Service had unexpected internal error",
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                },
+                                "example": {
+                                    "err_msg": "Internal Error",
+                                    "metadata": {
+                                        "code": "INTERNAL_ERROR"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-stoplight": {
+                    "id": "88faf1t0s8yio"
+                },
+                "description": "Creates a new registry connector for  based on the provided details.\n\n> **Required license:** \n>\n> Cortex Cloud Posture Management or Cortex Cloud Runtime Security.",
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "UCoWpG4rkNzgCp2dsh8m02iVpZsskwKHz7N1tErPcUV3Wmf59Gc9kytmgOv0pDWoem3PBlORyRIPiir4OcYdWUOWAM3JyTgoCxQf4nQoTlKmFRKz9Bj5vIjluw66p9WP "
+                        },
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "{api_key}",
+                        "required": true
+                    },
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "241"
+                        },
+                        "in": "header",
+                        "required": true,
+                        "name": "x-xdr-auth-id",
+                        "description": "{api_key_id}"
+                    }
+                ]
+            }
+        },
+        "/public_api/v1/cwp/registry_onboarding/instances/{connectorID}": {
+            "parameters": [
+                {
+                    "name": "connectorID",
+                    "description": "The unique identifier for the connector.",
+                    "in": "path",
+                    "required": true,
+                    "schema": {
+                        "type": "string"
+                    }
+                }
+            ],
+            "get": {
+                "summary": "Get a registry connector",
+                "operationId": "getUnmanagedRegistryConnectorPublicAPI",
+                "responses": {
+                    "200": {
+                        "description": "Connector details retrieved successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GetUnmanagedRegistryConnectorResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Connector not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                },
+                                "example": {
+                                    "err_msg": "Connector ID not found",
+                                    "metadata": {
+                                        "code": "NOT_FOUND"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Service had unexpected internal error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                },
+                                "example": {
+                                    "err_msg": "Internal Error",
+                                    "metadata": {
+                                        "code": "INTERNAL_ERROR"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-stoplight": {
+                    "id": "p94ahgh8bkwho"
+                },
+                "description": "Retrieves a registry connector details using its unique ID.\n\n> **Required license:** \n>\n> Cortex Cloud Posture Management or Cortex Cloud Runtime Security.",
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "UCoWpG4rkNzgCp2dsh8m02iVpZsskwKHz7N1tErPcUV3Wmf59Gc9kytmgOv0pDWoem3PBlORyRIPiir4OcYdWUOWAM3JyTgoCxQf4nQoTlKmFRKz9Bj5vIjluw66p9WP"
+                        },
+                        "in": "header",
+                        "name": "Authentication",
+                        "description": "{api_key}",
+                        "required": true
+                    },
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "241"
+                        },
+                        "in": "header",
+                        "description": "{api_key_id}",
+                        "required": true,
+                        "name": "x-xdr-auth-id"
+                    }
+                ]
+            },
+            "put": {
+                "summary": "Update a registry connector",
+                "operationId": "modifyUnmanagedRegistryConnectorPublicAPI",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UnmanagedRegistryConnectorPublicAPIObject"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "204": {
+                        "description": "Connector details have been updated successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "properties": {
+                                        "connector_id": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "connector_id"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Client error",
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                },
+                                "example": {
+                                    "err_msg": "Bad Request",
+                                    "metadata": {
+                                        "code": "BAD_REQUEST"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Connector ID not found",
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                },
+                                "example": {
+                                    "err_msg": "Connector ID not found",
+                                    "metadata": {
+                                        "code": "NOT_FOUND"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Service had unexpected internal error",
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                },
+                                "example": {
+                                    "err_msg": "Internal Error",
+                                    "metadata": {
+                                        "code": "INTERNAL_ERROR"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-stoplight": {
+                    "id": "hcefhi1h1hwj0"
+                },
+                "description": "Updates the attributes of an existing registry connector identified by its unique ID.\n\n> **Required license:** \n>\n> Cortex Cloud Posture Management or Cortex Cloud Runtime Security.",
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "UCoWpG4rkNzgCp2dsh8m02iVpZsskwKHz7N1tErPcUV3Wmf59Gc9kytmgOv0pDWoem3PBlORyRIPiir4OcYdWUOWAM3JyTgoCxQf4nQoTlKmFRKz9Bj5vIjluw66p9WP"
+                        },
+                        "in": "header",
+                        "name": "Authentication",
+                        "description": "{api_key}",
+                        "required": true
+                    },
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "241"
+                        },
+                        "in": "header",
+                        "name": "x-xdr-auth-id",
+                        "description": "{api_key_id}",
+                        "required": true
+                    }
+                ]
+            },
+            "delete": {
+                "summary": "Delete a registry connector",
+                "operationId": "deleteUnmanagedRegistryConnectorPublicAPI",
+                "responses": {
+                    "204": {
+                        "description": "Connector deleted successfully."
+                    },
+                    "404": {
+                        "description": "Connector not found.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                },
+                                "example": {
+                                    "err_msg": "Connector ID not found",
+                                    "metadata": {
+                                        "code": "NOT_FOUND"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Service had unexpected internal error.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                },
+                                "example": {
+                                    "err_msg": "Internal Error",
+                                    "metadata": {
+                                        "code": "INTERNAL_ERROR"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-stoplight": {
+                    "id": "zcjxliawti6li"
+                },
+                "description": "Deletes a specific registry connector identified by its unique ID.\n\n> **Required license:** \n>\n> Cortex Cloud Posture Management or Cortex Cloud Runtime Security.",
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "UCoWpG4rkNzgCp2dsh8m02iVpZsskwKHz7N1tErPcUV3Wmf59Gc9kytmgOv0pDWoem3PBlORyRIPiir4OcYdWUOWAM3JyTgoCxQf4nQoTlKmFRKz9Bj5vIjluw66p9WP"
+                        },
+                        "in": "header",
+                        "name": "Authentication",
+                        "description": "{api_key}",
+                        "required": true
+                    },
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "241"
+                        },
+                        "in": "header",
+                        "name": "x-xdr-auth-id",
+                        "description": "{api_key_id}",
+                        "required": true
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "FilterObject": {
+                "oneOf": [
+                    {
+                        "$ref": "#/components/schemas/ConnectorNode"
+                    },
+                    {
+                        "$ref": "#/components/schemas/TerminalNode"
+                    }
+                ],
+                "x-stoplight": {
+                    "id": "1yeznn0s62jq7"
+                },
+                "title": "Asset Scope Filter",
+                "description": "Defines the type of assets to be filtered (the scope). You can combine multiple conditions to create complex rules for when the asset filter should be applied."
+            },
+            "ConnectorNode": {
+                "type": "object",
+                "oneOf": [
+                    {
+                        "$ref": "#/components/schemas/AndConnectorNode"
+                    },
+                    {
+                        "$ref": "#/components/schemas/OrConnectorNode"
+                    }
+                ],
+                "x-stoplight": {
+                    "id": "dbz20sj74bl8o"
+                },
+                "description": ""
+            },
+            "AndConnectorNode": {
+                "type": "object",
+                "properties": {
+                    "AND": {
+                        "type": "array",
+                        "x-go-type-skip-optional-pointer": true,
+                        "items": {
+                            "$ref": "#/components/schemas/FilterObject"
+                        }
+                    }
+                },
+                "x-stoplight": {
+                    "id": "vnicodg7cal7l"
+                }
+            },
+            "OrConnectorNode": {
+                "type": "object",
+                "properties": {
+                    "OR": {
+                        "type": "array",
+                        "x-go-type-skip-optional-pointer": true,
+                        "items": {
+                            "$ref": "#/components/schemas/FilterObject"
+                        }
+                    }
+                },
+                "x-stoplight": {
+                    "id": "oscggp7afekyd"
+                }
+            },
+            "TerminalNode": {
+                "type": "object",
+                "x-stoplight": {
+                    "id": "1h68wsqbqe7at"
+                },
+                "properties": {
+                    "SEARCH_FIELD": {
+                        "type": "string",
+                        "description": "Defines the Field to be searched.",
+                        "example": "Registry",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "SEARCH_TYPE": {
+                        "type": "string",
+                        "description": "Defines the comparison operator to use for this filter. ",
+                        "example": "EQ",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "SEARCH_VALUE": {
+                        "type": "string",
+                        "description": "Defines the value to be searched.",
+                        "example": "library/ubuntu",
+                        "x-go-type-skip-optional-pointer": true
+                    }
+                }
+            },
+            "VendorSpecificConfig": {
+                "type": "object",
+                "description": "Vendor specific configuration options for scanning.",
+                "oneOf": [
+                    {
+                        "$ref": "#/components/schemas/GitlabSpecificConfig"
+                    },
+                    {
+                        "$ref": "#/components/schemas/DockerhubSpecificConfig"
+                    },
+                    {
+                        "$ref": "#/components/schemas/OpenShiftSpecificConfig"
+                    }
+                ],
+                "x-oapi-codegen-extra-tags": {
+                    "gorm": "type:jsonb"
+                },
+                "x-stoplight": {
+                    "id": "2zrxy0xuoh7xp"
+                },
+                "title": ""
+            },
+            "OpenShiftSpecificConfig": {
+                "type": "object",
+                "description": "Properties of an OpenShift connector.",
+                "x-stoplight": {
+                    "id": "fe4n00ryqz6yw"
+                },
+                "properties": {
+                    "cluster_id": {
+                        "type": "string",
+                        "description": "The unique identifier of the OpenShift cluster."
+                    },
+                    "cluster_name": {
+                        "type": "string",
+                        "description": "The name of the OpenShift cluster."
+                    },
+                    "cluster_asset_id": {
+                        "type": "string",
+                        "description": "The asset ID associated with the cluster."
+                    },
+                    "cluster_asset_type_id": {
+                        "type": "string",
+                        "description": "The asset type ID of the cluster."
+                    },
+                    "cluster_realm": {
+                        "type": "string",
+                        "description": "The realm or environment in which the cluster resides."
+                    }
+                },
+                "title": "OpenShift"
+            },
+            "DockerhubSpecificConfig": {
+                "type": "object",
+                "description": "Properties of a Dockerhub connector.",
+                "x-stoplight": {
+                    "id": "j7esq57re1ahv"
+                },
+                "properties": {
+                    "repository": {
+                        "type": "string",
+                        "description": "*Optional*. The Docker Hub repository to scan.",
+                        "example": "my-repo",
+                        "x-go-type-skip-optional-pointer": true
+                    }
+                },
+                "title": "DockerHub"
+            },
+            "GitlabSpecificConfig": {
+                "type": "object",
+                "description": "Properties of a GitLab connector.",
+                "x-stoplight": {
+                    "id": "88hw3pmkg584c"
+                },
+                "properties": {
+                    "group_ids": {
+                        "type": "string",
+                        "description": "*Optional*. The group IDs to scan.",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "project_ids": {
+                        "type": "string",
+                        "description": "*Optional*. The project IDs to scan.",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "api_domain_name": {
+                        "type": "string",
+                        "description": "*Optional*. The API domain name to use for the scan.",
+                        "x-go-type-skip-optional-pointer": true
+                    }
+                },
+                "x-examples": {},
+                "title": "GitLab"
+            },
+            "InitialScanConfiguration": {
+                "type": "object",
+                "x-oapi-codegen-extra-tags": {
+                    "gorm": "type:jsonb"
+                },
+                "x-stoplight": {
+                    "id": "el47emye037b3"
+                },
+                "title": "Initial Scan Configuration",
+                "properties": {
+                    "mode": {
+                        "type": "string",
+                        "description": "Specifies the initial scan configuration mode.\n \n* `ALL` — Scans all container images, including every tag, in all discovered repositories.\n* `LATEST_TAG` — Scans only images tagged as `latest` in all discovered repositories.\n* `TAGS_MODIFIED_DAYS` — Scans images in each repository modified within the last *X* days, where *X* is set via an argument. You can select a range of up to 90 days for the scan.\n",
+                        "enum": [
+                            "ALL",
+                            "LATEST_TAG",
+                            "TAGS_MODIFIED_DAYS"
+                        ],
+                        "example": "TAGS_MODIFIED_DAYS",
+                        "x-enum-varnames": [
+                            "LatestOnly",
+                            "LastNDays",
+                            "ScanAll"
+                        ],
+                        "x-go-type-skip-optional-pointer": true,
+                        "default": "ALL"
+                    },
+                    "numDays": {
+                        "type": "integer",
+                        "description": "Number of days for the scan mode `lastNDays`",
+                        "example": 7
+                    }
+                }
+            },
+            "Vendor": {
+                "type": "string",
+                "enum": [
+                    "DOCKER",
+                    "JFROG",
+                    "SONATYPE",
+                    "DOCKER_HUB",
+                    "HARBOR",
+                    "GITLAB_CONTAINER_REGISTRY",
+                    "OPENSHIFT"
+                ],
+                "x-enum-varnames": [
+                    "Docker",
+                    "JFrog",
+                    "Sonatype",
+                    "Docker Hub",
+                    "Harbor",
+                    "Gitlab Container Registry",
+                    "JFrog CAS",
+                    "OpenShift"
+                ],
+                "description": "Name of the registry vendor.",
+                "x-go-type-skip-optional-pointer": true,
+                "x-stoplight": {
+                    "id": "5ba7355t53nrl"
+                },
+                "title": "Vendor"
+            },
+            "ScanningMode": {
+                "type": "string",
+                "enum": [
+                    "CLOUD",
+                    "OUTPOST",
+                    "BROKER",
+                    "NOT_APPLICABLE",
+                    "KAPI"
+                ],
+                "x-enum-varnames": [
+                    "Cloud",
+                    "Outpost",
+                    "Broker",
+                    "NOT_APPLICABLE",
+                    "KAPI"
+                ],
+                "description": "The scanning mode used by the connector",
+                "x-stoplight": {
+                    "id": "qc9v1v54q2ql3"
+                }
+            },
+            "Provider": {
+                "type": "string",
+                "enum": [
+                    "AWS",
+                    "GCP",
+                    "AZURE"
+                ],
+                "x-enum-varnames": [
+                    "AWS",
+                    "GCP",
+                    "Azure"
+                ],
+                "description": "Specifies the cloud provider for the Cortex environment to use for registry scanning.",
+                "x-go-type-skip-optional-pointer": true,
+                "x-stoplight": {
+                    "id": "g4ni0fq3gwmze"
+                }
+            },
+            "RegistryType": {
+                "type": "string",
+                "enum": [
+                    "CLOUD_HOSTED",
+                    "SELF_HOSTED"
+                ],
+                "x-enum-varnames": [
+                    "CloudHosted",
+                    "SelfHosted"
+                ],
+                "description": "The type of registry.",
+                "x-stoplight": {
+                    "id": "zo8rqezu612h5"
+                }
+            },
+            "BrokerType": {
+                "type": "string",
+                "enum": [
+                    "BROKER_VM",
+                    "BROKER_CLUSTER"
+                ],
+                "x-enum-varnames": [
+                    "VM",
+                    "Cluster"
+                ],
+                "x-stoplight": {
+                    "id": "8c6lrnf8fwfzo"
+                },
+                "description": "Indicates the Broker VM type used by the Outpost."
+            },
+            "FilterType": {
+                "type": "string",
+                "enum": [
+                    "INCLUDE",
+                    "EXCLUDE"
+                ],
+                "x-enum-varnames": [
+                    "Include",
+                    "Exclude"
+                ],
+                "x-stoplight": {
+                    "id": "6c3oef2dihtek"
+                }
+            },
+            "PublicAPIErrorResponse": {
+                "$ref": "#/components/schemas/PublicAPIError",
+                "x-stoplight": {
+                    "id": "cvl83t0q4k44l"
+                }
+            },
+            "PublicAPIError": {
+                "type": "object",
+                "required": [
+                    "err_msg",
+                    "metadata"
+                ],
+                "properties": {
+                    "err_msg": {
+                        "type": "string",
+                        "description": "The error message"
+                    },
+                    "metadata": {
+                        "$ref": "#/components/schemas/PublicAPIErrorMetadata"
+                    }
+                },
+                "example": {
+                    "err_msg": "Policy ID not found",
+                    "metadata": {
+                        "code": "NOT_FOUND"
+                    }
+                },
+                "x-stoplight": {
+                    "id": "nxy7899g9k6rn"
+                }
+            },
+            "PublicAPIErrorMetadata": {
+                "type": "object",
+                "description": "Details for the PublicAPIError",
+                "properties": {
+                    "code": {
+                        "$ref": "#/components/schemas/Code"
+                    }
+                },
+                "required": [
+                    "code"
+                ],
+                "example": {
+                    "code": "INTERNAL_ERROR"
+                },
+                "x-stoplight": {
+                    "id": "ojevk8rwvr76a"
+                }
+            },
+            "Code": {
+                "type": "string",
+                "description": "A short, programmatically safe string indicating the error code reported",
+                "example": "NOT_FOUND",
+                "enum": [
+                    "BAD_REQUEST",
+                    "FORBIDDEN",
+                    "NOT_FOUND",
+                    "INTERNAL_ERROR"
+                ],
+                "x-stoplight": {
+                    "id": "r6ipuz1hh1nxa"
+                }
+            },
+            "UnmanagedRegistryConnectorPublicAPIObject": {
+                "type": "object",
+                "x-stoplight": {
+                    "id": "w7agwy1q03j57"
+                },
+                "required": [
+                    "vendor",
+                    "name",
+                    "url",
+                    "username",
+                    "password",
+                    "auth_token",
+                    "scanning_mode",
+                    "region",
+                    "insecure_pull",
+                    "initial_scan_configuration"
+                ],
+                "properties": {
+                    "connector_id": {
+                        "type": "string",
+                        "description": "The connector ID.",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "vendor": {
+                        "$ref": "#/components/schemas/Vendor"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Name of the registry connector."
+                    },
+                    "enabled": {
+                        "type": "boolean",
+                        "description": "Indicates whether the connector is enabled.",
+                        "x-go-type-skip-optional-pointer": true,
+                        "default": true
+                    },
+                    "url": {
+                        "type": "string",
+                        "description": "The URL of the registry."
+                    },
+                    "username": {
+                        "type": "string",
+                        "description": "The username for authentication."
+                    },
+                    "password": {
+                        "type": "string",
+                        "description": "The password for authentication."
+                    },
+                    "auth_token": {
+                        "type": "string",
+                        "description": "Token to authenticate the request."
+                    },
+                    "scanning_mode": {
+                        "$ref": "#/components/schemas/ScanningMode"
+                    },
+                    "cloud_provider": {
+                        "$ref": "#/components/schemas/Provider"
+                    },
+                    "outpost_id": {
+                        "type": "string",
+                        "description": "The outpost ID.",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "region": {
+                        "type": "string",
+                        "description": "Specifies the region to use for registry scanning. As a best practice, choose the region closest to your registry deployment to achieve the best scanning throughput and potentially reduce cloud costs."
+                    },
+                    "insecure_pull": {
+                        "type": "boolean",
+                        "description": "When set to `true`, allows image pulls from insecure registries.",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "ca_certificate": {
+                        "type": "string",
+                        "description": "*Optional*. The CA certificate used for authentication.",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "repository": {
+                        "type": "string",
+                        "description": "*Optional*. The repository used for image discovery.",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "initial_scan_configuration": {
+                        "$ref": "#/components/schemas/InitialScanConfiguration"
+                    },
+                    "allow_static_ips": {
+                        "type": "boolean",
+                        "description": "*Optional*. Indicates whether static IP addresses are allowed.",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "ip_identifier": {
+                        "type": "string",
+                        "description": "*Optional*. The identifier associated with the IP address.",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "asset_scope_filters": {
+                        "$ref": "#/components/schemas/FilterObject"
+                    },
+                    "registry_type": {
+                        "$ref": "#/components/schemas/RegistryType"
+                    },
+                    "tenant_id": {
+                        "type": "string",
+                        "description": "The tenant ID",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "broker_type": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/BrokerType"
+                            }
+                        ],
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "broker_id": {
+                        "type": "string",
+                        "x-go-type-skip-optional-pointer": true,
+                        "description": "The broker ID."
+                    },
+                    "filter_type": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/FilterType"
+                            }
+                        ],
+                        "description": "Controls whether `asset_scope_filters` act as an inclusion or exclusion filter.",
+                        "default": "INCLUDE",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "vendor_specific_configuration": {
+                        "$ref": "#/components/schemas/VendorSpecificConfig"
+                    }
+                }
+            },
+            "GetUnmanagedRegistryConnectorResponse": {
+                "type": "object",
+                "x-stoplight": {
+                    "id": "torkancswa68n"
+                },
+                "properties": {
+                    "connector_id": {
+                        "type": "string",
+                        "description": "The connector ID.",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "vendor": {
+                        "$ref": "#/components/schemas/Vendor"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "The name of the registry connector."
+                    },
+                    "enabled": {
+                        "type": "boolean",
+                        "description": "Indicates whether the connector is enabled.",
+                        "x-go-type-skip-optional-pointer": true,
+                        "default": true
+                    },
+                    "url": {
+                        "type": "string",
+                        "description": "The URL of the registry."
+                    },
+                    "username": {
+                        "type": "string",
+                        "description": "The username for authentication."
+                    },
+                    "password": {
+                        "type": "string",
+                        "description": "The password for authentication."
+                    },
+                    "auth_token": {
+                        "type": "string",
+                        "description": "Authentication token used to authorize requests to the API."
+                    },
+                    "scanning_mode": {
+                        "$ref": "#/components/schemas/ScanningMode"
+                    },
+                    "cloud_provider": {
+                        "$ref": "#/components/schemas/Provider"
+                    },
+                    "outpost_id": {
+                        "type": "string",
+                        "description": "The outpost ID.",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "region": {
+                        "type": "string",
+                        "description": "The region of the connector."
+                    },
+                    "insecure_pull": {
+                        "type": "boolean",
+                        "description": "When set to `true`, allows image pulls from insecure registries.",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "ca_certificate": {
+                        "type": "string",
+                        "description": "*Optional*. The CA certificate used for authentication.",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "repository": {
+                        "type": "string",
+                        "description": "*Optional*. The repository used for image discovery.",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "initial_scan_configuration": {
+                        "$ref": "#/components/schemas/InitialScanConfiguration"
+                    },
+                    "allow_static_ips": {
+                        "type": "boolean",
+                        "description": "*Optional*. Indicates whether static IP addresses are allowed.",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "ip_identifier": {
+                        "type": "string",
+                        "description": "*Optional*. The identifier associated with the IP address.",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "asset_scope_filters": {
+                        "$ref": "#/components/schemas/FilterObject"
+                    },
+                    "registry_type": {
+                        "$ref": "#/components/schemas/RegistryType"
+                    },
+                    "tenant_id": {
+                        "type": "string",
+                        "description": "The tenant ID",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "broker_type": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/BrokerType"
+                            }
+                        ],
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "broker_id": {
+                        "type": "string",
+                        "x-go-type-skip-optional-pointer": true,
+                        "description": "The broker ID."
+                    },
+                    "filter_type": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/FilterType"
+                            }
+                        ],
+                        "description": "Controls whether `asset_scope_filters` act as an inclusion or exclusion filter.",
+                        "default": "INCLUDE",
+                        "x-go-type-skip-optional-pointer": true
+                    },
+                    "vendor_specific_configuration": {
+                        "$ref": "#/components/schemas/VendorSpecificConfig"
+                    }
+                }
+            }
+        }
+    }
+}

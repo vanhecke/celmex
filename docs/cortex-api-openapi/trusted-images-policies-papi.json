@@ -1,0 +1,3344 @@
+{
+    "openapi": "3.0.3",
+    "info": {
+        "contact": {
+            "email": "docs-cortex@paloaltonetworks.com",
+            "name": "Cortex Documentation Team",
+            "url": "https://docs-cortex.paloaltonetworks.com/"
+        },
+        "version": "Cortex XSIAM 3.4",
+        "title": "Trusted Images APIs",
+        "description": "You can export the OpenAPI specs in the [Cortex Stoplight instance](https://cortex-panw.stoplight.io/docs/cortex-cloud). \n\nTrusted images is a security control that lets you declare, by policy, which registries, repositories, and images you trust. These policies also help you define the actions you wish to take when untrusted images are initiated in your environment.This microservice provides a CRUD model for managing rules in the Cloud Workload Protection module.\n\n**Required license:** Cortex Cloud Runtime Security or Cortex Cloud Posture Management"
+    },
+    "servers": [
+        {
+            "url": "https://api-yourfqdn",
+            "description": ""
+        }
+    ],
+    "tags": [
+        {
+            "name": "Rules Management Service",
+            "description": "Manages Cortex Cloud security detection rules"
+        }
+    ],
+    "components": {
+        "schemas": {
+            "AssetType": {
+                "properties": {
+                    "group": {
+                        "type": "string",
+                        "x-oapi-codegen-extra-tags": {
+                            "gorm": "column:group; type:char(36); not null; uniqueIndex:id_revision_type_idx; primaryKey",
+                            "yaml": "group"
+                        }
+                    },
+                    "resource": {
+                        "type": "string",
+                        "x-oapi-codegen-extra-tags": {
+                            "gorm": "column:resource; type:char(36); not null; uniqueIndex:id_revision_type_idx; primaryKey",
+                            "yaml": "resource"
+                        }
+                    },
+                    "version": {
+                        "type": "string",
+                        "x-oapi-codegen-extra-tags": {
+                            "gorm": "column:version; type:char(36); not null; uniqueIndex:id_revision_type_idx; primaryKey",
+                            "yaml": "version"
+                        }
+                    }
+                },
+                "required": [
+                    "resource",
+                    "version",
+                    "group"
+                ],
+                "type": "object"
+            },
+            "BadRequestResponse": {
+                "properties": {
+                    "error": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "error"
+                ],
+                "type": "object"
+            },
+            "CloudProviders": {
+                "description": "Lists supported cloud providers",
+                "enum": [
+                    "AWS",
+                    "GCP",
+                    "Azure",
+                    "ONPREM"
+                ],
+                "example": "Azure",
+                "type": "string"
+            },
+            "EvaluationMode": {
+                "description": "Lists supported evaluation modes",
+                "enum": [
+                    "PERIODIC",
+                    "CONTINUOUS"
+                ],
+                "example": "PERIODIC",
+                "type": "string"
+            },
+            "EvaluationScript": {
+                "properties": {
+                    "script": {
+                        "example": "package panw.compliance\n\nimport rego.v1\n\nmatch contains {\"msg\": msg} if {\n# Add your logic here\nmsg := \"<custom violation message>\"\n}",
+                        "format": "byte",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "script"
+                ],
+                "type": "object"
+            },
+            "EvaluationStage": {
+                "description": "Lists supported evaluation stages",
+                "enum": [
+                    "CI",
+                    "RUNTIME",
+                    "DEPLOY"
+                ],
+                "example": "CI",
+                "type": "string"
+            },
+            "ForbiddenResponse": {
+                "description": "Indicates a forbidden access response",
+                "properties": {
+                    "error": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "error"
+                ],
+                "type": "object"
+            },
+            "GetPoliciesResponse": {
+                "description": "The response you get when calling the `get policies` path",
+                "example": [
+                    {
+                        "action": "ISSUE",
+                        "assetGroups": [
+                            "group1",
+                            "group2"
+                        ],
+                        "assetGroupsIDs": [
+                            1,
+                            2
+                        ],
+                        "assetScope": "<some assetScope in blob form>",
+                        "condition": "<some condition in blob form>",
+                        "createdAt": "2024-07-28T18:50Z",
+                        "createdBy": "admin",
+                        "description": "some policy description",
+                        "disabled": false,
+                        "evaluationModes": [
+                            "periodic"
+                        ],
+                        "evaluationStage": "CI",
+                        "exception": "<some exception in blob form>",
+                        "id": "1",
+                        "missingInformationAction": "ISSUE",
+                        "modifiedAt": "2024-07-28T18:50Z",
+                        "name": "some policy",
+                        "remediationGuidance": "some remediation guidance",
+                        "revision": "3",
+                        "rulesIds": [
+                            "1",
+                            "2"
+                        ],
+                        "severity": "CRITICAL",
+                        "type": "COMPLIANCE"
+                    }
+                ],
+                "items": {
+                    "$ref": "#/components/schemas/PolicyData"
+                },
+                "type": "array"
+            },
+            "GetPoliciesResponseV2": {
+                "description": "The response you get when calling the `get policies V2` path",
+                "example": [
+                    {
+                        "action": "ISSUE",
+                        "assetGroups": [
+                            "group1",
+                            "group2"
+                        ],
+                        "assetGroupsIDs": [
+                            1,
+                            2
+                        ],
+                        "assetScope": "<some asset scope in blob form>",
+                        "condition": "<some condition in blob form>",
+                        "createdAt": "2024-07-28T18:50Z",
+                        "createdBy": "admin",
+                        "description": "some policy description",
+                        "disabled": false,
+                        "evaluationModes": [
+                            "periodic"
+                        ],
+                        "evaluationStage": "CI",
+                        "exception": "<some exception in blob form>",
+                        "id": "1",
+                        "missingInformationAction": "ISSUE",
+                        "modifiedAt": "2024-07-28T18:50Z",
+                        "name": "some policy",
+                        "policyRules": [
+                            {
+                                "action": "ISSUE",
+                                "id": "2",
+                                "policy_id": "1",
+                                "policy_revision": "3",
+                                "rule_id": "3",
+                                "rule_name": "ruleName",
+                                "severity": "CRITICAL"
+                            },
+                            {
+                                "action": "PREVENT",
+                                "id": "3",
+                                "policy_id": "1",
+                                "policy_revision": "3",
+                                "rule_id": "4",
+                                "rule_name": "ruleName2",
+                                "severity": "HIGH"
+                            }
+                        ],
+                        "remediationGuidance": "some remediation guidance",
+                        "revision": "3",
+                        "severity": "CRITICAL",
+                        "type": "COMPLIANCE"
+                    }
+                ],
+                "items": {
+                    "$ref": "#/components/schemas/PolicyGetResponseDataV2"
+                },
+                "type": "array"
+            },
+            "GetRulesResponse": {
+                "description": "The response you get when calling the `get rules` path",
+                "example": [
+                    {
+                        "description": "",
+                        "extraData": {
+                            "FindingInformation": {
+                                "Category": "IDENTITY",
+                                "FindingType": "Kubernetes role with excessive rights found"
+                            },
+                            "RegoLogic": " package pan.k8s_policy\ndefault allow = false\nallow { not has_wildcard_resources(input.resource) not has_wildcard_verbs(input.resource) }\nhas_wildcard_resources(role) { some i role.resources[i] == \"*\" }\nhas_wildcard_verbs(role) { some i role.verbs[i] == \"*\" } "
+                        },
+                        "name": "Minimize wildcard use in Roles and ClusterRoles",
+                        "provider": "AWS",
+                        "ruleId": "2808bbd9-51a4-47cc-a2fa-60d54903fe9c",
+                        "scannableAssets": [
+                            {
+                                "group": "rbac.authorization.k8s.io",
+                                "resource": "role",
+                                "version": "v1"
+                            },
+                            {
+                                "group": "rbac.authorization.k8s.io",
+                                "resourfce": "clusterroles",
+                                "version": "v1"
+                            }
+                        ],
+                        "supportedActions": [
+                            "Block",
+                            "Issue"
+                        ],
+                        "type": "Compliance"
+                    }
+                ],
+                "items": {
+                    "$ref": "#/components/schemas/RuleData"
+                },
+                "type": "array"
+            },
+            "PolicyAction": {
+                "description": "One of the supported policy actions",
+                "enum": [
+                    "ISSUE",
+                    "PREVENT",
+                    null
+                ],
+                "example": "ISSUE",
+                "type": "string",
+                "x-go-type-skip-optional-pointer": true
+            },
+            "PolicyData": {
+                "description": "The schema of a returned policy",
+                "example": {
+                    "action": "ISSUE",
+                    "assetGroups": [
+                        "group1",
+                        "group2"
+                    ],
+                    "assetGroupsIDs": [
+                        1,
+                        2
+                    ],
+                    "assetScope": "<some asset scope in blob form>",
+                    "condition": "<some condition in blob form>",
+                    "createdAt": "2024-07-28T18:50Z",
+                    "createdBy": "admin",
+                    "description": "some policy description",
+                    "disabled": false,
+                    "evaluationModes": [
+                        "PERIODIC"
+                    ],
+                    "evaluationStage": "CI",
+                    "exception": "<some exception in blob form>",
+                    "id": "1",
+                    "missingInformationAction": "ISSUE",
+                    "modifiedAt": "2024-07-28T18:50Z",
+                    "name": "some policy",
+                    "remediationGuidance": "some remediation guidance",
+                    "revision": "3",
+                    "ruleId": "",
+                    "severity": "CRITICAL",
+                    "type": "COMPLIANCE"
+                },
+                "properties": {
+                    "action": {
+                        "$ref": "#/components/schemas/PolicyAction"
+                    },
+                    "assetGroups": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    },
+                    "assetGroupsIDs": {
+                        "items": {
+                            "type": "integer"
+                        },
+                        "type": "array"
+                    },
+                    "assetScope": {
+                        "format": "byte",
+                        "type": "string"
+                    },
+                    "condition": {
+                        "format": "byte",
+                        "type": "string"
+                    },
+                    "createdAt": {
+                        "format": "date-time",
+                        "type": "string"
+                    },
+                    "createdBy": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "disabled": {
+                        "type": "boolean"
+                    },
+                    "evaluationModes": {
+                        "items": {
+                            "$ref": "#/components/schemas/EvaluationMode"
+                        },
+                        "type": "array"
+                    },
+                    "evaluationStage": {
+                        "$ref": "#/components/schemas/EvaluationStage"
+                    },
+                    "exception": {
+                        "format": "byte",
+                        "type": "string"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "missingInformationAction": {
+                        "$ref": "#/components/schemas/PolicyAction"
+                    },
+                    "modifiedAt": {
+                        "format": "date-time",
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "remediationGuidance": {
+                        "type": "string"
+                    },
+                    "revision": {
+                        "type": "integer"
+                    },
+                    "rulesIds": {
+                        "description": "The UUIDs of the rules that define the condition",
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    },
+                    "severity": {
+                        "$ref": "#/components/schemas/PolicySeverity"
+                    },
+                    "type": {
+                        "$ref": "#/components/schemas/PolicyType"
+                    }
+                },
+                "required": [
+                    "id",
+                    "revision",
+                    "createdAt",
+                    "modifiedAt",
+                    "type",
+                    "createdBy",
+                    "disabled",
+                    "name",
+                    "description",
+                    "evaluationModes",
+                    "evaluationStage",
+                    "rulesIds",
+                    "condition",
+                    "exception",
+                    "assetScope",
+                    "assetGroupsIDs",
+                    "assetGroups",
+                    "action",
+                    "severity",
+                    "remediationGuidance"
+                ],
+                "type": "object"
+            },
+            "PolicyGetResponseDataV2": {
+                "description": "The schema of a returned policy",
+                "example": {
+                    "action": "ISSUE",
+                    "assetGroups": [
+                        "group1",
+                        "group2"
+                    ],
+                    "assetGroupsIDs": [
+                        1,
+                        2
+                    ],
+                    "assetScope": "<some asset scope in blob form>",
+                    "condition": "<some condition in blob form>",
+                    "createdAt": "2024-07-28T18:50Z",
+                    "createdBy": "admin",
+                    "description": "some policy description",
+                    "disabled": false,
+                    "evaluationModes": [
+                        "PERIODIC"
+                    ],
+                    "evaluationStage": "CI",
+                    "exception": "<some exception in blob form>",
+                    "id": "1",
+                    "missingInformationAction": "ISSUE",
+                    "modifiedAt": "2024-07-28T18:50Z",
+                    "name": "some policy",
+                    "policyRules": [
+                        {
+                            "action": "ISSUE",
+                            "id": "2",
+                            "policy_id": "1",
+                            "policy_revision": "3",
+                            "rule_id": "3",
+                            "severity": "CRITICAL"
+                        },
+                        {
+                            "action": "PREVENT",
+                            "id": "3",
+                            "policy_id": "1",
+                            "policy_revision": "3",
+                            "rule_id": "4",
+                            "severity": "HIGH"
+                        }
+                    ],
+                    "remediationGuidance": "some remediation guidance",
+                    "revision": "3",
+                    "severity": "CRITICAL",
+                    "type": "COMPLIANCE",
+                    "usingSystemAssetGroups": false
+                },
+                "properties": {
+                    "action": {
+                        "$ref": "#/components/schemas/PolicyAction"
+                    },
+                    "assetGroups": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    },
+                    "assetGroupsIDs": {
+                        "items": {
+                            "type": "integer"
+                        },
+                        "type": "array"
+                    },
+                    "assetScope": {
+                        "format": "byte",
+                        "type": "string"
+                    },
+                    "condition": {
+                        "format": "byte",
+                        "type": "string"
+                    },
+                    "createdAt": {
+                        "format": "date-time",
+                        "type": "string"
+                    },
+                    "createdBy": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "disabled": {
+                        "type": "boolean"
+                    },
+                    "evaluationModes": {
+                        "items": {
+                            "$ref": "#/components/schemas/EvaluationMode"
+                        },
+                        "type": "array"
+                    },
+                    "evaluationStage": {
+                        "$ref": "#/components/schemas/EvaluationStage"
+                    },
+                    "exception": {
+                        "format": "byte",
+                        "type": "string"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "missingInformationAction": {
+                        "$ref": "#/components/schemas/PolicyAction"
+                    },
+                    "modifiedAt": {
+                        "format": "date-time",
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "policyRules": {
+                        "description": "Array of policy_rule objects related to the policy",
+                        "items": {
+                            "$ref": "#/components/schemas/PolicyRuleGetResponseData"
+                        },
+                        "type": "array"
+                    },
+                    "remediationGuidance": {
+                        "type": "string"
+                    },
+                    "revision": {
+                        "type": "integer"
+                    },
+                    "severity": {
+                        "$ref": "#/components/schemas/PolicySeverity"
+                    },
+                    "type": {
+                        "$ref": "#/components/schemas/PolicyType"
+                    },
+                    "usingSystemAssetGroups": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "id",
+                    "revision",
+                    "createdAt",
+                    "modifiedAt",
+                    "type",
+                    "createdBy",
+                    "disabled",
+                    "name",
+                    "description",
+                    "evaluationModes",
+                    "evaluationStage",
+                    "policyRules",
+                    "condition",
+                    "exception",
+                    "assetScope",
+                    "assetGroupsIDs",
+                    "assetGroups",
+                    "action",
+                    "severity",
+                    "remediationGuidance",
+                    "usingSystemAssetGroups"
+                ],
+                "type": "object"
+            },
+            "PolicyPostRequestDataV2": {
+                "description": "The schema of a created policy",
+                "example": {
+                    "action": "ISSUE",
+                    "assetGroups": [
+                        "group1",
+                        "group2"
+                    ],
+                    "assetGroupsIDs": [
+                        1,
+                        2
+                    ],
+                    "assetScope": "<some asset scope in blob form>",
+                    "condition": "<some condition in blob form>",
+                    "createdBy": "user",
+                    "description": "some policy description",
+                    "disabled": false,
+                    "evaluationModes": [
+                        "PERIODIC"
+                    ],
+                    "evaluationStage": "CI",
+                    "exception": "<some exception in blob form>",
+                    "missingInformationAction": "ISSUE",
+                    "name": "some policy",
+                    "policyRules": [
+                        {
+                            "action": "ISSUE",
+                            "rule_id": "3",
+                            "severity": "CRITICAL"
+                        },
+                        {
+                            "action": "PREVENT",
+                            "rule_id": "4",
+                            "severity": "HIGH"
+                        }
+                    ],
+                    "remediationGuidance": "some remediation guidance",
+                    "severity": "CRITICAL",
+                    "type": "COMPLIANCE",
+                    "usingSystemAssetGroups": false
+                },
+                "properties": {
+                    "action": {
+                        "$ref": "#/components/schemas/PolicyAction"
+                    },
+                    "assetGroups": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    },
+                    "assetGroupsIDs": {
+                        "items": {
+                            "type": "integer"
+                        },
+                        "type": "array"
+                    },
+                    "assetScope": {
+                        "format": "byte",
+                        "type": "string"
+                    },
+                    "condition": {
+                        "format": "byte",
+                        "type": "string"
+                    },
+                    "createdBy": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "disabled": {
+                        "type": "boolean"
+                    },
+                    "evaluationModes": {
+                        "items": {
+                            "$ref": "#/components/schemas/EvaluationMode"
+                        },
+                        "type": "array"
+                    },
+                    "evaluationStage": {
+                        "$ref": "#/components/schemas/EvaluationStage"
+                    },
+                    "exception": {
+                        "format": "byte",
+                        "type": "string"
+                    },
+                    "missingInformationAction": {
+                        "$ref": "#/components/schemas/PolicyAction"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "policyRules": {
+                        "description": "Array of policy_rule objects related to the policy",
+                        "items": {
+                            "$ref": "#/components/schemas/PolicyRulePostRequestData"
+                        },
+                        "type": "array"
+                    },
+                    "remediationGuidance": {
+                        "type": "string"
+                    },
+                    "severity": {
+                        "$ref": "#/components/schemas/PolicySeverity"
+                    },
+                    "type": {
+                        "$ref": "#/components/schemas/PolicyType"
+                    },
+                    "usingSystemAssetGroups": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "type",
+                    "disabled",
+                    "name",
+                    "description",
+                    "evaluationModes",
+                    "evaluationStage",
+                    "policyRules",
+                    "condition",
+                    "exception",
+                    "assetScope",
+                    "assetGroupsIDs",
+                    "assetGroups",
+                    "action",
+                    "severity",
+                    "remediationGuidance",
+                    "createdBy",
+                    "usingSystemAssetGroups"
+                ],
+                "type": "object"
+            },
+            "PolicyPutRequestDataV2": {
+                "description": "The schema of a created policy",
+                "example": {
+                    "action": "ISSUE",
+                    "assetGroups": [
+                        "group1",
+                        "group2"
+                    ],
+                    "assetGroupsIDs": [
+                        1,
+                        2
+                    ],
+                    "assetScope": "<some asset scope in blob form>",
+                    "condition": "<some condition in blob form>",
+                    "createdBy": "user",
+                    "description": "some policy description",
+                    "disabled": false,
+                    "evaluationModes": [
+                        "PERIODIC"
+                    ],
+                    "evaluationStage": "CI",
+                    "exception": "<some exception in blob form>",
+                    "id": "policyID",
+                    "missingInformationAction": "ISSUE",
+                    "name": "some policy",
+                    "policyRules": [
+                        {
+                            "action": "ISSUE",
+                            "rule_id": "3",
+                            "severity": "CRITICAL"
+                        },
+                        {
+                            "action": "PREVENT",
+                            "rule_id": "4",
+                            "severity": "HIGH"
+                        }
+                    ],
+                    "remediationGuidance": "some remediation guidance",
+                    "severity": "CRITICAL",
+                    "type": "COMPLIANCE",
+                    "usingSystemAssetGroups": false
+                },
+                "properties": {
+                    "action": {
+                        "$ref": "#/components/schemas/PolicyAction"
+                    },
+                    "assetGroups": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    },
+                    "assetGroupsIDs": {
+                        "items": {
+                            "type": "integer"
+                        },
+                        "type": "array"
+                    },
+                    "assetScope": {
+                        "format": "byte",
+                        "type": "string"
+                    },
+                    "condition": {
+                        "format": "byte",
+                        "type": "string"
+                    },
+                    "createdBy": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "disabled": {
+                        "type": "boolean"
+                    },
+                    "evaluationModes": {
+                        "items": {
+                            "$ref": "#/components/schemas/EvaluationMode"
+                        },
+                        "type": "array"
+                    },
+                    "evaluationStage": {
+                        "$ref": "#/components/schemas/EvaluationStage"
+                    },
+                    "exception": {
+                        "format": "byte",
+                        "type": "string"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "missingInformationAction": {
+                        "$ref": "#/components/schemas/PolicyAction"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "policyRules": {
+                        "description": "Array of policy_rule objects related to the policy",
+                        "items": {
+                            "$ref": "#/components/schemas/PolicyRulePostRequestData"
+                        },
+                        "type": "array"
+                    },
+                    "remediationGuidance": {
+                        "type": "string"
+                    },
+                    "severity": {
+                        "$ref": "#/components/schemas/PolicySeverity"
+                    },
+                    "type": {
+                        "$ref": "#/components/schemas/PolicyType"
+                    },
+                    "usingSystemAssetGroups": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "id",
+                    "type",
+                    "disabled",
+                    "name",
+                    "description",
+                    "evaluationModes",
+                    "evaluationStage",
+                    "policyRules",
+                    "condition",
+                    "exception",
+                    "assetScope",
+                    "assetGroupsIDs",
+                    "assetGroups",
+                    "action",
+                    "severity",
+                    "remediationGuidance",
+                    "createBy",
+                    "usingSystemAssetGroups"
+                ],
+                "type": "object"
+            },
+            "PolicyRuleGetResponseData": {
+                "description": "The schema of policy_rule object",
+                "properties": {
+                    "action": {
+                        "$ref": "#/components/schemas/PolicyAction"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "policy_id": {
+                        "type": "string"
+                    },
+                    "policy_revision": {
+                        "type": "integer"
+                    },
+                    "remediation_guidance": {
+                        "type": "string"
+                    },
+                    "rule_id": {
+                        "type": "string"
+                    },
+                    "rule_name": {
+                        "type": "string"
+                    },
+                    "severity": {
+                        "$ref": "#/components/schemas/PolicySeverity"
+                    },
+                    "user_remediation_guidance": {
+                        "description": "Additional remediation guidance that can be added to the rule’s predefined guidance.",
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "rule_id",
+                    "policy_id",
+                    "severity",
+                    "action",
+                    "policy_revision",
+                    "rule_name",
+                    "remediation_guidance",
+                    "user_remediation_guidance"
+                ],
+                "type": "object"
+            },
+            "PolicyRulePostRequestData": {
+                "description": "The schema of policy_rule object",
+                "properties": {
+                    "action": {
+                        "$ref": "#/components/schemas/PolicyAction"
+                    },
+                    "rule_id": {
+                        "type": "string"
+                    },
+                    "severity": {
+                        "$ref": "#/components/schemas/PolicySeverity"
+                    },
+                    "user_remediation_guidance": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "rule_id",
+                    "severity",
+                    "action",
+                    "user_remediation_guidance"
+                ],
+                "type": "object"
+            },
+            "PolicySeverity": {
+                "description": "One of the supported policy severities",
+                "enum": [
+                    "INFO",
+                    "LOW",
+                    "MEDIUM",
+                    "HIGH",
+                    "CRITICAL",
+                    null
+                ],
+                "example": "CRITICAL",
+                "type": "string"
+            },
+            "PolicyType": {
+                "description": "One of the supported policy types",
+                "enum": [
+                    "COMPLIANCE",
+                    "MALWARE",
+                    "SECRET",
+                    "TRUSTED_IMAGES",
+                    null
+                ],
+                "example": "MALWARE",
+                "type": "string"
+            },
+            "PublicAPIErrorResponse": {
+                "example": {
+                    "err_msg": "Policy ID not found",
+                    "metadata": {
+                        "code": "NOT_FOUND"
+                    }
+                },
+                "properties": {
+                    "err_msg": {
+                        "description": "The error message",
+                        "type": "string"
+                    },
+                    "metadata": {
+                        "$ref": "#/components/schemas/public_api_openapi-spec_PublicAPIErrorMetadata"
+                    }
+                },
+                "required": [
+                    "err_msg",
+                    "metadata"
+                ],
+                "type": "object"
+            },
+            "RuleData": {
+                "description": "The schema of a returned rule definition",
+                "example": {
+                    "description": "Lists rule parameters",
+                    "engine": "rego",
+                    "extraData": {
+                        "FindingInformation": {
+                            "Category": "IDENTITY",
+                            "FindingType": "Kubernetes role with excessive rights found"
+                        },
+                        "RegoLogic": " package pan.k8s_policy\ndefault allow = false\nallow { not has_wildcard_resources(input.resource) not has_wildcard_verbs(input.resource) }\nhas_wildcard_resources(role) { some i role.resources[i] == \"*\" }\nhas_wildcard_verbs(role) { some i role.verbs[i] == \"*\" } "
+                    },
+                    "name": "Minimize wildcard use in Roles and ClusterRoles",
+                    "providers": [
+                        "AWS"
+                    ],
+                    "ruleId": "2808bbd9-51a4-47cc-a2fa-60d54903fe9c",
+                    "scannableAssets": [
+                        {
+                            "group": "rbac.authorization.k8s.io",
+                            "resource": "role",
+                            "version": "v1"
+                        },
+                        {
+                            "group": "rbac.authorization.k8s.io",
+                            "resourfce": "clusterroles",
+                            "version": "v1"
+                        }
+                    ],
+                    "source": "K8sApi",
+                    "supportedActions": [
+                        "Block",
+                        "Issue"
+                    ],
+                    "type": "Compliance"
+                },
+                "properties": {
+                    "description": {
+                        "type": "string",
+                        "x-oapi-codegen-extra-tags": {
+                            "gorm": "column:description; type:text",
+                            "yaml": "description"
+                        }
+                    },
+                    "engine": {
+                        "type": "string",
+                        "x-oapi-codegen-extra-tags": {
+                            "gorm": "column:engine; type:varchar(255)",
+                            "yaml": "engine"
+                        }
+                    },
+                    "extraData": {
+                        "type": "object",
+                        "x-oapi-codegen-extra-tags": {
+                            "gorm": "column:extra_data; type:json",
+                            "yaml": "extraData"
+                        }
+                    },
+                    "name": {
+                        "type": "string",
+                        "x-oapi-codegen-extra-tags": {
+                            "gorm": "column:name; type:varchar(255)",
+                            "yaml": "name"
+                        }
+                    },
+                    "providers": {
+                        "items": {
+                            "$ref": "#/components/schemas/CloudProviders"
+                        },
+                        "type": "array",
+                        "x-oapi-codegen-extra-tags": {
+                            "gorm": "column:providers; type:json",
+                            "yaml": "providers"
+                        }
+                    },
+                    "revision": {
+                        "type": "integer",
+                        "x-oapi-codegen-extra-tags": {
+                            "gorm": "column:revision; type:int; default:0; uniqueIndex:id_revision_idx;",
+                            "yaml": "revision"
+                        }
+                    },
+                    "ruleId": {
+                        "type": "string",
+                        "x-oapi-codegen-extra-tags": {
+                            "gorm": "column:rule_id; type:char(36); not null; uniqueIndex:id_revision_idx; primaryKey",
+                            "yaml": "ruleId"
+                        }
+                    },
+                    "scannableAssets": {
+                        "items": {
+                            "$ref": "#/components/schemas/AssetType"
+                        },
+                        "type": "array",
+                        "x-oapi-codegen-extra-tags": {
+                            "gorm": "column:scannable_assets; type:json",
+                            "yaml": "scannableAssets"
+                        }
+                    },
+                    "source": {
+                        "enum": [
+                            "UAI",
+                            "K8sApi",
+                            "K8sFileSystem",
+                            "Host"
+                        ],
+                        "type": "string",
+                        "x-oapi-codegen-extra-tags": {
+                            "gorm": "column:source; type:varchar(255)",
+                            "yaml": "source"
+                        }
+                    },
+                    "supportedActions": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array",
+                        "x-oapi-codegen-extra-tags": {
+                            "gorm": "column:supported_actions; type:json",
+                            "yaml": "supportedActions"
+                        }
+                    },
+                    "type": {
+                        "type": "string",
+                        "x-oapi-codegen-extra-tags": {
+                            "gorm": "column:type; type:varchar(255)",
+                            "yaml": "type"
+                        }
+                    }
+                },
+                "required": [
+                    "ruleId",
+                    "revision",
+                    "type",
+                    "providers",
+                    "name",
+                    "description",
+                    "extraData",
+                    "supportedActions",
+                    "scannableAssets",
+                    "engine",
+                    "source"
+                ],
+                "type": "object"
+            },
+            "RuleDef": {
+                "description": "The schema of a rule definition",
+                "example": {
+                    "changeLog": "format the rego script",
+                    "controlsIDs": [
+                        "2a16a9f3-2602-4f0c-a909-7c184ddfeda2",
+                        "2a16a9f3-2602-4f0c-a909-7c184ddfe11"
+                    ],
+                    "createdAt": "2024-06-12T09:55:22",
+                    "createdBy": "eli",
+                    "description": "Some description for the rule",
+                    "engine": "rego",
+                    "evaluationScript": " package pan.k8s_policy default allow = false allow { not has_wildcard_resources(input.resource) not has_wildcard_verbs(input.resource) } has_wildcard_resources(role) { some i role.resources[i] == \"*\" } has_wildcard_verbs(role) { some i role.verbs[i] == \"*\" } ",
+                    "extraData": {
+                        "compliance": [
+                            {
+                                "control": "5.4.1",
+                                "name": "CIS AKS",
+                                "version": "1.5"
+                            }
+                        ],
+                        "finding": {
+                            "category": "IDENTITY",
+                            "description": "Cool k8s finding",
+                            "name": "Kubernetes role with excessive rights found",
+                            "typeId": 80
+                        },
+                        "scannableAssets": [
+                            {
+                                "group": "rbac.authorization.k8s.io",
+                                "resource": "role",
+                                "version": "v1"
+                            },
+                            {
+                                "group": "rbac.authorization.k8s.io",
+                                "resourfce": "clusterroles",
+                                "version": "v1"
+                            }
+                        ],
+                        "supportedActions": [
+                            "Issue"
+                        ]
+                    },
+                    "isSystemRule": true,
+                    "modifiedAt": "2024-11-23T19:35:48",
+                    "modifiedBy": "gil",
+                    "name": "Minimize wildcard use in Roles and ClusterRoles",
+                    "platforms": [
+                        "Linux"
+                    ],
+                    "providers": [
+                        "AWS",
+                        "GCP"
+                    ],
+                    "remediation": "Enable ssl mode",
+                    "revision": 1,
+                    "ruleId": "2808bbd9-51a4-47cc-a2fa-60d54903fe9c",
+                    "severity": "LOW",
+                    "source": [
+                        "K8sApi"
+                    ],
+                    "specVer": "1",
+                    "type": "COMPLIANCE"
+                },
+                "properties": {
+                    "availableActions": {
+                        "description": "A list of the available actions",
+                        "items": {
+                            "$ref": "#/components/schemas/rules-definition_openapi-spec_Action"
+                        },
+                        "type": "array",
+                        "x-oapi-codegen-extra-tags": {
+                            "yaml": "ruleAvailableActions"
+                        }
+                    },
+                    "changeLog": {
+                        "type": "string",
+                        "x-oapi-codegen-extra-tags": {
+                            "yaml": "changeLog"
+                        }
+                    },
+                    "controlsIDs": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    },
+                    "createdAt": {
+                        "format": "date-time",
+                        "type": "string",
+                        "x-oapi-codegen-extra-tags": {
+                            "yaml": "createdAt"
+                        }
+                    },
+                    "createdBy": {
+                        "type": "string",
+                        "x-oapi-codegen-extra-tags": {
+                            "yaml": "createdBy"
+                        }
+                    },
+                    "description": {
+                        "type": "string",
+                        "x-oapi-codegen-extra-tags": {
+                            "yaml": "description"
+                        }
+                    },
+                    "engine": {
+                        "$ref": "#/components/schemas/rules-definition_openapi-spec_EngineType"
+                    },
+                    "evaluationScript": {
+                        "type": "string",
+                        "x-oapi-codegen-extra-tags": {
+                            "yaml": "evaluationScript"
+                        }
+                    },
+                    "extraData": {
+                        "type": "object",
+                        "x-oapi-codegen-extra-tags": {
+                            "yaml": "extraData"
+                        }
+                    },
+                    "isSystemRule": {
+                        "type": "boolean",
+                        "x-oapi-codegen-extra-tags": {
+                            "yaml": "isSystemRule"
+                        }
+                    },
+                    "modifiedAt": {
+                        "format": "date-time",
+                        "type": "string",
+                        "x-oapi-codegen-extra-tags": {
+                            "yaml": "modifiedAt"
+                        }
+                    },
+                    "modifiedBy": {
+                        "type": "string",
+                        "x-oapi-codegen-extra-tags": {
+                            "yaml": "modifiedBy"
+                        }
+                    },
+                    "name": {
+                        "type": "string",
+                        "x-oapi-codegen-extra-tags": {
+                            "yaml": "name"
+                        }
+                    },
+                    "platforms": {
+                        "items": {
+                            "$ref": "#/components/schemas/rules-definition_openapi-spec_Platform"
+                        },
+                        "type": "array",
+                        "x-oapi-codegen-extra-tags": {
+                            "yaml": "platforms"
+                        }
+                    },
+                    "providers": {
+                        "items": {
+                            "$ref": "#/components/schemas/rules-definition_openapi-spec_CloudProvider"
+                        },
+                        "type": "array",
+                        "x-oapi-codegen-extra-tags": {
+                            "yaml": "providers"
+                        }
+                    },
+                    "remediation": {
+                        "type": "string",
+                        "x-oapi-codegen-extra-tags": {
+                            "yaml": "remediation"
+                        }
+                    },
+                    "revision": {
+                        "type": "integer",
+                        "x-oapi-codegen-extra-tags": {
+                            "yaml": "revision"
+                        }
+                    },
+                    "ruleId": {
+                        "type": "string",
+                        "x-oapi-codegen-extra-tags": {
+                            "yaml": "ruleId"
+                        }
+                    },
+                    "ruleStandards": {
+                        "description": "Lists rule standards",
+                        "items": {
+                            "x-go-type": "Compliance"
+                        },
+                        "type": "array",
+                        "x-oapi-codegen-extra-tags": {
+                            "yaml": "ruleStandards"
+                        }
+                    },
+                    "ruleUAIAssets": {
+                        "description": "Lists UAI assets relevant to the rule",
+                        "items": {
+                            "x-go-type": "AssetTypeID"
+                        },
+                        "type": "array",
+                        "x-oapi-codegen-extra-tags": {
+                            "yaml": "ruleUAIAssets"
+                        }
+                    },
+                    "severity": {
+                        "$ref": "#/components/schemas/rules-definition_openapi-spec_RuleSeverity"
+                    },
+                    "source": {
+                        "items": {
+                            "$ref": "#/components/schemas/rules-definition_openapi-spec_Source"
+                        },
+                        "type": "array",
+                        "x-oapi-codegen-extra-tags": {
+                            "yaml": "source"
+                        }
+                    },
+                    "specVer": {
+                        "type": "string",
+                        "x-oapi-codegen-extra-tags": {
+                            "yaml": "specVer"
+                        }
+                    },
+                    "type": {
+                        "type": "string",
+                        "x-oapi-codegen-extra-tags": {
+                            "yaml": "type"
+                        }
+                    }
+                },
+                "required": [
+                    "ruleId",
+                    "revision",
+                    "specVer",
+                    "engine",
+                    "evaluationScript",
+                    "extraData",
+                    "source",
+                    "type",
+                    "platforms",
+                    "providers",
+                    "isSystemRule",
+                    "name",
+                    "description",
+                    "createdAt",
+                    "modifiedAt",
+                    "createdBy",
+                    "modifiedBy",
+                    "changeLog",
+                    "severity",
+                    "controlsIDs",
+                    "remediation",
+                    "ruleUAIAssets",
+                    "availableActions",
+                    "ruleStandards"
+                ],
+                "type": "object"
+            },
+            "RulesPaginatedResponse": {
+                "description": "Returns a compliance rules page",
+                "properties": {
+                    "limit": {
+                        "description": "The maximum rules to fetch in a single page request, if not provided default is to fetch all.",
+                        "example": 50,
+                        "type": "integer"
+                    },
+                    "offset": {
+                        "description": "The offset from where the rules fetched",
+                        "example": 150,
+                        "type": "integer"
+                    },
+                    "rules": {
+                        "items": {
+                            "$ref": "#/components/schemas/rules-definition_openapi-spec_RuleData"
+                        },
+                        "type": "array"
+                    },
+                    "total": {
+                        "description": "Total filtered count of rules",
+                        "example": 347,
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "offset",
+                    "limit",
+                    "total",
+                    "rules"
+                ],
+                "type": "object"
+            },
+            "UnprocessableEntityResponse": {
+                "properties": {
+                    "error": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "error"
+                ],
+                "type": "object"
+            },
+            "public_api_openapi-spec_Code": {
+                "description": "Reported error code",
+                "enum": [
+                    "BAD_REQUEST",
+                    "FORBIDDEN",
+                    "NOT_FOUND",
+                    "INTERNAL_ERROR"
+                ],
+                "example": "NOT_FOUND",
+                "type": "string"
+            },
+            "public_api_openapi-spec_PublicAPIError": {
+                "example": {
+                    "err_msg": "Policy ID not found",
+                    "metadata": {
+                        "code": "NOT_FOUND"
+                    }
+                },
+                "properties": {
+                    "err_msg": {
+                        "description": "Error message returned",
+                        "type": "string"
+                    },
+                    "metadata": {
+                        "$ref": "#/components/schemas/public_api_openapi-spec_PublicAPIErrorMetadata"
+                    }
+                },
+                "required": [
+                    "err_msg",
+                    "metadata"
+                ],
+                "type": "object"
+            },
+            "public_api_openapi-spec_PublicAPIErrorMetadata": {
+                "description": "Details for the PublicAPIError",
+                "example": {
+                    "code": "INTERNAL_SERVER_ERROR"
+                },
+                "properties": {
+                    "code": {
+                        "$ref": "#/components/schemas/public_api_openapi-spec_Code"
+                    }
+                },
+                "required": [
+                    "code"
+                ],
+                "type": "object"
+            },
+            "rules-definition_openapi-spec_Action": {
+                "description": "Supported rule severities",
+                "enum": [
+                    "Block",
+                    "Issue"
+                ],
+                "example": "Block",
+                "type": "string",
+                "x-oapi-codegen-extra-tags": {
+                    "json": "action",
+                    "yaml": "action"
+                }
+            },
+            "rules-definition_openapi-spec_CloudProvider": {
+                "description": "Supported cloud providers",
+                "enum": [
+                    "AWS",
+                    "GCP",
+                    "Azure",
+                    "ONPREM"
+                ],
+                "example": "Azure",
+                "type": "string",
+                "x-oapi-codegen-extra-tags": {
+                    "yaml": "CloudProvider"
+                }
+            },
+            "rules-definition_openapi-spec_EngineType": {
+                "enum": [
+                    "rego",
+                    "bash",
+                    "embedded",
+                    "python"
+                ],
+                "example": "rego",
+                "type": "string",
+                "x-oapi-codegen-extra-tags": {
+                    "yaml": "engine"
+                }
+            },
+            "rules-definition_openapi-spec_Platform": {
+                "description": "One of the supported platforms",
+                "enum": [
+                    "Linux",
+                    "Windows",
+                    "KUBERNETES_CLUSTER",
+                    "KUBERNETES_RESOURCE"
+                ],
+                "type": "string",
+                "x-oapi-codegen-extra-tags": {
+                    "yaml": "Platform"
+                }
+            },
+            "rules-definition_openapi-spec_RuleData": {
+                "description": "Rule definition schema",
+                "example": {
+                    "changeLog": "format the rego script",
+                    "controlsIDs": [
+                        "2a16a9f3-2602-4f0c-a909-7c184ddfeda2",
+                        "2a16a9f3-2602-4f0c-a909-7c184ddfe11"
+                    ],
+                    "createdAt": "2024-06-12T09:55:22",
+                    "createdBy": "eli",
+                    "description": "Some description for the rule",
+                    "engine": "rego",
+                    "evaluationScript": " package pan.k8s_policy default allow = false allow { not has_wildcard_resources(input.resource) not has_wildcard_verbs(input.resource) } has_wildcard_resources(role) { some i role.resources[i] == \"*\" } has_wildcard_verbs(role) { some i role.verbs[i] == \"*\" } ",
+                    "extraData": {
+                        "compliance": [
+                            {
+                                "control": "5.4.1",
+                                "name": "CIS AKS",
+                                "version": "1.5"
+                            }
+                        ],
+                        "finding": {
+                            "category": "IDENTITY",
+                            "description": "Cool k8s finding",
+                            "name": "Kubernetes role with excessive rights found",
+                            "typeId": 80
+                        },
+                        "scannableAssets": [
+                            {
+                                "group": "rbac.authorization.k8s.io",
+                                "resource": "role",
+                                "version": "v1"
+                            },
+                            {
+                                "group": "rbac.authorization.k8s.io",
+                                "resourfce": "clusterroles",
+                                "version": "v1"
+                            }
+                        ],
+                        "supportedActions": [
+                            "Issue"
+                        ]
+                    },
+                    "isSystemRule": true,
+                    "modifiedAt": "2024-11-23T19:35:48",
+                    "modifiedBy": "gil",
+                    "name": "Minimize wildcard use in Roles and ClusterRoles",
+                    "platforms": [
+                        "Linux"
+                    ],
+                    "providers": [
+                        "AWS",
+                        "GCP"
+                    ],
+                    "remediation": "Enable ssl mode",
+                    "revision": 1,
+                    "ruleId": "2808bbd9-51a4-47cc-a2fa-60d54903fe9c",
+                    "severity": "LOW",
+                    "source": [
+                        "K8sApi"
+                    ],
+                    "specVer": "1",
+                    "type": "COMPLIANCE"
+                },
+                "properties": {
+                    "availableActions": {
+                        "description": "Lists available actions",
+                        "items": {
+                            "$ref": "#/components/schemas/rules-definition_openapi-spec_Action"
+                        },
+                        "type": "array",
+                        "x-oapi-codegen-extra-tags": {
+                            "yaml": "ruleAvailableActions"
+                        }
+                    },
+                    "changeLog": {
+                        "type": "string",
+                        "x-oapi-codegen-extra-tags": {
+                            "yaml": "changeLog"
+                        }
+                    },
+                    "controlsIDs": {
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    },
+                    "createdAt": {
+                        "format": "date-time",
+                        "type": "string",
+                        "x-oapi-codegen-extra-tags": {
+                            "yaml": "createdAt"
+                        }
+                    },
+                    "createdBy": {
+                        "type": "string",
+                        "x-oapi-codegen-extra-tags": {
+                            "yaml": "createdBy"
+                        }
+                    },
+                    "description": {
+                        "type": "string",
+                        "x-oapi-codegen-extra-tags": {
+                            "yaml": "description"
+                        }
+                    },
+                    "engine": {
+                        "$ref": "#/components/schemas/rules-definition_openapi-spec_EngineType"
+                    },
+                    "evaluationScript": {
+                        "type": "string",
+                        "x-oapi-codegen-extra-tags": {
+                            "yaml": "evaluationScript"
+                        }
+                    },
+                    "extraData": {
+                        "type": "object",
+                        "x-oapi-codegen-extra-tags": {
+                            "yaml": "extraData"
+                        }
+                    },
+                    "isSystemRule": {
+                        "type": "boolean",
+                        "x-oapi-codegen-extra-tags": {
+                            "yaml": "isSystemRule"
+                        }
+                    },
+                    "modifiedAt": {
+                        "format": "date-time",
+                        "type": "string",
+                        "x-oapi-codegen-extra-tags": {
+                            "yaml": "modifiedAt"
+                        }
+                    },
+                    "modifiedBy": {
+                        "type": "string",
+                        "x-oapi-codegen-extra-tags": {
+                            "yaml": "modifiedBy"
+                        }
+                    },
+                    "name": {
+                        "type": "string",
+                        "x-oapi-codegen-extra-tags": {
+                            "yaml": "name"
+                        }
+                    },
+                    "platforms": {
+                        "items": {
+                            "$ref": "#/components/schemas/rules-definition_openapi-spec_Platform"
+                        },
+                        "type": "array",
+                        "x-oapi-codegen-extra-tags": {
+                            "yaml": "platforms"
+                        }
+                    },
+                    "providers": {
+                        "items": {
+                            "$ref": "#/components/schemas/rules-definition_openapi-spec_CloudProvider"
+                        },
+                        "type": "array",
+                        "x-oapi-codegen-extra-tags": {
+                            "yaml": "providers"
+                        }
+                    },
+                    "remediation": {
+                        "type": "string",
+                        "x-oapi-codegen-extra-tags": {
+                            "yaml": "remediation"
+                        }
+                    },
+                    "revision": {
+                        "type": "integer",
+                        "x-oapi-codegen-extra-tags": {
+                            "yaml": "revision"
+                        }
+                    },
+                    "ruleId": {
+                        "type": "string",
+                        "x-oapi-codegen-extra-tags": {
+                            "yaml": "ruleId"
+                        }
+                    },
+                    "ruleStandards": {
+                        "description": "Lists rule standards",
+                        "items": {
+                            "x-go-type": "Compliance"
+                        },
+                        "type": "array",
+                        "x-oapi-codegen-extra-tags": {
+                            "yaml": "ruleStandards"
+                        }
+                    },
+                    "ruleUAIAssets": {
+                        "description": "Lists UAI assets relevant to the rule",
+                        "items": {
+                            "x-go-type": "AssetTypeID"
+                        },
+                        "type": "array",
+                        "x-oapi-codegen-extra-tags": {
+                            "yaml": "ruleUAIAssets"
+                        }
+                    },
+                    "severity": {
+                        "$ref": "#/components/schemas/rules-definition_openapi-spec_RuleSeverity"
+                    },
+                    "source": {
+                        "items": {
+                            "$ref": "#/components/schemas/rules-definition_openapi-spec_Source"
+                        },
+                        "type": "array",
+                        "x-oapi-codegen-extra-tags": {
+                            "yaml": "source"
+                        }
+                    },
+                    "specVer": {
+                        "type": "string",
+                        "x-oapi-codegen-extra-tags": {
+                            "yaml": "specVer"
+                        }
+                    },
+                    "type": {
+                        "type": "string",
+                        "x-oapi-codegen-extra-tags": {
+                            "yaml": "type"
+                        }
+                    }
+                },
+                "required": [
+                    "ruleId",
+                    "revision",
+                    "specVer",
+                    "engine",
+                    "evaluationScript",
+                    "extraData",
+                    "source",
+                    "type",
+                    "platforms",
+                    "providers",
+                    "isSystemRule",
+                    "name",
+                    "description",
+                    "createdAt",
+                    "modifiedAt",
+                    "createdBy",
+                    "modifiedBy",
+                    "changeLog",
+                    "severity",
+                    "controlsIDs",
+                    "remediation",
+                    "ruleUAIAssets",
+                    "availableActions",
+                    "ruleStandards"
+                ],
+                "type": "object"
+            },
+            "rules-definition_openapi-spec_RuleSeverity": {
+                "description": "Supported rule severities",
+                "enum": [
+                    "INFO",
+                    "LOW",
+                    "MEDIUM",
+                    "HIGH",
+                    "CRITICAL"
+                ],
+                "example": "CRITICAL",
+                "type": "string",
+                "x-oapi-codegen-extra-tags": {
+                    "yaml": "severity"
+                }
+            },
+            "rules-definition_openapi-spec_Source": {
+                "description": "Scanner source",
+                "enum": [
+                    "UAI",
+                    "K8sApi",
+                    "K8sFileSystem",
+                    "Host",
+                    "ClusterDescribe",
+                    "ADS"
+                ],
+                "type": "string",
+                "x-oapi-codegen-extra-tags": {
+                    "yaml": "Source"
+                }
+            }
+        }
+    },
+    "paths": {
+        "/api/v1/policies": {
+            "delete": {
+                "tags": [
+                    "Rules Management Service"
+                ],
+                "description": "Delete policies/rule instances from the rules management service.",
+                "operationId": "DeleteApiV1Policies",
+                "parameters": [
+                    {
+                        "default": null,
+                        "description": "If set, will trigger issue closing of issues opened by the deleted policies",
+                        "in": "query",
+                        "name": "closeIssues",
+                        "nullable": true,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json; charset=UTF-8": {
+                            "schema": {
+                                "items": {
+                                    "type": "string"
+                                },
+                                "type": "array"
+                            }
+                        }
+                    },
+                    "description": "Array of policy IDs to delete.",
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "400": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BadRequestResponse"
+                                }
+                            }
+                        },
+                        "description": "Client error"
+                    },
+                    "403": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenResponse"
+                                }
+                            }
+                        },
+                        "description": "Forbidden error"
+                    },
+                    "500": {
+                        "description": "Service had unexpected internal error"
+                    }
+                },
+                "summary": "Delete Policies",
+                "x-go-middlewares": [
+                    "CustomLogging"
+                ],
+                "x-public": false
+            },
+            "get": {
+                "tags": [
+                    "Rules Management Service"
+                ],
+                "description": "Get all latest policies/rule instances from a list of given policy types. Default behavior is all.",
+                "operationId": "GetApiV1Policies",
+                "parameters": [
+                    {
+                        "default": null,
+                        "description": "Lists policy types to fetch.",
+                        "in": "query",
+                        "name": "types",
+                        "nullable": true,
+                        "schema": {
+                            "items": {
+                                "$ref": "#/components/schemas/PolicyType"
+                            },
+                            "type": "array"
+                        }
+                    },
+                    {
+                        "default": false,
+                        "description": "This flag bypasses calling the platform for asset groups data when fetching policies. Note that this means asset groups will not be updated when fetching policies.",
+                        "in": "query",
+                        "name": "disableVerbose",
+                        "nullable": true,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GetPoliciesResponse"
+                                }
+                            }
+                        },
+                        "description": "Success"
+                    },
+                    "400": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BadRequestResponse"
+                                }
+                            }
+                        },
+                        "description": "Client error"
+                    },
+                    "500": {
+                        "description": "Service had unexpected internal error"
+                    }
+                },
+                "summary": "Get Policies",
+                "x-go-middlewares": [
+                    "CustomLogging"
+                ],
+                "x-public": false
+            },
+            "post": {
+                "tags": [
+                    "Rules Management Service"
+                ],
+                "description": "Adds policies and rule instances to the rules management service.",
+                "operationId": "PostApiV1Policies",
+                "requestBody": {
+                    "content": {
+                        "application/json; charset=UTF-8": {
+                            "schema": {
+                                "items": {
+                                    "$ref": "#/components/schemas/PolicyData"
+                                },
+                                "type": "array"
+                            }
+                        }
+                    },
+                    "description": "Array of policies to add.",
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "400": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BadRequestResponse"
+                                }
+                            }
+                        },
+                        "description": "Client error"
+                    },
+                    "403": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenResponse"
+                                }
+                            }
+                        },
+                        "description": "Forbidden error"
+                    },
+                    "500": {
+                        "description": "Service encountered unexpected internal error"
+                    }
+                },
+                "summary": "Add Policies",
+                "x-go-middlewares": [
+                    "CustomLogging"
+                ],
+                "x-public": false
+            },
+            "put": {
+                "tags": [
+                    "Rules Management Service"
+                ],
+                "description": "Updates policies and rule instances in the rules management service.",
+                "operationId": "PutApiV1Policies",
+                "requestBody": {
+                    "content": {
+                        "application/json; charset=UTF-8": {
+                            "schema": {
+                                "items": {
+                                    "$ref": "#/components/schemas/PolicyData"
+                                },
+                                "type": "array"
+                            }
+                        }
+                    },
+                    "description": "Array of policies to update. Policy IDs are mandatory. Revisions are auto-incremented. All other data fields in the request are updated. If a data field is not present, it is considered as filled with the default value and is updated.",
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "400": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BadRequestResponse"
+                                }
+                            }
+                        },
+                        "description": "Client error"
+                    },
+                    "403": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenResponse"
+                                }
+                            }
+                        },
+                        "description": "Forbidden error"
+                    },
+                    "500": {
+                        "description": "Service encountered unexpected internal error"
+                    }
+                },
+                "summary": "Update Policies",
+                "x-go-middlewares": [
+                    "CustomLogging"
+                ],
+                "x-public": false
+            }
+        },
+        "/api/v1/policies/disable": {
+            "post": {
+                "tags": [
+                    "Rules Management Service"
+                ],
+                "description": "Disable policies/rule instances.",
+                "operationId": "PostApiV1PoliciesDisable",
+                "requestBody": {
+                    "content": {
+                        "application/json; charset=UTF-8": {
+                            "schema": {
+                                "items": {
+                                    "type": "string"
+                                },
+                                "type": "array"
+                            }
+                        }
+                    },
+                    "description": "Array of policies to disable.",
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "400": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BadRequestResponse"
+                                }
+                            }
+                        },
+                        "description": "Client error"
+                    },
+                    "403": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenResponse"
+                                }
+                            }
+                        },
+                        "description": "Forbidden error"
+                    },
+                    "500": {
+                        "description": "Service encountered unexpected internal error"
+                    }
+                },
+                "summary": "Disable Policies",
+                "x-go-middlewares": [
+                    "CustomLogging"
+                ],
+                "x-public": false
+            }
+        },
+        "/api/v1/policies/enable": {
+            "post": {
+                "tags": [
+                    "Rules Management Service"
+                ],
+                "description": "Enable policies/rule instances.",
+                "operationId": "PostApiV1PoliciesEnable",
+                "requestBody": {
+                    "content": {
+                        "application/json; charset=UTF-8": {
+                            "schema": {
+                                "items": {
+                                    "type": "string"
+                                },
+                                "type": "array"
+                            }
+                        }
+                    },
+                    "description": "Array of policies to enable.",
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "400": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BadRequestResponse"
+                                }
+                            }
+                        },
+                        "description": "Client error"
+                    },
+                    "403": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenResponse"
+                                }
+                            }
+                        },
+                        "description": "Forbidden error"
+                    },
+                    "500": {
+                        "description": "Service encountered unexpected internal error"
+                    }
+                },
+                "summary": "Enable Policies",
+                "x-go-middlewares": [
+                    "CustomLogging"
+                ],
+                "x-public": false
+            }
+        },
+        "/api/v1/policies/{id}": {
+            "get": {
+                "tags": [
+                    "Rules Management Service"
+                ],
+                "description": "Get a policy instance by its ID.",
+                "operationId": "GetApiV1PoliciesId",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "default": false,
+                        "description": "Flag to bypass calling platform for asset groups data when fetching policy. Note that this means asset groups will not be updated upon fetching policy.",
+                        "in": "query",
+                        "name": "disableVerbose",
+                        "nullable": true,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PolicyData"
+                                }
+                            }
+                        },
+                        "description": "Success"
+                    },
+                    "400": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BadRequestResponse"
+                                }
+                            }
+                        },
+                        "description": "Bad request error"
+                    },
+                    "404": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BadRequestResponse"
+                                }
+                            }
+                        },
+                        "description": "Policy not found"
+                    },
+                    "500": {
+                        "description": "Service had unexpected internal error"
+                    }
+                },
+                "summary": "Get a Policy by ID",
+                "x-go-middlewares": [
+                    "CustomLogging"
+                ],
+                "x-public": false
+            }
+        },
+        "/api/v1/rules/add": {
+            "post": {
+                "tags": [
+                    "Rules Management Service"
+                ],
+                "description": "Adds a custom compliance rule to the rules management service.",
+                "operationId": "PostApiV1RulesAdd",
+                "requestBody": {
+                    "content": {
+                        "application/json; charset=UTF-8": {
+                            "schema": {
+                                "items": {
+                                    "$ref": "#/components/schemas/RuleDef"
+                                },
+                                "type": "array"
+                            }
+                        }
+                    },
+                    "description": "Array of compliance rules to add.",
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "400": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BadRequestResponse"
+                                }
+                            }
+                        },
+                        "description": "Client error"
+                    },
+                    "403": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenResponse"
+                                }
+                            }
+                        },
+                        "description": "Forbidden error"
+                    },
+                    "500": {
+                        "description": "Service encountered an unexpected internal error"
+                    }
+                },
+                "summary": "Add (custom) Compliance rules",
+                "x-go-middlewares": [
+                    "CustomLogging"
+                ],
+                "x-public": false
+            }
+        },
+        "/api/v1/rules/delete": {
+            "post": {
+                "tags": [
+                    "Rules Management Service"
+                ],
+                "description": "Delete custom CWP Rules instances from the rules management service.",
+                "operationId": "PostApiV1RulesDelete",
+                "requestBody": {
+                    "content": {
+                        "application/json; charset=UTF-8": {
+                            "schema": {
+                                "items": {
+                                    "type": "string"
+                                },
+                                "type": "array"
+                            }
+                        }
+                    },
+                    "description": "Array of rules IDs to delete.",
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "400": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BadRequestResponse"
+                                }
+                            }
+                        },
+                        "description": "Client error"
+                    },
+                    "403": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenResponse"
+                                }
+                            }
+                        },
+                        "description": "Forbidden error"
+                    },
+                    "500": {
+                        "description": "Service encountered an unexpected internal error"
+                    }
+                },
+                "summary": "Delete (custom) CWP Rules",
+                "x-go-middlewares": [
+                    "CustomLogging"
+                ],
+                "x-public": false
+            }
+        },
+        "/api/v1/rules/fetch": {
+            "post": {
+                "tags": [
+                    "Rules Management Service"
+                ],
+                "description": "Get rules by a list of IDs. If a rule is not found for a specific ID, an error is returned.",
+                "operationId": "PostApiV1RulesFetch",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "example": {
+                                    "ids": [
+                                        "rule-id-1",
+                                        "rule-id-2",
+                                        "rule-id-3"
+                                    ]
+                                },
+                                "properties": {
+                                    "ids": {
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "type": "array"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "items": {
+                                        "$ref": "#/components/schemas/RuleDef"
+                                    },
+                                    "type": "array"
+                                }
+                            }
+                        },
+                        "description": "Success. Returns a list of rule objects."
+                    },
+                    "400": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BadRequestResponse"
+                                }
+                            }
+                        },
+                        "description": "Bad request error."
+                    },
+                    "404": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BadRequestResponse"
+                                }
+                            }
+                        },
+                        "description": "Rules not found"
+                    },
+                    "500": {
+                        "description": "Service encountered an unexpected internal error."
+                    }
+                },
+                "summary": "Get rules by IDs",
+                "x-go-middlewares": [
+                    "CustomLogging"
+                ],
+                "x-public": false
+            }
+        },
+        "/api/v1/rules/get": {
+            "get": {
+                "tags": [
+                    "Rules Management Service"
+                ],
+                "description": "Get all Compliance rules (system and custom).This API supports pagination.",
+                "operationId": "GetApiV1RulesGet",
+                "parameters": [
+                    {
+                        "description": "Fetches rules from offset location, default is 0.",
+                        "in": "query",
+                        "name": "offset",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "The maximum number of rules to fetch in a single page request, if not specified. default is set to fetch all.",
+                        "in": "query",
+                        "name": "limit",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "default": null,
+                        "description": "The policy rule definitions types to fetch.",
+                        "in": "query",
+                        "name": "types",
+                        "nullable": true,
+                        "schema": {
+                            "items": {
+                                "$ref": "#/components/schemas/PolicyType"
+                            },
+                            "type": "array"
+                        }
+                    },
+                    {
+                        "description": "The platform to which the rules should be applied.",
+                        "in": "query",
+                        "name": "platform",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "The scanner source type for the rule.",
+                        "example": "K8sApi",
+                        "in": "query",
+                        "name": "source",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RulesPaginatedResponse"
+                                }
+                            }
+                        },
+                        "description": "Success"
+                    },
+                    "400": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BadRequestResponse"
+                                }
+                            }
+                        },
+                        "description": "Client error"
+                    },
+                    "500": {
+                        "description": "Service encountered an unexpected internal error"
+                    }
+                },
+                "summary": "Get the Compliance Rules",
+                "x-go-middlewares": [
+                    "CustomLogging"
+                ],
+                "x-public": false
+            }
+        },
+        "/api/v1/rules/get/{id}": {
+            "get": {
+                "tags": [
+                    "Rules Management Service"
+                ],
+                "description": "Get a rule instance by its ID.",
+                "operationId": "GetApiV1RulesGetId",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RuleDef"
+                                }
+                            }
+                        },
+                        "description": "Success"
+                    },
+                    "400": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BadRequestResponse"
+                                }
+                            }
+                        },
+                        "description": "Bad request error"
+                    },
+                    "404": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BadRequestResponse"
+                                }
+                            }
+                        },
+                        "description": "Rule not found"
+                    },
+                    "500": {
+                        "description": "Service encountered an unexpected internal error"
+                    }
+                },
+                "summary": "Get a rule by ID",
+                "x-go-middlewares": [
+                    "CustomLogging"
+                ],
+                "x-public": false
+            }
+        },
+        "/api/v1/rules/lint/rego": {
+            "post": {
+                "tags": [
+                    "Rules Management Service"
+                ],
+                "description": "lint the content of the rego script",
+                "operationId": "PostApiV1RulesLintRego",
+                "requestBody": {
+                    "content": {
+                        "application/json; charset=UTF-8": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EvaluationScript"
+                            }
+                        }
+                    },
+                    "description": "rego script content",
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "400": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BadRequestResponse"
+                                }
+                            }
+                        },
+                        "description": "Client error"
+                    },
+                    "422": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnprocessableEntityResponse"
+                                }
+                            }
+                        },
+                        "description": "Invalid script syntax"
+                    },
+                    "500": {
+                        "description": "Service encountered an unexpected internal error"
+                    }
+                },
+                "summary": "rego script linter",
+                "x-public": false
+            }
+        },
+        "/api/v1/rules/update": {
+            "post": {
+                "tags": [
+                    "Rules Management Service"
+                ],
+                "description": "Update (custom) Compliance rules in the rules management service.",
+                "operationId": "PostApiV1RulesUpdate",
+                "requestBody": {
+                    "content": {
+                        "application/json; charset=UTF-8": {
+                            "schema": {
+                                "items": {
+                                    "$ref": "#/components/schemas/RuleDef"
+                                },
+                                "type": "array"
+                            }
+                        }
+                    },
+                    "description": "Array of compliance rules to update. Rule IDs are mandatory. Revision will be auto-incremented. All other data fields in the request will be updated. If a data field is not present, it is considered as filled with the default value and will be updated by default.",
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "400": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BadRequestResponse"
+                                }
+                            }
+                        },
+                        "description": "Client error"
+                    },
+                    "403": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenResponse"
+                                }
+                            }
+                        },
+                        "description": "Forbidden error"
+                    },
+                    "500": {
+                        "description": "Service encountered an unexpected internal error"
+                    }
+                },
+                "summary": "Update (custom) Compliance rules",
+                "x-go-middlewares": [
+                    "CustomLogging"
+                ],
+                "x-public": false
+            }
+        },
+        "/api/v2/policies": {
+            "get": {
+                "tags": [
+                    "Rules Management Service"
+                ],
+                "description": "Gets all policy instances from a list of given policy types. Default behavior is all.",
+                "operationId": "GetApiV2Policies",
+                "parameters": [
+                    {
+                        "default": null,
+                        "description": "Policy types to fetch",
+                        "in": "query",
+                        "name": "types",
+                        "nullable": true,
+                        "schema": {
+                            "items": {
+                                "$ref": "#/components/schemas/PolicyType"
+                            },
+                            "type": "array"
+                        }
+                    },
+                    {
+                        "default": false,
+                        "description": "Flag to bypass calling platform for asset groups data when fetching policies. Note that this means asset groups will not be updated when fetching policies.",
+                        "in": "query",
+                        "name": "disableVerbose",
+                        "nullable": true,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GetPoliciesResponseV2"
+                                }
+                            }
+                        },
+                        "description": "Success"
+                    },
+                    "400": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BadRequestResponse"
+                                }
+                            }
+                        },
+                        "description": "Client error"
+                    },
+                    "500": {
+                        "description": "Service encountered an unexpected internal error"
+                    }
+                },
+                "summary": "Get Policies",
+                "x-go-middlewares": [
+                    "CustomLogging"
+                ],
+                "x-public": false
+            },
+            "post": {
+                "tags": [
+                    "Rules Management Service"
+                ],
+                "description": "Adds policies and rule instances to the rules management service.",
+                "operationId": "PostApiV2Policies",
+                "requestBody": {
+                    "content": {
+                        "application/json; charset=UTF-8": {
+                            "schema": {
+                                "items": {
+                                    "$ref": "#/components/schemas/PolicyPostRequestDataV2"
+                                },
+                                "type": "array"
+                            }
+                        }
+                    },
+                    "description": "Array of policies to add.",
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Success"
+                    },
+                    "400": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BadRequestResponse"
+                                }
+                            }
+                        },
+                        "description": "Client error"
+                    },
+                    "403": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenResponse"
+                                }
+                            }
+                        },
+                        "description": "Forbidden error"
+                    },
+                    "500": {
+                        "description": "Service encountered an unexpected internal error"
+                    }
+                },
+                "summary": "Add Policies",
+                "x-go-middlewares": [
+                    "CustomLogging"
+                ],
+                "x-public": false
+            },
+            "put": {
+                "tags": [
+                    "Rules Management Service"
+                ],
+                "description": "Update policies/rule instances in the rules management service.",
+                "operationId": "PutApiV2Policies",
+                "requestBody": {
+                    "content": {
+                        "application/json; charset=UTF-8": {
+                            "schema": {
+                                "items": {
+                                    "$ref": "#/components/schemas/PolicyPutRequestDataV2"
+                                },
+                                "type": "array"
+                            }
+                        }
+                    },
+                    "description": "Array of policies to update. Policy IDs are mandatory. Revision will be auto-incremented. All other data fields in the request will be updated. If a data field is not present, it is considered as filled with the default value and will be updated with the default.",
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success"
+                    },
+                    "400": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BadRequestResponse"
+                                }
+                            }
+                        },
+                        "description": "Client error"
+                    },
+                    "403": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenResponse"
+                                }
+                            }
+                        },
+                        "description": "Forbidden error"
+                    },
+                    "500": {
+                        "description": "Service had unexpected internal error"
+                    }
+                },
+                "summary": "Update Policies",
+                "x-go-middlewares": [
+                    "CustomLogging"
+                ],
+                "x-public": false
+            }
+        },
+        "/api/v2/policies/{id}": {
+            "get": {
+                "tags": [
+                    "Rules Management Service"
+                ],
+                "description": "Get a policy instance by its ID.",
+                "operationId": "GetApiV2PoliciesId",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "default": false,
+                        "description": "Flag to bypass calling platform for asset groups data when fetching policy. Note that this means asset groups will not be updated when fetching policy.",
+                        "in": "query",
+                        "name": "disableVerbose",
+                        "nullable": true,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PolicyGetResponseDataV2"
+                                }
+                            }
+                        },
+                        "description": "Success"
+                    },
+                    "400": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BadRequestResponse"
+                                }
+                            }
+                        },
+                        "description": "Bad request error"
+                    },
+                    "404": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BadRequestResponse"
+                                }
+                            }
+                        },
+                        "description": "Policy not found"
+                    },
+                    "500": {
+                        "description": "Service encountered an unexpected internal error"
+                    }
+                },
+                "summary": "Get a Policy by ID",
+                "x-go-middlewares": [
+                    "CustomLogging"
+                ],
+                "x-public": false
+            }
+        },
+        "/public_api/v1/cwp/policies": {
+            "get": {
+                "tags": [
+                    "Rules Management Service"
+                ],
+                "description": "Get all policy instances of a given type. Default behavior is all.",
+                "operationId": "GetPublicApiV1CwpPolicies",
+                "parameters": [
+                    {
+                        "description": "The policies type",
+                        "in": "query",
+                        "name": "types",
+                        "schema": {
+                            "items": {
+                                "$ref": "#/components/schemas/PolicyType"
+                            },
+                            "type": "array"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GetPoliciesResponse"
+                                }
+                            }
+                        },
+                        "description": "Success"
+                    },
+                    "400": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "example": {
+                                    "err_msg": "Bad Request",
+                                    "metadata": {
+                                        "code": "BAD_REQUEST"
+                                    }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Client error"
+                    },
+                    "500": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "example": {
+                                    "err_msg": "Internal Error",
+                                    "metadata": {
+                                        "code": "INTERNAL_ERROR"
+                                    }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Service encountered an unexpected internal error"
+                    }
+                },
+                "summary": "Get Policies.",
+                "x-go-middlewares": [
+                    "CustomLogging"
+                ],
+                "x-public": true
+            },
+            "post": {
+                "tags": [
+                    "Rules Management Service"
+                ],
+                "description": "Add policy instances.",
+                "operationId": "PostPublicApiV1CwpPolicies",
+                "requestBody": {
+                    "content": {
+                        "application/json; charset=UTF-8": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PolicyData"
+                            }
+                        }
+                    },
+                    "description": "Policy to add.",
+                    "required": true
+                },
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        },
+                        "description": "Success"
+                    },
+                    "400": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "example": {
+                                    "err_msg": "Bad Request",
+                                    "metadata": {
+                                        "code": "BAD_REQUEST"
+                                    }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Client error"
+                    },
+                    "403": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "example": {
+                                    "err_msg": "Forbidden",
+                                    "metadata": {
+                                        "code": "FORBIDDEN"
+                                    }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Forbidden error"
+                    },
+                    "500": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "example": {
+                                    "err_msg": "Internal Error",
+                                    "metadata": {
+                                        "code": "INTERNAL_ERROR"
+                                    }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Service encountered an unexpected internal error"
+                    }
+                },
+                "summary": "Add Policy.",
+                "x-go-middlewares": [
+                    "CustomLogging"
+                ],
+                "x-public": true
+            }
+        },
+        "/public_api/v1/cwp/policies/{id}": {
+            "delete": {
+                "tags": [
+                    "Rules Management Service"
+                ],
+                "description": "Delete a policy instance by its ID.",
+                "operationId": "DeletePublicApiV1CwpPoliciesId",
+                "parameters": [
+                    {
+                        "description": "If set, will trigger closing of issues opened by the deleted policy.",
+                        "in": "query",
+                        "name": "closeIssues",
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "description": "Policy ID to delete",
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Success"
+                    },
+                    "400": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "example": {
+                                    "err_msg": "Bad Request",
+                                    "metadata": {
+                                        "code": "BAD_REQUEST"
+                                    }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Client error"
+                    },
+                    "403": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "example": {
+                                    "err_msg": "Forbidden",
+                                    "metadata": {
+                                        "code": "FORBIDDEN"
+                                    }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Forbidden error"
+                    },
+                    "404": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "example": {
+                                    "err_msg": "Policy ID not found",
+                                    "metadata": {
+                                        "code": "NOT_FOUND"
+                                    }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Policy ID not found"
+                    },
+                    "500": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "example": {
+                                    "err_msg": "Internal Error",
+                                    "metadata": {
+                                        "code": "INTERNAL_ERROR"
+                                    }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Service had unexpected internal error"
+                    }
+                },
+                "summary": "Delete a Policy by ID",
+                "x-go-middlewares": [
+                    "CustomLogging"
+                ],
+                "x-public": true
+            },
+            "get": {
+                "tags": [
+                    "Rules Management Service"
+                ],
+                "description": "Get a policy instance by its ID.",
+                "operationId": "GetPublicApiV1CwpPoliciesId",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PolicyData"
+                                }
+                            }
+                        },
+                        "description": "Success"
+                    },
+                    "404": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "example": {
+                                    "err_msg": "Policy ID not found",
+                                    "metadata": {
+                                        "code": "NOT_FOUND"
+                                    }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Policy ID not found"
+                    },
+                    "500": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "example": {
+                                    "err_msg": "Internal Error",
+                                    "metadata": {
+                                        "code": "INTERNAL_ERROR"
+                                    }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Service had unexpected internal error"
+                    }
+                },
+                "summary": "Get a Policy by ID.",
+                "x-go-middlewares": [
+                    "CustomLogging"
+                ],
+                "x-public": true
+            },
+            "put": {
+                "tags": [
+                    "Rules Management Service"
+                ],
+                "description": "Update a policy instance by its ID",
+                "operationId": "PutPublicApiV1CwpPoliciesId",
+                "parameters": [
+                    {
+                        "description": "Policy ID to delete",
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json; charset=UTF-8": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PolicyData"
+                            }
+                        }
+                    },
+                    "description": "Policy object to update. Policy ID is mandatory. Revision will be auto-incremented. All other data fields in the request will be updated. If a data field is not present, it is considered as filled with the default value and will be updated with the default value.",
+                    "required": true
+                },
+                "responses": {
+                    "204": {
+                        "description": "Success"
+                    },
+                    "400": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "example": {
+                                    "err_msg": "Bad Request",
+                                    "metadata": {
+                                        "code": "BAD_REQUEST"
+                                    }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Client error"
+                    },
+                    "403": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "example": {
+                                    "err_msg": "Forbidden",
+                                    "metadata": {
+                                        "code": "FORBIDDEN"
+                                    }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Forbidden error"
+                    },
+                    "404": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "example": {
+                                    "err_msg": "Policy ID not found",
+                                    "metadata": {
+                                        "code": "NOT_FOUND"
+                                    }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Policy ID not found"
+                    },
+                    "500": {
+                        "content": {
+                            "application/json; charset=UTF-8": {
+                                "example": {
+                                    "err_msg": "Internal Error",
+                                    "metadata": {
+                                        "code": "INTERNAL_ERROR"
+                                    }
+                                },
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicAPIErrorResponse"
+                                }
+                            }
+                        },
+                        "description": "Service had unexpected internal error"
+                    }
+                },
+                "summary": "Update a Policy by ID.",
+                "x-go-middlewares": [
+                    "CustomLogging"
+                ],
+                "x-public": true
+            }
+        }
+    }
+}

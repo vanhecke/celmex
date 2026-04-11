@@ -1,0 +1,689 @@
+{
+    "openapi": "3.0.0",
+    "x-stoplight": {
+        "id": "rsl7ivq0a5ei3"
+    },
+    "info": {
+        "title": "Cloud Infrastructure Entitlement Management APIs",
+        "description": "You can export the OpenAPI specs in the [Cortex Stoplight instance](: )https://cortex-panw.stoplight.io/docs/cortex-xsiam-3-x/rsl7ivq0a5ei3-cloud-infrastructure-entitlement-management-ap-is). \n\nAPI for searching and retrieving access information within the Cloud Infrastructure Entitlement Management (CIEM) module.\n\n**Required license:** Cortex Cloud Runtime Security or Cortex Cloud Posture Management",
+        "version": "Cortex XSIAM 3.4",
+        "contact": {
+            "email": "docs-cortex@paloaltonetworks.com",
+            "name": "Cortex Documentation Team",
+            "url": "https://docs-cortex.paloaltonetworks.com/"
+        }
+    },
+    "servers": [
+        {
+            "url": "https://api-yourfqdn",
+            "description": ""
+        }
+    ],
+    "paths": {
+        "/public_api/v1/ciem/access/search": {
+            "post": {
+                "summary": "Search CIEM Access",
+                "operationId": "ciemAccessSearch",
+                "description": "Retrieves a list of access entries based on specified filters, sorting, and pagination.\n\n**Required license:** Cortex Cloud Runtime Security or Cortex Cloud Posture Management",
+                "parameters": [
+                    {
+                        "in": "header",
+                        "name": "x-xdr-auth-id",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "required": true,
+                        "description": "{api_key_id}"
+                    },
+                    {
+                        "in": "header",
+                        "name": "Authorization",
+                        "schema": {
+                            "type": "string",
+                            "pattern": "^Bearer .+$"
+                        },
+                        "required": true,
+                        "description": "{api_key}"
+                    },
+                    {
+                        "in": "header",
+                        "name": "Content-Type",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "application/json"
+                            ]
+                        },
+                        "required": true,
+                        "description": "Specifies the request body format."
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CiemAccessSearchRequest"
+                            },
+                            "examples": {
+                                "default": {
+                                    "value": {
+                                        "filter": {
+                                            "AND": [
+                                                {
+                                                    "search_field": "dest_cloud_resource_id",
+                                                    "search_type": "EQ",
+                                                    "search_value": "abc"
+                                                }
+                                            ]
+                                        },
+                                        "sort": [
+                                            {
+                                                "field": "dest_cloud_resource_id",
+                                                "order": "DESC"
+                                            }
+                                        ],
+                                        "metadata": {
+                                            "next_page_token": "some_base64_string"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful response with CIEM access data.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CiemAccessSearchResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request. Invalid JSON.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
+                                "examples": {
+                                    "Example 1": {
+                                        "value": {
+                                            "reply": {
+                                                "err_code": 400,
+                                                "err_msg": "Invalid Request Body",
+                                                "err_extra": {
+                                                    "err_msg": "The request body contains invalid JSON or malformed parameters for CIEM Access Search."
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized access. An issue occurred during authentication. This can indicate an incorrect key, id, or other invalid authentication parameters.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
+                                "examples": {
+                                    "Example 1": {
+                                        "value": {
+                                            "reply": {
+                                                "err_code": 401,
+                                                "err_msg": "Authentication Failed",
+                                                "err_extra": {
+                                                    "err_msg": "Invalid API key or key ID provided. Please check your authentication credentials."
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "402": {
+                        "description": "Unauthorized access. User does not have the required license type to run this API.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
+                                "examples": {
+                                    "Example 1": {
+                                        "value": {
+                                            "reply": {
+                                                "err_code": 402,
+                                                "err_msg": "License Required",
+                                                "err_extra": {
+                                                    "err_msg": "Your account does not have the necessary license to access the CIEM Access Search API."
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden access. The provided API Key does not have the required RBAC permissions to run this API.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
+                                "examples": {
+                                    "Example 1": {
+                                        "value": {
+                                            "reply": {
+                                                "err_code": 403,
+                                                "err_msg": "Forbidden Access",
+                                                "err_extra": {
+                                                    "err_msg": "The provided API key lacks the required RBAC permissions for the CIEM Access Search operation."
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error. A unified status for API communication type errors.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ErrorResponse"
+                                },
+                                "examples": {
+                                    "Example 1": {
+                                        "value": {
+                                            "reply": {
+                                                "err_code": 500,
+                                                "err_msg": "An error occurred while processing CIEM Access Search query",
+                                                "err_extra": {
+                                                    "err_msg": "Internal server issue encountered during CIEM Access Search."
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-stoplight": {
+                    "id": "9aw9uvy4lxxi0"
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "CIEM access",
+            "description": "Search CIEM access"
+        }
+    ],
+    "components": {
+        "schemas": {
+            "CiemAccessSearchRequest": {
+                "type": "object",
+                "properties": {
+                    "filter": {
+                        "type": "object",
+                        "description": "Optional filters to apply to the search results.",
+                        "properties": {
+                            "AND": {
+                                "type": "array",
+                                "description": "A list of filter conditions. Currently only supports AND logic.",
+                                "items": {
+                                    "$ref": "#/components/schemas/FilterObject"
+                                }
+                            }
+                        }
+                    },
+                    "sort": {
+                        "type": "array",
+                        "description": "Optional sorting criteria for the search results.",
+                        "items": {
+                            "$ref": "#/components/schemas/SortObject"
+                        },
+                        "minItems": 1,
+                        "maxItems": 1
+                    },
+                    "metadata": {
+                        "type": "object",
+                        "description": "Optional metadata for pagination.",
+                        "properties": {
+                            "next_page_token": {
+                                "type": "string",
+                                "description": "A token provided by a previous response to fetch the next page of results."
+                            }
+                        }
+                    }
+                },
+                "example": {
+                    "filter": {
+                        "AND": [
+                            {
+                                "search_field": "dest_cloud_resource_id",
+                                "search_type": "EQ",
+                                "search_value": "abc"
+                            }
+                        ]
+                    },
+                    "sort": [
+                        {
+                            "field": "dest_cloud_resource_id",
+                            "order": "DESC"
+                        }
+                    ],
+                    "metadata": {
+                        "next_page_token": "some_base64_string"
+                    }
+                },
+                "x-stoplight": {
+                    "id": "zu2j276mtgeci"
+                }
+            },
+            "FilterObject": {
+                "type": "object",
+                "example": {
+                    "search_field": "dest_cloud_resource_id",
+                    "search_type": "EQ",
+                    "search_value": "abc"
+                },
+                "x-stoplight": {
+                    "id": "oatmewtclloyo"
+                },
+                "required": [
+                    "search_field",
+                    "search_type",
+                    "search_value"
+                ],
+                "properties": {
+                    "search_field": {
+                        "type": "string",
+                        "description": "Identifies the field to filter.\n",
+                        "enum": [
+                            "access_levels",
+                            "account_access_transformed",
+                            "dest_cloud_account_id",
+                            "dest_cloud_account_name",
+                            "dest_cloud_region",
+                            "dest_cloud_resource_id",
+                            "dest_cloud_resource_name",
+                            "dest_cloud_resource_type",
+                            "dest_cloud_resource_uai",
+                            "dest_cloud_service_name",
+                            "destCategory",
+                            "destination_access_labels",
+                            "excessive_policies_count",
+                            "grantedby_cloud_entity_id",
+                            "grantedby_cloud_entity_name",
+                            "grantedby_cloud_entity_type",
+                            "grantedby_cloud_entity_uai",
+                            "granterCategory",
+                            "last_used",
+                            "permission_scope",
+                            "source_cloud_account_id",
+                            "source_cloud_account_is_vendor",
+                            "source_cloud_account_name",
+                            "source_cloud_region",
+                            "source_cloud_resource_id",
+                            "source_cloud_resource_name",
+                            "source_cloud_resource_type",
+                            "source_cloud_resource_uai",
+                            "source_cloud_service_name",
+                            "sourceCategory",
+                            "sourceVendorName",
+                            "unused_actions_count"
+                        ]
+                    },
+                    "search_type": {
+                        "type": "string",
+                        "description": "Identifies the comparison operator you want to use for this filter. Valid values are:\n- `EQ`",
+                        "enum": [
+                            "EQ"
+                        ]
+                    },
+                    "search_value": {
+                        "type": "string",
+                        "description": "Value that this filter must match."
+                    }
+                }
+            },
+            "SortObject": {
+                "type": "object",
+                "required": [
+                    "field",
+                    "order"
+                ],
+                "properties": {
+                    "field": {
+                        "type": "string",
+                        "description": "The field to sort by.",
+                        "enum": [
+                            "account_access_transformed",
+                            "dest_cloud_account_id",
+                            "dest_cloud_account_name",
+                            "dest_cloud_resource_id",
+                            "dest_cloud_resource_name",
+                            "dest_cloud_resource_type",
+                            "dest_cloud_resource_uai",
+                            "dest_cloud_service_name",
+                            "excessive_policies_count",
+                            "grantedby_cloud_entity_id",
+                            "grantedby_cloud_entity_name",
+                            "grantedby_cloud_entity_type",
+                            "grantedby_cloud_entity_uai",
+                            "is_last_access_supported",
+                            "last_used",
+                            "permission_scope",
+                            "source_cloud_account_id",
+                            "source_cloud_account_is_vendor",
+                            "source_cloud_account_name",
+                            "source_cloud_resource_id",
+                            "source_cloud_resource_name",
+                            "source_cloud_resource_type",
+                            "source_cloud_resource_uai",
+                            "source_cloud_service_name",
+                            "unused_actions_count"
+                        ]
+                    },
+                    "order": {
+                        "type": "string",
+                        "description": "The sort order.",
+                        "enum": [
+                            "ASC",
+                            "DESC"
+                        ]
+                    }
+                },
+                "example": {
+                    "field": "dest_cloud_resource_id",
+                    "order": "DESC"
+                },
+                "x-stoplight": {
+                    "id": "6im93fkzgpvfv"
+                }
+            },
+            "CiemAccessSearchResponse": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "array",
+                        "description": "An array of access entries.",
+                        "items": {
+                            "$ref": "#/components/schemas/AccessEntry"
+                        }
+                    },
+                    "metadata": {
+                        "type": "object",
+                        "description": "Metadata for pagination.",
+                        "properties": {
+                            "next_page_token": {
+                                "type": "string",
+                                "description": "A token to retrieve the next page of results, if available."
+                            }
+                        }
+                    },
+                    "filter_count": {
+                        "type": "integer",
+                        "description": "The number of results after applying filters.",
+                        "format": "int32"
+                    },
+                    "total_count": {
+                        "type": "integer",
+                        "description": "The total number of available results, ignoring pagination.",
+                        "format": "int32"
+                    }
+                },
+                "example": {
+                    "data": [
+                        {
+                            "access_levels": [
+                                "Read",
+                                "Write"
+                            ],
+                            "account_access_transformed": "admin_access",
+                            "dest_cloud_account_name": "prod-account",
+                            "dest_cloud_resource_name": "S3 Bucket",
+                            "dest_cloud_resource_type": "AWS::S3::Bucket",
+                            "dest_cloud_service_name": "Amazon S3",
+                            "dest_category": "Cloud Service Account",
+                            "destination_access_labels": [],
+                            "excessive_policies_count": 5,
+                            "grantedby_cloud_entity_name": "AdminRole",
+                            "grantedby_cloud_entity_type": "IAM Role",
+                            "granter_category": "IAM Group",
+                            "last_used": "2023-01-15T10:30:00Z",
+                            "permission_scope": "Global",
+                            "source_cloud_account_name": "dev-account",
+                            "source_cloud_account_is_vendor": false,
+                            "source_cloud_resource_name": "EC2 Instance",
+                            "source_cloud_resource_type": "AWS::EC2::Instance",
+                            "source_cloud_service_name": "Amazon EC2",
+                            "source_category": "Human",
+                            "source_vendor_name": "AWS",
+                            "unused_actions_count": 10
+                        }
+                    ],
+                    "metadata": {
+                        "next_page_token": "another_base64_string"
+                    },
+                    "filter_count": 100,
+                    "total_count": 500
+                },
+                "x-stoplight": {
+                    "id": "1sbwh1tgjbntv"
+                }
+            },
+            "AccessEntry": {
+                "type": "object",
+                "description": "Represents a single CIEM access entry.",
+                "x-stoplight": {
+                    "id": "hvxl0wrz4o9ob"
+                },
+                "properties": {
+                    "access_levels": {
+                        "type": "array",
+                        "description": "Access levels granted",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "account_access_transformed": {
+                        "type": "string",
+                        "description": "Transformed account access details"
+                    },
+                    "dest_cloud_account_id": {
+                        "type": "string",
+                        "description": "Destination account ID"
+                    },
+                    "dest_cloud_account_name": {
+                        "type": "string",
+                        "description": "Name of the destination cloud account"
+                    },
+                    "dest_cloud_region": {
+                        "type": "string",
+                        "description": "Destination region"
+                    },
+                    "dest_cloud_resource_id": {
+                        "type": "string",
+                        "description": "Destination resource ID"
+                    },
+                    "dest_cloud_resource_name": {
+                        "type": "string",
+                        "description": "Name of the destination resource"
+                    },
+                    "dest_cloud_resource_type": {
+                        "type": "string",
+                        "description": "Type of the destination resource"
+                    },
+                    "dest_cloud_resource_uai": {
+                        "type": "string",
+                        "description": "Destination resource UAI"
+                    },
+                    "dest_cloud_service_name": {
+                        "type": "string",
+                        "description": "Name of the destination cloud service"
+                    },
+                    "dest_category": {
+                        "type": "string",
+                        "enum": [
+                            "Human",
+                            "Non-human",
+                            "Cloud Service Account",
+                            "IAM Group",
+                            "IAM Policy"
+                        ],
+                        "description": "Category of the destination entity. Valid values include:\n- `Human`: All cloud, identity provider (IdP), and platform users.\n- `Non-human`: Machine identities that can assume permissions and perform cloud Identity and Access Management (IAM) actions such as VMs and functions.\n- `Cloud Service Account`: A category unifying AWS roles, Microsoft Azure service accounts and managed identities, and GCP service accounts.\n- `IAM Group`: IAM group, which is a collection of IAM users.\n- `IAM Policy`: Permission documents, such as AWS policies, Azure roles, and GCP roles."
+                    },
+                    "destination_access_labels": {
+                        "type": "array",
+                        "description": "Labels describing access to data",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "excessive_policies_count": {
+                        "type": "integer",
+                        "description": "Number of excessive policies"
+                    },
+                    "grantedby_cloud_entity_id": {
+                        "type": "string",
+                        "description": "Granted by cloud entity ID"
+                    },
+                    "grantedby_cloud_entity_name": {
+                        "type": "string",
+                        "description": "Name of the cloud entity that granted access"
+                    },
+                    "grantedby_cloud_entity_type": {
+                        "type": "string",
+                        "description": "Type of the cloud entity that granted access"
+                    },
+                    "grantedby_cloud_entity_uai": {
+                        "type": "string",
+                        "description": "Granted by cloud entity UAI"
+                    },
+                    "granter_category": {
+                        "type": "string",
+                        "description": "Category of the granter entity"
+                    },
+                    "is_last_access_supported": {
+                        "type": "boolean",
+                        "description": "Indicates if last access is supported"
+                    },
+                    "last_used": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Timestamp of when access was last used"
+                    },
+                    "permission_scope": {
+                        "type": "string",
+                        "description": "Scope of the permission"
+                    },
+                    "source_cloud_account_id": {
+                        "type": "string",
+                        "description": "Source account ID"
+                    },
+                    "source_cloud_account_is_vendor": {
+                        "type": "boolean",
+                        "description": "Indicates if the source account is a known vendor"
+                    },
+                    "source_cloud_account_name": {
+                        "type": "string",
+                        "description": "Name of the source cloud account"
+                    },
+                    "source_cloud_region": {
+                        "type": "string",
+                        "description": "Source region"
+                    },
+                    "source_cloud_resource_id": {
+                        "type": "string",
+                        "description": "Source resource ID"
+                    },
+                    "source_cloud_resource_name": {
+                        "type": "string",
+                        "description": "Name of the source resource"
+                    },
+                    "source_cloud_resource_type": {
+                        "type": "string",
+                        "description": "Type of the source resource"
+                    },
+                    "source_cloud_resource_uai": {
+                        "type": "string",
+                        "description": "Source resource UAI"
+                    },
+                    "source_cloud_service_name": {
+                        "type": "string",
+                        "description": "Name of the source cloud service"
+                    },
+                    "source_category": {
+                        "type": "string",
+                        "enum": [
+                            "Human",
+                            "Non-human",
+                            "Cloud Service Account",
+                            "IAM Group",
+                            "IAM Policy"
+                        ],
+                        "description": "Category of the source entity. Valid values include:\n- `Human`: All cloud, identity provider (IdP), and platform users.\n- `Non-human`: Machine identities that can assume permissions and perform cloud Identity and Access Management (IAM) actions such as VMs and functions.\n- `Cloud Service Account`: A category unifying AWS roles, Microsoft Azure service accounts and managed identities, and GCP service accounts.\n- `IAM Group`: IAM group, which is a collection of IAM users.\n- `IAM Policy`: Permission documents, such as AWS policies, Azure roles, and GCP roles."
+                    },
+                    "source_vendor_name": {
+                        "type": "string",
+                        "description": "Name of the source vendor"
+                    },
+                    "unused_actions_count": {
+                        "type": "integer",
+                        "description": "Number of unused actions"
+                    }
+                }
+            },
+            "ErrorResponse": {
+                "type": "object",
+                "properties": {
+                    "reply": {
+                        "type": "object",
+                        "properties": {
+                            "err_code": {
+                                "type": "integer"
+                            },
+                            "err_msg": {
+                                "type": "string"
+                            },
+                            "err_extra": {
+                                "type": "object",
+                                "properties": {
+                                    "err_msg": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "example": {
+                    "reply": {
+                        "err_code": 500,
+                        "err_msg": "An error occurred while processing CIEM Access Search query",
+                        "err_extra": {
+                            "err_msg": "Internal server issue encountered during CIEM Access Search."
+                        }
+                    }
+                },
+                "x-stoplight": {
+                    "id": "xeq0k99m9wd58"
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,990 @@
+{
+    "openapi": "3.0.3",
+    "x-stoplight": {
+        "id": "9jldcj8imsddh"
+    },
+    "tags": [
+        {
+            "name": "DisableInjectionandPreventionRule",
+            "description": "Disable Injection and Prevention Rule"
+        }
+    ],
+    "info": {
+        "version": "Cortex XSIAM 3.4",
+        "title": "Disable Injection and Prevention Rules Public API",
+        "description": "The Disable Injection and Prevention Rules API lets you add and manage rules in Cortex XDR that define process-level exceptions, bypassing prevention modules and injection. These rules can be applied only to endpoints running Cortex XDR agent version 7.9 or later.    \n\nThis API allows you to:\n- Fetch existing Disable Injection and Prevention rules with filtering and pagination.\n- Add new Disable Injection and Prevention rules to generate a temporary exception to bypass a process from prevention modules and injections.\n- Disable existing rules by their IDs.\n\nYou can export the OpenAPI specs in the [Cortex Stoplight instance](https://cortex-panw.stoplight.io/docs/cortex-xsiam-3-x/branches/main/9jldcj8imsddh-disable-injection-and-prevention-rules-public-api)\n\n**Required license:** In Cortex XSIAM Premium, Cortex XSIAM Enterprise, or Cortex XSIAM NG SIEM, requires the Cortex Cloud Posture Management add-on. ",
+        "contact": {
+            "email": "docs-cortex@paloaltonetworks.com",
+            "name": "Cortex Documentation Team",
+            "url": "https://docs-cortex.paloaltonetworks.com/"
+        }
+    },
+    "servers": [
+        {
+            "url": "https://api-yourfqdn"
+        }
+    ],
+    "paths": {
+        "/public_api/v1/disable_injection_prevention_rules/fetch": {
+            "post": {
+                "summary": "Get Disable Injection and Prevention rules",
+                "description": "Retrieves a paginated list of Disable Injection and Prevention rules based on optional filters and sorting criteria.\n\nThis endpoint allows you to:\n- Retrieve all rules or filter by specific criteria\n- Sort results by any field in ascending or descending order\n- Paginate through large result sets\n- Get total count and filtered count of rules\n",
+                "operationId": "fetchDisableInjectionPreventionRules",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "x-examples": {
+                                    "Example 1": {
+                                        "request_data": {}
+                                    }
+                                },
+                                "required": [
+                                    "request_data"
+                                ],
+                                "properties": {
+                                    "request_data": {
+                                        "$ref": "#/components/schemas/GetDataRequest"
+                                    }
+                                }
+                            },
+                            "examples": {
+                                "Example 1": {
+                                    "value": {
+                                        "request_data": {
+                                            "search_from": 0,
+                                            "search_to": 1,
+                                            "sort": {
+                                                "field": "rule_id",
+                                                "keyword": "desc"
+                                            },
+                                            "filters": [
+                                                {
+                                                    "field": "status",
+                                                    "operator": "eq",
+                                                    "value": "active"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                },
+                                "Example 2": {
+                                    "value": {
+                                        "request_data": {
+                                            "search_from": 0,
+                                            "search_to": 10,
+                                            "filters": [
+                                                {
+                                                    "field": "rule_name",
+                                                    "operator": "eq",
+                                                    "value": "Protect Critical app"
+                                                },
+                                                {
+                                                    "field": "status",
+                                                    "operator": "eq",
+                                                    "value": "active"
+                                                }
+                                            ]
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublicGetDataResponse"
+                                },
+                                "examples": {
+                                    "Example 1": {
+                                        "value": {
+                                            "reply": {
+                                                "data": [
+                                                    {
+                                                        "rule_id": "24bd70bab9d94905aa18773de2555969",
+                                                        "rule_name": "Protect Critical App",
+                                                        "description": "Disable injection prevention for critical business application",
+                                                        "platform": "windows",
+                                                        "status": "active",
+                                                        "expiration_time": 1770445053461,
+                                                        "process_name": "criticalApp.exe",
+                                                        "path": "string",
+                                                        "created_by": "John Doe",
+                                                        "creation_time": 1770358653000,
+                                                        "is_global": false,
+                                                        "profile_ids": [
+                                                            96
+                                                        ]
+                                                    }
+                                                ],
+                                                "filter_count": 1,
+                                                "total_count": 6
+                                            }
+                                        }
+                                    },
+                                    "Example 2": {
+                                        "value": {
+                                            "reply": {
+                                                "data": [
+                                                    {
+                                                        "rule_id": "24bd70bab9d94905aa18773de2555969",
+                                                        "rule_name": "Protect Critical App",
+                                                        "description": "Disable injection prevention for critical business application",
+                                                        "platform": "windows",
+                                                        "status": "active",
+                                                        "expiration_time": 1770445053461,
+                                                        "process_name": "criticalApp.exe",
+                                                        "path": "string",
+                                                        "created_by": "Public API - 241",
+                                                        "creation_time": 1770358653000,
+                                                        "is_global": true,
+                                                        "profile_ids": null
+                                                    }
+                                                ],
+                                                "filter_count": 1,
+                                                "total_count": 6
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "x-examples": {
+                                        "Example 1": {
+                                            "reply": {
+                                                "err_code": 400,
+                                                "err_msg": "Got an invalid input while processing XDR public API",
+                                                "err_extra": "search_from: Input should be greater than or equal to 0"
+                                            }
+                                        }
+                                    },
+                                    "properties": {
+                                        "reply": {
+                                            "type": "object",
+                                            "properties": {
+                                                "err_code": {
+                                                    "type": "integer",
+                                                    "description": "Numeric error code returned by the API."
+                                                },
+                                                "err_msg": {
+                                                    "type": "string",
+                                                    "description": "Human-readable summary of the error."
+                                                },
+                                                "err_extra": {
+                                                    "type": "string",
+                                                    "description": "Detailed description of the error, including the cause and how to resolve it when applicable."
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "examples": {
+                                    "Example 1": {
+                                        "value": {
+                                            "reply": {
+                                                "err_code": 400,
+                                                "err_msg": "Got an invalid input while processing XDR public API",
+                                                "err_extra": "search_from: Input should be greater than or equal to 0"
+                                            }
+                                        }
+                                    },
+                                    "Example 2": {
+                                        "value": {
+                                            "reply": {
+                                                "err_code": 400,
+                                                "err_msg": "Got an invalid input while processing XDR public API",
+                                                "err_extra": "search_from: Input should be greater than or equal to 0"
+                                            }
+                                        }
+                                    },
+                                    "Example 3": {
+                                        "value": {
+                                            "reply": {
+                                                "err_code": 400,
+                                                "err_msg": "Got an invalid input while processing XDR public API",
+                                                "err_extra": "Unknown field 'scope'"
+                                            }
+                                        }
+                                    },
+                                    "Example 4": {
+                                        "value": {
+                                            "reply": {
+                                                "err_code": 400,
+                                                "err_msg": "Got an invalid input while processing XDR public API",
+                                                "err_extra": "Unsupported operator 'lte' for field rule_id"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-stoplight": {
+                    "id": "klhvtcfh7sgez"
+                },
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "UCoWpG4rkNzgCp2dsh8m02iVpZsskwKHz7N1tErPcUV3Wmf59Gc9kytmgOv0pDWoem3PBlORyRIPiir4OcYdWUOWAM3JyTgoCxQf4nQoTlKmFRKz9Bj5vIjluw66p9WP"
+                        },
+                        "in": "header",
+                        "name": "Authorization",
+                        "description": "{api_key}",
+                        "required": true
+                    },
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "241"
+                        },
+                        "in": "header",
+                        "name": "x-xdr-auth-id",
+                        "description": "{api_key_id}",
+                        "required": true
+                    }
+                ]
+            }
+        },
+        "/public_api/v1/disable_injection_prevention_rules/add": {
+            "post": {
+                "summary": "Add Disable Injection and Prevention rule",
+                "description": "Creates a new Disable Injection and Prevention rule to allow specific processes to bypass injection prevention.\n\nThis endpoint allows you to:\n- Define a new rule with a unique name and description\n- Specify the target platform (Windows, Linux, or macOS)\n- Set the process name and path to be protected\n- Configure expiration time\n- Apply the rule globally or to specific profiles\n",
+                "operationId": "addDisableInjectionPreventionRule",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "x-examples": {
+                                    "Example 1": {
+                                        "request_data": {}
+                                    }
+                                },
+                                "required": [
+                                    "request_data"
+                                ],
+                                "properties": {
+                                    "request_data": {
+                                        "$ref": "#/components/schemas/DisableInjectionAddRulePAPIRequest"
+                                    }
+                                }
+                            },
+                            "examples": {
+                                "Profile rule for Windows": {
+                                    "value": {
+                                        "request_data": {
+                                            "rule_name": "Global Windows Exception",
+                                            "description": "Allow injection for trusted Windows application across all endpoints",
+                                            "platform": "windows",
+                                            "process_name": "trustedapp.exe",
+                                            "path": "C:\\Program Files\\TrustedApp\\trustedapp.exe",
+                                            "hours_to_expiration": 24,
+                                            "profile_ids": [
+                                                96
+                                            ],
+                                            "scope": "profile"
+                                        }
+                                    }
+                                },
+                                "Global rule for windows": {
+                                    "value": {
+                                        "request_data": {
+                                            "rule_name": "Global Windows Exception",
+                                            "description": "Allow injection for trusted Windows application across all endpoints",
+                                            "platform": "windows",
+                                            "process_name": "trustedapp.exe",
+                                            "path": "C:\\Program Files\\TrustedApp\\trustedapp.exe",
+                                            "hours_to_expiration": 24,
+                                            "profile_ids": [],
+                                            "scope": "global"
+                                        }
+                                    }
+                                },
+                                "Profile rule for Linux": {
+                                    "value": {
+                                        "request_data": {
+                                            "rule_name": "Development Server Exception",
+                                            "description": "Temporary exception for development servers",
+                                            "platform": "linux",
+                                            "process_name": "node",
+                                            "path": "/usr/bin/node",
+                                            "hours_to_expiration": 24,
+                                            "scope": "profile",
+                                            "profile_ids": [
+                                                201,
+                                                202
+                                            ]
+                                        }
+                                    }
+                                },
+                                "Global rule for macos": {
+                                    "value": {
+                                        "request_data": {
+                                            "rule_name": "macOS Design Tool",
+                                            "description": "Exception for design application on macOS",
+                                            "platform": "macos",
+                                            "process_name": "DesignApp",
+                                            "path": "/Applications/DesignApp.app/Contents/MacOS/DesignApp",
+                                            "hours_to_expiration": 48,
+                                            "scope": "global",
+                                            "profile_ids": null
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BaseResponseString"
+                                },
+                                "examples": {
+                                    "Example 1": {
+                                        "value": {
+                                            "reply": "e35dcf2150b74d19ba354fbe871f978d"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "x-examples": {
+                                        "Example 1": {
+                                            "reply": {
+                                                "err_code": 400,
+                                                "err_msg": "Got an invalid input while processing XDR public API",
+                                                "err_extra": "hours_to_expiration: Value error, Invalid value '12'. Allowed values: {24, 48}"
+                                            }
+                                        }
+                                    },
+                                    "properties": {
+                                        "reply": {
+                                            "type": "object",
+                                            "properties": {
+                                                "err_code": {
+                                                    "type": "integer",
+                                                    "description": "Numeric error code returned by the API."
+                                                },
+                                                "err_msg": {
+                                                    "type": "string",
+                                                    "description": "Human-readable summary of the error."
+                                                },
+                                                "err_extra": {
+                                                    "type": "string",
+                                                    "description": "Detailed description of the error, including the cause and how to resolve it when applicable."
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "examples": {
+                                    "Example 1": {
+                                        "value": {
+                                            "reply": {
+                                                "err_code": 400,
+                                                "err_msg": "Got an invalid input while processing XDR public API",
+                                                "err_extra": "hours_to_expiration: Value error, Invalid value '12'. Allowed values: {24, 48}"
+                                            }
+                                        }
+                                    },
+                                    "Example 2": {
+                                        "value": {
+                                            "reply": {
+                                                "err_code": 400,
+                                                "err_msg": "Got an invalid input while processing XDR public API",
+                                                "err_extra": "The following profile ID(s) have a wrong type: [96]. The allowed types are: ['Exceptions']"
+                                            }
+                                        }
+                                    },
+                                    "Example 3": {
+                                        "value": {
+                                            "reply": {
+                                                "err_code": 400,
+                                                "err_msg": "Got an invalid input while processing XDR public API",
+                                                "err_extra": "Value error, profile_ids are required when scope is 'profile'"
+                                            }
+                                        }
+                                    },
+                                    "Example 4": {
+                                        "value": {
+                                            "reply": {
+                                                "err_code": 400,
+                                                "err_msg": "Got an invalid input while processing XDR public API",
+                                                "err_extra": "Value error, profile_ids can only be set when scope is 'profile'"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-stoplight": {
+                    "id": "w57uomes9ni0y"
+                },
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "UCoWpG4rkNzgCp2dsh8m02iVpZsskwKHz7N1tErPcUV3Wmf59Gc9kytmgOv0pDWoem3PBlORyRIPiir4OcYdWUOWAM3JyTgoCxQf4nQoTlKmFRKz9Bj5vIjluw66p9WP"
+                        },
+                        "in": "header",
+                        "name": "Authorization",
+                        "required": true,
+                        "description": "{api_key}"
+                    },
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "241"
+                        },
+                        "in": "header",
+                        "name": "x-xdr-auth-id",
+                        "required": true,
+                        "description": "{api_key_id}"
+                    }
+                ]
+            }
+        },
+        "/public_api/v1/disable_injection_prevention_rules/disable": {
+            "post": {
+                "summary": "Disable Disable Injection and Prevention Rules",
+                "description": "Disables one or more existing Disable Injection and Prevention rules by their IDs.\n\nThis endpoint allows you to:\n- Disable multiple rules in a single request\n- Immediately stop rules from being applied        \n",
+                "operationId": "disableDisableInjectionPreventionRules",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "x-examples": {
+                                    "Example 1": {
+                                        "request_data": {}
+                                    }
+                                },
+                                "required": [
+                                    "request_data"
+                                ],
+                                "properties": {
+                                    "request_data": {
+                                        "$ref": "#/components/schemas/DisableInjectionDisableRulesPAPIRequest"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DisableInjectionResponseString"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "x-examples": {
+                                        "Example 1": {
+                                            "reply": {
+                                                "err_code": 404,
+                                                "err_msg": "Requested resource not found while processing XDR public API",
+                                                "err_extra": "Could not find Disable Injection and Prevention Rule(s) with the following ID(s): ['9133403bfc764080ad8909a6e05b67']"
+                                            }
+                                        }
+                                    },
+                                    "properties": {
+                                        "reply": {
+                                            "type": "object",
+                                            "properties": {
+                                                "err_code": {
+                                                    "type": "integer",
+                                                    "description": "Numeric error code returned by the API."
+                                                },
+                                                "err_msg": {
+                                                    "type": "string",
+                                                    "description": "Human-readable summary of the error."
+                                                },
+                                                "err_extra": {
+                                                    "type": "string",
+                                                    "description": "Detailed description of the error, including the cause and how to resolve it when applicable."
+                                                }
+                                            }
+                                        }
+                                    }
+                                },
+                                "examples": {
+                                    "Example 1": {
+                                        "value": {
+                                            "reply": {
+                                                "err_code": 404,
+                                                "err_msg": "Requested resource not found while processing XDR public API",
+                                                "err_extra": "Could not find Disable Injection and Prevention Rule(s) with the following ID(s): ['9133403bfc764080ad8909a6e05b67']"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "x-stoplight": {
+                    "id": "tpifa2857fbof"
+                },
+                "parameters": [
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "UCoWpG4rkNzgCp2dsh8m02iVpZsskwKHz7N1tErPcUV3Wmf59Gc9kytmgOv0pDWoem3PBlORyRIPiir4OcYdWUOWAM3JyTgoCxQf4nQoTlKmFRKz9Bj5vIjluw66p9WP"
+                        },
+                        "in": "header",
+                        "required": true,
+                        "name": "Authorization",
+                        "description": "{api_key}"
+                    },
+                    {
+                        "schema": {
+                            "type": "string",
+                            "example": "241"
+                        },
+                        "in": "header",
+                        "required": true,
+                        "name": "x-xdr-auth-id",
+                        "description": "{api_key_id}"
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "GetDataRequest": {
+                "type": "object",
+                "x-stoplight": {
+                    "id": "1ep6cgx60qcyy"
+                },
+                "x-examples": {
+                    "Example 1": {
+                        "search_from": 0,
+                        "search_to": 10,
+                        "sort": {
+                            "field": "rule_id",
+                            "keyword": "desc"
+                        },
+                        "filters": [
+                            {
+                                "field": "status",
+                                "operator": "eq",
+                                "value": "active"
+                            }
+                        ]
+                    }
+                },
+                "description": "Request body containing pagination, sorting, and filtering parameters.",
+                "properties": {
+                    "search_from": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "default": 0,
+                        "example": 0,
+                        "description": "Starting index for pagination (zero-based). Defines the offset from which to begin returning results."
+                    },
+                    "search_to": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "default": 100,
+                        "example": 1,
+                        "description": "Ending index for pagination (exclusive). Defines the maximum number of results to return (search_to - search_from)."
+                    },
+                    "sort": {
+                        "$ref": "#/components/schemas/SortingRequest"
+                    },
+                    "filters": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/FilterRequest"
+                        }
+                    }
+                }
+            },
+            "SortingRequest": {
+                "type": "object",
+                "required": [
+                    "field",
+                    "keyword"
+                ],
+                "properties": {
+                    "field": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "The field name to filter on. For example, `rule_id`, `rule_name`, `status`,`platform`.",
+                        "example": "rule_id"
+                    },
+                    "keyword": {
+                        "type": "string",
+                        "enum": [
+                            "asc",
+                            "desc"
+                        ],
+                        "description": "Determines the sort order.",
+                        "example": "desc"
+                    }
+                },
+                "x-stoplight": {
+                    "id": "iwmvln2z0rpbc"
+                },
+                "description": "Defines sorting criteria for query results."
+            },
+            "FilterRequest": {
+                "type": "object",
+                "description": "Define filter condition for querying data.",
+                "x-stoplight": {
+                    "id": "9336y32mppr8p"
+                },
+                "x-examples": {
+                    "Example 1": {
+                        "field": "status",
+                        "operator": "eq",
+                        "value": "active"
+                    }
+                },
+                "required": [
+                    "field",
+                    "operator",
+                    "value"
+                ],
+                "properties": {
+                    "field": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "The field name to filter on. For example, `rule_id`, `rule_name`, `status`,`platform`.",
+                        "example": "status"
+                    },
+                    "operator": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Comparison operator to use for filtering. For example, (`eq` (equals), `neq` (not equals), `gte` (greater than or equal), `lte` (less than or equal), `contains` or `not_contains`)",
+                        "default": "eq"
+                    },
+                    "value": {
+                        "type": "string",
+                        "description": "The value to compare against. Type should match the field type.\nCan be a string or number depending on the operator.\n**Examples:**\n* If the `field` is `status`, the `value` can be `active`, `disabled`, or `expired`\n* If the `field` is `platform`, the `value` can be a string such as `windows`, `macos`, or `linux`                \n",
+                        "example": "active"
+                    }
+                }
+            },
+            "PublicGetDataResponse": {
+                "type": "object",
+                "x-stoplight": {
+                    "id": "2ayhjb46b9hz6"
+                },
+                "x-examples": {
+                    "Response with multiple rules": {
+                        "reply": {
+                            "data": [
+                                {
+                                    "rule_id": "2672e5d5d7b8421fb74f94895e29cda8",
+                                    "rule_name": "Protect Critical App",
+                                    "description": "Disable injection prevention for critical business application",
+                                    "platform": "windows",
+                                    "status": "disabled",
+                                    "expiration_time": 1770445053461,
+                                    "process_name": "criticalapp.exe",
+                                    "path": "C:\\Program Files\\CriticalApp\\criticalapp.exe",
+                                    "created_by": "Public API - 241",
+                                    "creation_time": 1770358653000,
+                                    "is_global": true,
+                                    "profile_ids": []
+                                },
+                                {
+                                    "rule_id": "9133403bfc764080ad8909a6e05b6793",
+                                    "rule_name": "Dev Environment Exception",
+                                    "description": "Allow injection for development tools",
+                                    "platform": "linux",
+                                    "status": "active",
+                                    "expiration_time": 1770446020254,
+                                    "process_name": "node",
+                                    "path": "/usr/bin/node",
+                                    "created_by": "John Doe",
+                                    "creation_time": 1770359620000,
+                                    "is_global": false,
+                                    "profile_ids": [
+                                        97
+                                    ]
+                                }
+                            ],
+                            "filter_count": 4,
+                            "total_count": 6
+                        }
+                    }
+                },
+                "properties": {
+                    "reply": {
+                        "type": "object",
+                        "description": "Container object for the response data and metadata",
+                        "properties": {
+                            "data": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/DisableInjectionRulePAPIObject"
+                                }
+                            },
+                            "filter_count": {
+                                "type": "integer",
+                                "description": "The number of rules returned in the current response after applying filters.",
+                                "example": 4
+                            },
+                            "total_count": {
+                                "type": "integer",
+                                "description": "The total number of rules available that match the filter criteria, regardless of pagination.",
+                                "example": 6
+                            }
+                        }
+                    }
+                }
+            },
+            "BaseResponseString": {
+                "type": "object",
+                "x-stoplight": {
+                    "id": "q3k1kqk2w411i"
+                },
+                "properties": {
+                    "reply": {
+                        "type": "string",
+                        "example": "e35dcf2150b74d19ba354fbe871f978d",
+                        "description": "Returns the Disable Injection and Prevention Rule ID."
+                    }
+                }
+            },
+            "DisableInjectionResponseString": {
+                "type": "object",
+                "x-stoplight": {
+                    "id": "8nf6srhapf7w4"
+                },
+                "properties": {
+                    "reply": {
+                        "type": "string",
+                        "example": "The selected rules were disabled",
+                        "description": "Describes the success message."
+                    }
+                }
+            },
+            "DisableInjectionRulePAPIObject": {
+                "type": "object",
+                "x-stoplight": {
+                    "id": "byzwr3o2yzuqv"
+                },
+                "description": "Array of Disable Injection and Prevention rule objects matching the query criteria.",
+                "properties": {
+                    "rule_id": {
+                        "type": "string",
+                        "description": "Unique identifier for the rule. Auto-generated upon rule creation and used for all subsequent operations.",
+                        "example": "24bd70bab9d94905aa18773de2555969"
+                    },
+                    "rule_name": {
+                        "type": "string",
+                        "description": "Name of the rule.",
+                        "example": "Protect Critical App"
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Description of the rule's purpose and context. ",
+                        "example": "Disable injection prevention for critical business application"
+                    },
+                    "platform": {
+                        "type": "string",
+                        "example": "windows",
+                        "description": "Target operating system to which the rule applies. For example: `windows`, `linux`, or `macos`."
+                    },
+                    "status": {
+                        "type": "string",
+                        "description": "Current status of the rule. For example: `active`, `disabled`, or `expired`.\n- `active`: Rule is active and being applied\n- `disabled`: Rule is inactive and not being applied\n- `expired`: Rule has passed its expiration time",
+                        "example": "active"
+                    },
+                    "expiration_time": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Unix timestamp (milliseconds) when the rule will expire.",
+                        "example": 1770445053461
+                    },
+                    "process_name": {
+                        "type": "string",
+                        "description": "Name of the process executable to which this rule applies. Should match the exact process name as it appears in the system.",
+                        "example": "criticalApp.exe"
+                    },
+                    "path": {
+                        "type": "string",
+                        "description": "Full file system path to the process executable. "
+                    },
+                    "created_by": {
+                        "type": "string",
+                        "description": "Name of the user or API key ID that created this rule.",
+                        "example": "John Doe"
+                    },
+                    "creation_time": {
+                        "type": "integer",
+                        "format": "int64",
+                        "description": "Unix timestamp (milliseconds) when the rule was created.",
+                        "example": 1770358653000
+                    },
+                    "is_global": {
+                        "type": "boolean",
+                        "description": "Indicates whether the rule applies globally to all endpoints or only to specific profiles.\n- `true`: Rule applies to all endpoints in the tenant.\n- `false`: Rule applies only to endpoints in the specified `profile_ids`.",
+                        "default": false
+                    },
+                    "profile_ids": {
+                        "type": "array",
+                        "description": "Array of profile IDs to which this rule applies. Only relevant when is_global is false. \n`null` or empty when `is_global` is `true`.",
+                        "nullable": true,
+                        "items": {
+                            "type": "integer",
+                            "example": 96
+                        }
+                    }
+                }
+            },
+            "DisableInjectionAddRulePAPIRequest": {
+                "type": "object",
+                "x-stoplight": {
+                    "id": "idyr96bsy0yov"
+                },
+                "description": "Request schema for creating a new Disable Injection and Prevention rule. All required fields must be provided to successfully create a rule.",
+                "required": [
+                    "rule_name",
+                    "description",
+                    "platform",
+                    "process_name",
+                    "path",
+                    "hours_to_expiration",
+                    "scope"
+                ],
+                "properties": {
+                    "rule_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100,
+                        "description": "Unique name for the new rule. Must be between 1-100 characters and should be descriptive of the rule's purpose.",
+                        "example": "Global Windows Exception"
+                    },
+                    "description": {
+                        "type": "string",
+                        "maxLength": 500,
+                        "example": "Allow injection for trusted Windows application across all endpoints",
+                        "description": "Description explaining the purpose and context of this rule. Maximum 500 characters."
+                    },
+                    "platform": {
+                        "type": "string",
+                        "enum": [
+                            "windows",
+                            "linux",
+                            "macos"
+                        ],
+                        "description": "Target operating system to which the rule applies. "
+                    },
+                    "process_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100,
+                        "description": "Name of the process executable to protect. Must match the exact process name (1-100 characters).",
+                        "example": "trustedapp.exe"
+                    },
+                    "path": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 1000,
+                        "description": "Full file system path to the process executable. Must be a valid path for the specified platform (1-1000 characters).",
+                        "example": "C:\\Program Files\\TrustedApp\\trustedapp.exe"
+                    },
+                    "hours_to_expiration": {
+                        "type": "integer",
+                        "enum": [
+                            24,
+                            48
+                        ],
+                        "description": "Number of hours until the rule expires. After expiration, the rule will no longer be applied. For example, 24 hours."
+                    },
+                    "profile_ids": {
+                        "type": "array",
+                        "description": "Array of profile IDs to which this rule should apply. \nRequired when `scope` is `profile`. Must be `null` or omitted when scope is `global`.",
+                        "nullable": true,
+                        "items": {
+                            "type": "integer",
+                            "default": 96
+                        }
+                    },
+                    "scope": {
+                        "type": "string",
+                        "enum": [
+                            "global",
+                            "profile"
+                        ],
+                        "description": "Defines the application scope of the rule.\n- `global`: Rule applies to all endpoints all matching endpoints (by platform and agent version >= 7.9)\n- `profile`: Rule applies only to endpoints in the specified `profile_ids`"
+                    }
+                }
+            },
+            "DisableInjectionDisableRulesPAPIRequest": {
+                "type": "object",
+                "x-stoplight": {
+                    "id": "5x8750f3jfdq2"
+                },
+                "description": "Request schema for disabling one or more existing Disable Injection Prevention rules. Requires at least one valid rule ID.",
+                "required": [
+                    "rule_ids"
+                ],
+                "properties": {
+                    "rule_ids": {
+                        "type": "array",
+                        "minLength": 1,
+                        "description": "Array of rule IDs to disable. Must contain at least one valid rule ID.",
+                        "items": {
+                            "type": "string",
+                            "example": "24bd70bab9d94905aa18773de2555969"
+                        }
+                    }
+                },
+                "x-examples": {
+                    "Example 1": {
+                        "rule_ids": [
+                            "24bd70bab9d94905aa18773de2555969"
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}
