@@ -7,7 +7,10 @@ Complete inventory of all API endpoints from the OpenAPI specs in `docs/cortex-a
 - **Edit** = mutating (creates, updates, deletes, triggers actions)
 - Elm / CLI / Test columns: `-` = not started, module/command/file name = done
 
-> `cloud-onboarding-papi.json` duplicates `cortex-platform-papi.json` and `appsec-papi (1).json` duplicates `appsec-papi.json` — omitted.
+> `cloud-onboarding-papi.json` (136 endpoints) is a strict subset of `cortex-platform-papi.json` — omitted.
+> `appsec-papi (1).json` (44 endpoints) is identical to `appsec-papi.json` — omitted.
+> 9 endpoints appear in multiple specs (CWP / Trusted Images / Registry Connectors) — listed in each relevant section.
+> Raw total across all 22 spec files: 521. After removing the 2 duplicate files: 345 listed below (332 unique).
 
 **Progress:** 4/345 endpoints implemented | 180 View | 165 Edit
 

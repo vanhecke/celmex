@@ -35,3 +35,4 @@ just clean     # remove elm-stuff and build artifacts
 - SHA-256 via `folkertdev/elm-sha2` (v1.0.0)
 - elm-format enforced on all source files
 - Integration testing only (no unit tests). Tests hit a real tenant.
+- API response decoders must parse **all** fields from the API response. Never drop data from incoming responses. Use `Decode.value` for complex/nested objects if needed, but always capture every field the API returns.

@@ -22,6 +22,7 @@ type alias Endpoint =
     , agentType : Maybe String
     , ip : List String
     , lastSeen : Maybe Int
+    , tags : Encode.Value
     , users : List String
     }
 
@@ -63,7 +64,20 @@ endpointDecoder =
         )
         (Decode.maybe (Decode.field "last_seen" Decode.int))
         (Decode.oneOf
-            [ Decode.field "users" (Decode.list Decode.string)
-            , Decode.succeed []
+            [ Decode.field "tags" Decode.value
+            , Decode.succeed Encode.null
             ]
         )
+        |> andMap
+            (Decode.oneOf
+                [ Decode.field "users" (Decode.list Decode.string)
+                , Decode.succeed []
+                ]
+            )
+
+
+{-| Pipeline-style helper to apply an additional decoder when map8 is not enough.
+-}
+andMap : Decoder a -> Decoder (a -> b) -> Decoder b
+andMap valDecoder funcDecoder =
+    Decode.map2 (\f v -> f v) funcDecoder valDecoder

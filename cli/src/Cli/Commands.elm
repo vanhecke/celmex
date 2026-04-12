@@ -140,6 +140,7 @@ encodeEndpoint ep =
             , Maybe.map (\v -> ( "agent_type", Encode.string v )) ep.agentType
             , Just ( "ip", Encode.list Encode.string ep.ip )
             , Maybe.map (\v -> ( "last_seen", Encode.int v )) ep.lastSeen
+            , Just ( "tags", ep.tags )
             , Just ( "users", Encode.list Encode.string ep.users )
             ]
         )
