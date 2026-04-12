@@ -1,0 +1,3 @@
+export CORTEX_TENANT_URL="https://api-<tenant>.xdr.<region>.paloaltonetworks.com"
+export CORTEX_API_KEY_ID="<your key id>"
+export CORTEX_API_KEY="<your advanced api key>"

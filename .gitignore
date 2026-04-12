@@ -1,2 +1,6 @@
 docs/functional*
 docs/guide*
+elm-stuff/
+node_modules/
+cli/dist/
+.envrc

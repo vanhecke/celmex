@@ -1,0 +1,15 @@
+{
+    "name": "elm-cortex-cli",
+    "private": true,
+    "bin": {
+        "cortex": "./cli/bin/cortex"
+    },
+    "devDependencies": {
+        "xhr2": "^0.2.1"
+    },
+    "scripts": {
+        "build": "just build",
+        "format": "just format",
+        "test": "just test"
+    }
+}
