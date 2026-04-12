@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  format:
+    name: Format check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - run: npm install -g elm-format@0.8.7
+
+      - name: Check formatting
+        run: elm-format src/ cli/src/ --validate
+
+  compile:
+    name: Compile
+    needs: format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: jorelali/setup-elm@v6
+        with:
+          elm-version: 0.19.1
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            elm-stuff
+            cli/elm-stuff
+            ~/.elm
+          key: elm-${{ runner.os }}-${{ hashFiles('elm.json', 'cli/elm.json') }}
+          restore-keys: |
+            elm-${{ runner.os }}-
+
+      - name: Compile CLI
+        run: cd cli && elm make src/Cli/Main.elm --optimize --output=dist/elm.js
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cli-dist
+          path: cli/dist/elm.js
+          retention-days: 1
+
+  test:
+    name: Integration tests
+    needs: compile
+    runs-on: ubuntu-latest
+    env:
+      CORTEX_TENANT_URL: ${{ secrets.CORTEX_TENANT_URL }}
+      CORTEX_API_KEY: ${{ secrets.CORTEX_API_KEY }}
+      CORTEX_API_KEY_ID: ${{ secrets.CORTEX_API_KEY_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm install -g bats
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: cli-dist
+          path: cli/dist
+
+      - name: Run BATS tests
+        run: bats tests/
