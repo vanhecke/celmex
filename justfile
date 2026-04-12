@@ -1,3 +1,5 @@
+set dotenv-filename := ".envrc"
+
 format:
     elm-format src/ cli/src/ --yes
 
