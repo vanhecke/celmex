@@ -99,7 +99,11 @@ toRequestRecord config stamp req =
                 ++ [ Http.header "Content-Type" "application/json" ]
 
         body =
-            Http.jsonBody internal.body
+            if internal.method == "GET" then
+                Http.emptyBody
+
+            else
+                Http.jsonBody internal.body
     in
     { method = internal.method
     , headers = headers
