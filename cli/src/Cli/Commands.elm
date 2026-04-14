@@ -2,6 +2,9 @@ module Cli.Commands exposing (Msg(..), dispatch, handleResult)
 
 import Cli.Ports as Ports
 import Cortex.Api.AuditLogs as AuditLogs exposing (AuditLog, SearchResponse)
+import Cortex.Api.Endpoints as Endpoints
+import Cortex.Api.Healthcheck as Healthcheck
+import Cortex.Api.TenantInfo as TenantInfo
 import Cortex.Auth as Auth
 import Cortex.Client as Client exposing (Config)
 import Cortex.Error exposing (Error(..))
@@ -10,11 +13,23 @@ import Json.Encode as Encode
 
 type Msg
     = GotAuditLogs (Result Error SearchResponse)
+    | GotHealthcheck (Result Error Healthcheck.HealthcheckResponse)
+    | GotTenantInfo (Result Error TenantInfo.TenantInfo)
+    | GotEndpoints (Result Error Endpoints.ListResponse)
 
 
 dispatch : Auth.Stamp -> Config -> List String -> Result String (Cmd Msg)
 dispatch stamp config args =
     case args of
+        [ "healthcheck" ] ->
+            Ok (Client.sendWith stamp config GotHealthcheck Healthcheck.check)
+
+        [ "tenant-info" ] ->
+            Ok (Client.sendWith stamp config GotTenantInfo TenantInfo.get)
+
+        [ "endpoints", "list" ] ->
+            Ok (Client.sendWith stamp config GotEndpoints Endpoints.list)
+
         [ "audit-logs", "search" ] ->
             Ok (Client.sendWith stamp config GotAuditLogs AuditLogs.search)
 
@@ -32,6 +47,42 @@ handleResult msg =
                 ]
 
         GotAuditLogs (Err err) ->
+            Cmd.batch
+                [ Ports.stderr (errorToString err ++ "\n")
+                , Ports.exit 1
+                ]
+
+        GotHealthcheck (Ok response) ->
+            Cmd.batch
+                [ Ports.stdout (Encode.encode 2 (encodeHealthcheck response) ++ "\n")
+                , Ports.exit 0
+                ]
+
+        GotHealthcheck (Err err) ->
+            Cmd.batch
+                [ Ports.stderr (errorToString err ++ "\n")
+                , Ports.exit 1
+                ]
+
+        GotTenantInfo (Ok response) ->
+            Cmd.batch
+                [ Ports.stdout (Encode.encode 2 response.raw ++ "\n")
+                , Ports.exit 0
+                ]
+
+        GotTenantInfo (Err err) ->
+            Cmd.batch
+                [ Ports.stderr (errorToString err ++ "\n")
+                , Ports.exit 1
+                ]
+
+        GotEndpoints (Ok response) ->
+            Cmd.batch
+                [ Ports.stdout (Encode.encode 2 (encodeListResponse response) ++ "\n")
+                , Ports.exit 0
+                ]
+
+        GotEndpoints (Err err) ->
             Cmd.batch
                 [ Ports.stderr (errorToString err ++ "\n")
                 , Ports.exit 1
@@ -64,6 +115,37 @@ encodeAuditLog log =
         )
 
 
+encodeHealthcheck : Healthcheck.HealthcheckResponse -> Encode.Value
+encodeHealthcheck response =
+    Encode.object
+        [ ( "status", Encode.string response.status )
+        ]
+
+
+encodeListResponse : Endpoints.ListResponse -> Encode.Value
+encodeListResponse response =
+    Encode.object
+        [ ( "endpoints", Encode.list encodeEndpoint response.endpoints )
+        ]
+
+
+encodeEndpoint : Endpoints.Endpoint -> Encode.Value
+encodeEndpoint ep =
+    Encode.object
+        (List.filterMap identity
+            [ Just ( "agent_id", Encode.string ep.agentId )
+            , Maybe.map (\v -> ( "agent_status", Encode.string v )) ep.agentStatus
+            , Maybe.map (\v -> ( "operational_status", Encode.string v )) ep.operationalStatus
+            , Maybe.map (\v -> ( "host_name", Encode.string v )) ep.hostName
+            , Maybe.map (\v -> ( "agent_type", Encode.string v )) ep.agentType
+            , Just ( "ip", Encode.list Encode.string ep.ip )
+            , Maybe.map (\v -> ( "last_seen", Encode.int v )) ep.lastSeen
+            , Just ( "tags", ep.tags )
+            , Just ( "users", Encode.list Encode.string ep.users )
+            ]
+        )
+
+
 errorToString : Error -> String
 errorToString err =
     case err of
@@ -92,4 +174,4 @@ usage : List String -> String
 usage args =
     "Unknown command: "
         ++ String.join " " args
-        ++ "\n\nUsage:\n  cortex audit-logs search    Search audit management logs"
+        ++ "\n\nUsage:\n  cortex healthcheck           System health check\n  cortex tenant-info           Get tenant license and config info\n  cortex endpoints list        List all endpoints\n  cortex audit-logs search     Search audit management logs"

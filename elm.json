@@ -9,7 +9,10 @@
         "Cortex.Client",
         "Cortex.Error",
         "Cortex.Request",
-        "Cortex.Api.AuditLogs"
+        "Cortex.Api.AuditLogs",
+        "Cortex.Api.Endpoints",
+        "Cortex.Api.Healthcheck",
+        "Cortex.Api.TenantInfo"
     ],
     "elm-version": "0.19.0 <= v < 0.20.0",
     "dependencies": {
