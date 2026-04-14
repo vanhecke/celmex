@@ -9,5 +9,8 @@ build: format
 test: build
     bats tests/
 
+curl METHOD PATH BODY='':
+    ./cli/bin/cortex-curl {{METHOD}} {{PATH}} '{{BODY}}'
+
 clean:
     rm -rf elm-stuff cli/elm-stuff cli/dist

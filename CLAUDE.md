@@ -12,6 +12,7 @@
   - `cli/elm.json` has `source-directories: ["src", "../src"]` to compile both
   - `cli/index.js` — xhr2 polyfill (must come before elm.js require), crypto nonce
   - `cli/bin/cortex` — shebang launcher
+  - `cli/bin/cortex-curl` — bash tool for raw authenticated API calls (no Elm needed)
 - `tests/*.bats` — BATS integration tests against a real Cortex tenant
 - `docs/cortex-api-openapi/` — OpenAPI specs (source of truth for API shapes)
 
@@ -21,6 +22,7 @@
 just format    # elm-format all source files
 just build     # format + compile cli/dist/elm.js
 just test      # build + run BATS tests
+just curl      # raw authenticated API call: just curl GET /public_api/v1/healthcheck | jq .
 just clean     # remove elm-stuff and build artifacts
 ```
 

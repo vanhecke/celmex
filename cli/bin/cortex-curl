@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+    cat >&2 <<'USAGE'
+Usage: cortex-curl <method> <path> [json-body]
+
+  method    HTTP method (GET, POST, PUT, DELETE)
+  path      API path, e.g. /public_api/v1/healthcheck
+  json-body Optional request body as JSON string
+
+Examples:
+  cortex-curl GET /public_api/v1/healthcheck
+  cortex-curl POST /public_api/v1/audits/management_logs '{"request_data":{}}'
+  cortex-curl GET /public_api/v1/healthcheck | jq .
+
+Environment variables (set in .envrc):
+  CORTEX_TENANT_URL   Base URL of the Cortex tenant
+  CORTEX_API_KEY_ID   API key identifier
+  CORTEX_API_KEY      API key secret
+USAGE
+    exit 1
+}
+
+[[ $# -lt 2 ]] && usage
+
+: "${CORTEX_TENANT_URL:?Set CORTEX_TENANT_URL in .envrc}"
+: "${CORTEX_API_KEY_ID:?Set CORTEX_API_KEY_ID in .envrc}"
+: "${CORTEX_API_KEY:?Set CORTEX_API_KEY in .envrc}"
+
+method="${1^^}"
+path="$2"
+body="${3:-}"
+
+[[ "$path" != /* ]] && path="/$path"
+
+timestamp=$(python3 -c "import time; print(int(time.time() * 1000))")
+nonce=$(openssl rand -hex 32)
+
+hash=$(printf '%s' "${CORTEX_API_KEY}${nonce}${timestamp}" | shasum -a 256 | cut -d' ' -f1)
+
+url="${CORTEX_TENANT_URL%/}${path}"
+
+curl_args=(
+    --silent
+    --show-error
+    --request "$method"
+    --header "Authorization: ${hash}"
+    --header "x-xdr-auth-id: ${CORTEX_API_KEY_ID}"
+    --header "x-xdr-timestamp: ${timestamp}"
+    --header "x-xdr-nonce: ${nonce}"
+    --header "Content-Type: application/json"
+)
+
+if [[ -n "$body" ]]; then
+    curl_args+=(--data "$body")
+fi
+
+exec curl "${curl_args[@]}" "$url"
