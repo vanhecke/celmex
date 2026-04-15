@@ -1,0 +1,95 @@
+module Cortex.Api.AttackSurface exposing
+    ( AttackSurfaceRule
+    , RulesResponse
+    , encode
+    , getRules
+    )
+
+import Cortex.Request as Request exposing (Request)
+import Json.Decode as Decode exposing (Decoder)
+import Json.Encode as Encode
+
+
+type alias RulesResponse =
+    { totalCount : Maybe Int
+    , resultCount : Maybe Int
+    , attackSurfaceRules : List AttackSurfaceRule
+    }
+
+
+type alias AttackSurfaceRule =
+    { attackSurfaceRuleName : Maybe String
+    , enabledStatus : Maybe String
+    , priority : Maybe String
+    , description : Maybe String
+    , category : Maybe String
+    , attackSurfaceRuleId : Maybe String
+    , asmAlertCategories : List Encode.Value
+    , created : Maybe Int
+    }
+
+
+{-| POST /public\_api/v1/get\_attack\_surface\_rules
+-}
+getRules : Request RulesResponse
+getRules =
+    Request.post
+        [ "public_api", "v1", "get_attack_surface_rules" ]
+        (Encode.object [ ( "request_data", Encode.object [] ) ])
+        (Decode.field "reply" rulesResponseDecoder)
+
+
+rulesResponseDecoder : Decoder RulesResponse
+rulesResponseDecoder =
+    Decode.map3 RulesResponse
+        (Decode.maybe (Decode.field "total_count" Decode.int))
+        (Decode.maybe (Decode.field "result_count" Decode.int))
+        (Decode.oneOf
+            [ Decode.field "attack_surface_rules" (Decode.list attackSurfaceRuleDecoder)
+            , Decode.succeed []
+            ]
+        )
+
+
+attackSurfaceRuleDecoder : Decoder AttackSurfaceRule
+attackSurfaceRuleDecoder =
+    Decode.map8 AttackSurfaceRule
+        (Decode.maybe (Decode.field "attack_surface_rule_name" Decode.string))
+        (Decode.maybe (Decode.field "enabled_status" Decode.string))
+        (Decode.maybe (Decode.field "priority" Decode.string))
+        (Decode.maybe (Decode.field "description" Decode.string))
+        (Decode.maybe (Decode.field "category" Decode.string))
+        (Decode.maybe (Decode.field "attack_surface_rule_id" Decode.string))
+        (Decode.oneOf
+            [ Decode.field "asm_alert_categories" (Decode.list Decode.value)
+            , Decode.succeed []
+            ]
+        )
+        (Decode.maybe (Decode.field "created" Decode.int))
+
+
+encode : RulesResponse -> Encode.Value
+encode r =
+    Encode.object
+        (List.filterMap identity
+            [ Maybe.map (\v -> ( "total_count", Encode.int v )) r.totalCount
+            , Maybe.map (\v -> ( "result_count", Encode.int v )) r.resultCount
+            , Just ( "attack_surface_rules", Encode.list encodeRule r.attackSurfaceRules )
+            ]
+        )
+
+
+encodeRule : AttackSurfaceRule -> Encode.Value
+encodeRule rule =
+    Encode.object
+        (List.filterMap identity
+            [ Maybe.map (\v -> ( "attack_surface_rule_name", Encode.string v )) rule.attackSurfaceRuleName
+            , Maybe.map (\v -> ( "enabled_status", Encode.string v )) rule.enabledStatus
+            , Maybe.map (\v -> ( "priority", Encode.string v )) rule.priority
+            , Maybe.map (\v -> ( "description", Encode.string v )) rule.description
+            , Maybe.map (\v -> ( "category", Encode.string v )) rule.category
+            , Maybe.map (\v -> ( "attack_surface_rule_id", Encode.string v )) rule.attackSurfaceRuleId
+            , Just ( "asm_alert_categories", Encode.list identity rule.asmAlertCategories )
+            , Maybe.map (\v -> ( "created", Encode.int v )) rule.created
+            ]
+        )

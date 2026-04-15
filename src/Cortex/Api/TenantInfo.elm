@@ -1,5 +1,6 @@
 module Cortex.Api.TenantInfo exposing
     ( TenantInfo
+    , encode
     , get
     )
 
@@ -37,3 +38,8 @@ tenantInfoDecoder : Decoder TenantInfo
 tenantInfoDecoder =
     Decode.field "reply" Decode.value
         |> Decode.map TenantInfo
+
+
+encode : TenantInfo -> Encode.Value
+encode info =
+    info.raw

@@ -1,0 +1,65 @@
+module Cortex.Api.Issues exposing
+    ( SearchResponse
+    , encodeSearch
+    , search
+    )
+
+import Cortex.Request as Request exposing (Request)
+import Json.Decode as Decode exposing (Decoder)
+import Json.Encode as Encode
+
+
+{-| Issue records have ~50 normalized fields plus tenant-specific custom fields,
+so we preserve them as raw JSON and only type the paginated envelope counters.
+-}
+type alias SearchResponse =
+    { data : List Encode.Value
+    , filterCount : Maybe Int
+    , totalCount : Maybe Int
+    }
+
+
+{-| POST /public\_api/v1/issue/search
+-}
+search : Request SearchResponse
+search =
+    Request.post
+        [ "public_api", "v1", "issue", "search" ]
+        (Encode.object [ ( "request_data", Encode.object [] ) ])
+        (Decode.field "reply" searchResponseDecoder)
+
+
+searchResponseDecoder : Decoder SearchResponse
+searchResponseDecoder =
+    Decode.map3 SearchResponse
+        (Decode.oneOf
+            [ Decode.field "DATA" (Decode.list Decode.value)
+            , Decode.field "data" (Decode.list Decode.value)
+            , Decode.succeed []
+            ]
+        )
+        (Decode.maybe
+            (Decode.oneOf
+                [ Decode.field "FILTER_COUNT" Decode.int
+                , Decode.field "filter_count" Decode.int
+                ]
+            )
+        )
+        (Decode.maybe
+            (Decode.oneOf
+                [ Decode.field "TOTAL_COUNT" Decode.int
+                , Decode.field "total_count" Decode.int
+                ]
+            )
+        )
+
+
+encodeSearch : SearchResponse -> Encode.Value
+encodeSearch r =
+    Encode.object
+        (List.filterMap identity
+            [ Just ( "DATA", Encode.list identity r.data )
+            , Maybe.map (\v -> ( "FILTER_COUNT", Encode.int v )) r.filterCount
+            , Maybe.map (\v -> ( "TOTAL_COUNT", Encode.int v )) r.totalCount
+            ]
+        )

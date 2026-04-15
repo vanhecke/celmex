@@ -12,7 +12,7 @@ Complete inventory of all API endpoints from the OpenAPI specs in `docs/cortex-a
 > 9 endpoints appear in multiple specs (CWP / Trusted Images / Registry Connectors) — listed in each relevant section.
 > Raw total across all 22 spec files: 521. After removing the 2 duplicate files: 341 listed below.
 
-**Progress:** 4/341 endpoints implemented | 178 View | 163 Edit
+**Progress:** 31/341 endpoints implemented | 174 View | 167 Edit
 
 
 ## Cortex Platform
@@ -21,18 +21,18 @@ Source: `cortex-platform-papi.json`
 
 | ✓ | Method | Path | Description | Type | Elm | CLI | Test |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-|  | GET | `/public_api/v1/cli/releases/version` | Get the latest version of the Cortex CLI | View |  |  |  |
+| ✓ | GET | `/public_api/v1/cli/releases/version` | Get the latest version of the Cortex CLI | View | `Cortex.Api.Cli` | `cli version` | `cli_version.bats` |
 |  | POST | `/public_api/v1/xql/start_xql_query` | Start an XQL query | Edit |  |  |  |
 |  | POST | `/public_api/v1/xql/get_query_results` | Get XQL query results | View |  |  |  |
-|  | POST | `/public_api/v1/xql/get_quota` | Get XQL query Quota | View |  |  |  |
+| ✓ | POST | `/public_api/v1/xql/get_quota` | Get XQL query Quota | View | `Cortex.Api.Xql` | `xql get-quota` | `xql.bats` |
 |  | POST | `/public_api/v1/xql/get_query_results_stream` | Get XQL query results Stream | View |  |  |  |
-|  | POST | `/public_api/v1/distributions/get_versions` | Get Distribution version | View |  |  |  |
+| ✓ | POST | `/public_api/v1/distributions/get_versions` | Get Distribution version | View | `Cortex.Api.Distributions` | `distributions get-versions` | `distributions.bats` |
 | ✓ | POST | `/public_api/v1/endpoints/get_endpoints` | Get all Endpoints | View | `Cortex.Api.Endpoints` | `endpoints list` | `endpoints.bats` |
 |  | POST | `/public_api/v1/endpoints/get_policy` | Get Policy | View |  |  |  |
 |  | POST | `/public_api/v1/endpoints/delete` | Delete Endpoints | Edit |  |  |  |
 |  | POST | `/public_api/v1/distributions/create` | Create distributions | Edit |  |  |  |
-|  | POST | `/public_api/v1/distributions/get_distributions` | Get Distributions | View |  |  |  |
-|  | POST | `/public_api/v1/device_control/get_violations` | Get Violations | View |  |  |  |
+| ✓ | POST | `/public_api/v1/distributions/get_distributions` | Get Distributions | View | `Cortex.Api.Distributions` | `distributions list` | `distributions.bats` |
+| ✓ | POST | `/public_api/v1/device_control/get_violations` | Get Violations | View | `Cortex.Api.DeviceControl` | `device-control get-violations` | `device_control.bats` |
 |  | POST | `/public_api/v1/distributions/get_status` | Get Distribution status | View |  |  |  |
 |  | POST | `/public_api/v1/distributions/get_dist_url` | Get Distribution URL | View |  |  |  |
 |  | POST | `/public_api/v1/endpoints/update_agent_name` | Set an Endpoint Alias | Edit |  |  |  |
@@ -61,7 +61,7 @@ Source: `cortex-platform-papi.json`
 | ✓ | POST | `/public_api/v1/audits/management_logs` | Get Audit Management Log | View | `Cortex.Api.AuditLogs` | `audit-logs search` | `audit_logs.bats` |
 | ✓ | GET | `/public_api/v1/healthcheck` | System Health Check | View | `Cortex.Api.Healthcheck` | `healthcheck` | `healthcheck.bats` |
 | ✓ | POST | `/public_api/v1/system/get_tenant_info` | Get Tenant Info | View | `Cortex.Api.TenantInfo` | `tenant-info` | `tenant_info.bats` |
-|  | POST | `/public_api/v1/rbac/get_users` | Get Users | View |  |  |  |
+| ✓ | POST | `/public_api/v1/rbac/get_users` | Get Users | View | `Cortex.Api.Rbac` | `rbac get-users` | `rbac.bats` |
 |  | POST | `/public_api/v1/rbac/get_roles` | Get Roles | View |  |  |  |
 |  | POST | `/public_api/v1/rbac/get_user_group` | Get User Groups | View |  |  |  |
 |  | POST | `/public_api/v1/rbac/set_user_role` | Set a User Role | Edit |  |  |  |
@@ -71,56 +71,56 @@ Source: `cortex-platform-papi.json`
 |  | POST | `/public_api/v1/get_risky_hosts` | Get Risky Hosts | View |  |  |  |
 |  | POST | `/public_api/v1/endpoints/file_retrieval` | Retrieve File | Edit |  |  |  |
 |  | POST | `/public_api/v1/endpoints/isolate` | Isolate Endpoints | Edit |  |  |  |
-|  | POST | `/public_api/v1/audits/agents_reports` | Get Audit Agent Report | View |  |  |  |
+| ✓ | POST | `/public_api/v1/audits/agents_reports` | Get Audit Agent Report | View | `Cortex.Api.AuditLogs` | `audit-logs agents-reports` | `audit_logs_agents_reports.bats` |
 |  | POST | `/public_api/v1/assets/get_external_service` | Get External Service | View |  |  |  |
-|  | POST | `/public_api/v1/assets/get_external_services` | Get All Services | View |  |  |  |
-|  | POST | `/public_api/v1/assets/get_assets_internet_exposure` | Get all Internet Exposures | View |  |  |  |
+| ✓ | POST | `/public_api/v1/assets/get_external_services` | Get All Services | View | `Cortex.Api.Assets` | `assets external-services` | `assets.bats` |
+| ✓ | POST | `/public_api/v1/assets/get_assets_internet_exposure` | Get all Internet Exposures | View | `Cortex.Api.Assets` | `assets internet-exposures` | `assets.bats` |
 |  | POST | `/public_api/v1/assets/get_asset_internet_exposure` | Get Internet Exposure | View |  |  |  |
-|  | POST | `/public_api/v1/assets/get_external_ip_address_ranges` | Get all External IP Address Ranges | View |  |  |  |
+| ✓ | POST | `/public_api/v1/assets/get_external_ip_address_ranges` | Get all External IP Address Ranges | View | `Cortex.Api.Assets` | `assets ip-ranges` | `assets.bats` |
 |  | POST | `/public_api/v1/assets/get_external_ip_address_range` | Get External IP Address Range | View |  |  |  |
 |  | POST | `/public_api/v1/triage_endpoint` | Initiate Forensics Triage | Edit |  |  |  |
-|  | POST | `/public_api/v1/assets/get_vulnerability_tests` | Get vulnerability tests | View |  |  |  |
+| ✓ | POST | `/public_api/v1/assets/get_vulnerability_tests` | Get vulnerability tests | View | `Cortex.Api.Assets` | `assets vulnerability-tests` | `assets.bats` |
 |  | POST | `/public_api/v1/assets/bulk_update_vulnerability_tests` | Bulk Update Vulnerability Tests | Edit |  |  |  |
 |  | POST | `/public_api/v1/dataset/define_dataset` | Define an XQL user dataset | Edit |  |  |  |
 |  | POST | `/public_api/v1/dataset/get_created_datasets` | Get created XQL user datasets | View |  |  |  |
 |  | POST | `/public_api/v1/dataset/delete_dataset` | Delete an XQL user dataset | Edit |  |  |  |
 |  | POST | `/public_api/v1/xql/add_dataset` | Add Dataset | Edit |  |  |  |
 |  | POST | `/public_api/v2/xql/delete_dataset` | Delete a dataset | Edit |  |  |  |
-|  | POST | `/public_api/v1/xql/get_datasets` | Get all datasets | View |  |  |  |
+| ✓ | POST | `/public_api/v1/xql/get_datasets` | Get all datasets | View | `Cortex.Api.Xql` | `xql get-datasets` | `xql.bats` |
 |  | POST | `/public_api/v1/xql/lookups/add_data` | Add or update data in a lookup dataset | Edit |  |  |  |
 |  | POST | `/public_api/v1/xql/lookups/remove_data` | Remove data from a lookup dataset | Edit |  |  |  |
 |  | POST | `/public_api/v1/xql/lookups/get_data` | Get data from a lookup dataset | View |  |  |  |
 |  | POST | `/public_api/v1/get_triage_presets` | Get triage presets | View |  |  |  |
-|  | POST | `/public_api/v1/authentication-settings/create` | Create authentication settings for IdP SSO or metadata URL | View |  |  |  |
+|  | POST | `/public_api/v1/authentication-settings/create` | Create authentication settings for IdP SSO or metadata URL | Edit |  |  |  |
 |  | POST | `/public_api/v1/authentication-settings/update` | Update authentication settings | Edit |  |  |  |
 |  | POST | `/public_api/v1/authentication-settings/delete` | Delete authentication settings by domain | Edit |  |  |  |
-|  | POST | `/public_api/v1/authentication-settings/get/settings` | Get authentication settings for all configured domains | View |  |  |  |
+| ✓ | POST | `/public_api/v1/authentication-settings/get/settings` | Get authentication settings for all configured domains | View | `Cortex.Api.AuthSettings` | `authentication-settings get` | `authentication_settings.bats` |
 |  | POST | `/public_api/v1/authentication-settings/get/metadata` | Get IdP metadata | View |  |  |  |
 |  | POST | `/public_api/v1/asm_management/upload_asm_data` | Upload assets to the inventory | Edit |  |  |  |
 |  | POST | `/public_api/v1/assets/get_external_website` | Get Website Details | View |  |  |  |
-|  | POST | `/public_api/v1/assets/get_external_websites` | Get all Websites | View |  |  |  |
-|  | POST | `/public_api/v1/assets/get_external_websites/last_external_assessment` | Get Websites Last Assessment | View |  |  |  |
+| ✓ | POST | `/public_api/v1/assets/get_external_websites` | Get all Websites | View | `Cortex.Api.Assets` | `assets external-websites` | `assets.bats` |
+| ✓ | POST | `/public_api/v1/assets/get_external_websites/last_external_assessment` | Get Websites Last Assessment | View | `Cortex.Api.Assets` | `assets websites-last-assessment` | `assets.bats` |
 |  | POST | `/public_api/v1/integrations/syslog/create` | Create a syslog integration | Edit |  |  |  |
 |  | POST | `/public_api/v1/integrations/syslog/get` | Get all or filtered syslog servers | View |  |  |  |
 |  | POST | `/public_api/v1/integrations/syslog/update` | Update a syslog integration | Edit |  |  |  |
 |  | POST | `/public_api/v1/integrations/syslog/delete` | Delete all or filtered syslog integrations | Edit |  |  |  |
 |  | POST | `/public_api/v1/integrations/syslog/test` | Test syslog integration | Edit |  |  |  |
 |  | POST | `/public_api/v1/distributions/delete` | Delete agent installation packages | Edit |  |  |  |
-|  | POST | `/public_api/v1/get_attack_surface_rules` | Get all Attack Surface Rules | View |  |  |  |
+| ✓ | POST | `/public_api/v1/get_attack_surface_rules` | Get all Attack Surface Rules | View | `Cortex.Api.AttackSurface` | `attack-surface get-rules` | `attack_surface.bats` |
 |  | POST | `/public_api/v1/asm_management/remove_asm_data` | Remove Assets | Edit |  |  |  |
-|  | POST | `/public_api/v1/scheduled_queries/list` | Get scheduled queries | View |  |  |  |
+| ✓ | POST | `/public_api/v1/scheduled_queries/list` | Get scheduled queries | View | `Cortex.Api.ScheduledQueries` | `scheduled-queries list` | `scheduled_queries.bats` |
 |  | POST | `/public_api/v1/scheduled_queries/insert` | Insert or update scheduled queries | Edit |  |  |  |
 |  | POST | `/public_api/v1/scheduled_queries/delete` | Delete a scheduled query | Edit |  |  |  |
-|  | POST | `/public_api/xql_library/get` | Get XQL Queries | View |  |  |  |
+| ✓ | POST | `/public_api/xql_library/get` | Get XQL Queries | View | `Cortex.Api.Xql` | `xql-library get` | `xql.bats` |
 |  | POST | `/public_api/xql_library/insert` | Insert or update XQL queries | Edit |  |  |  |
 |  | POST | `/public_api/xql_library/delete` | Delete XQL Queries | Edit |  |  |  |
-|  | POST | `/public_api/v1/indicators/get` | Get Indicators (IOCs) | View |  |  |  |
+| ✓ | POST | `/public_api/v1/indicators/get` | Get Indicators (IOCs) | View | `Cortex.Api.Indicators` | `indicators get` | `indicators.bats` |
 |  | POST | `/public_api/v1/indicators/insert` | Insert or update IOCs | Edit |  |  |  |
 |  | POST | `/public_api/v1/indicators/delete` | Delete Indicators (IOCs) | Edit |  |  |  |
-|  | POST | `/public_api/v1/bioc/get` | Get BIOCs | View |  |  |  |
+| ✓ | POST | `/public_api/v1/bioc/get` | Get BIOCs | View | `Cortex.Api.Biocs` | `bioc get` | `biocs.bats` |
 |  | POST | `/public_api/v1/bioc/insert` | Insert or update BIOCs | Edit |  |  |  |
 |  | POST | `/public_api/v1/bioc/delete` | Delete BIOCs | Edit |  |  |  |
-|  | POST | `/public_api/v1/correlations/get` | Get Correlation Rules | View |  |  |  |
+| ✓ | POST | `/public_api/v1/correlations/get` | Get Correlation Rules | View | `Cortex.Api.Correlations` | `correlations get` | `correlations.bats` |
 |  | POST | `/public_api/v1/correlations/insert` | Insert or update Correlation Rules | Edit |  |  |  |
 |  | POST | `/public_api/v1/correlations/delete` | Delete Correlation Rules | Edit |  |  |  |
 |  | POST | `/public_api/v1/playbooks/get` | Get a playbook | View |  |  |  |
@@ -133,10 +133,10 @@ Source: `cortex-platform-papi.json`
 |  | POST | `/public_api/v1/dashboards/insert` | Insert or update dashboards | Edit |  |  |  |
 |  | POST | `/public_api/v1/dashboards/delete` | Delete dashboards | Edit |  |  |  |
 |  | POST | `/public_api/v1/widgets/get` | Get widgets | View |  |  |  |
-|  | POST | `/public_api/v1/widgets/insert` | Insert or update widgets | View |  |  |  |
-|  | POST | `/public_api/v1/widgets/delete` | Delete widgets | View |  |  |  |
+|  | POST | `/public_api/v1/widgets/insert` | Insert or update widgets | Edit |  |  |  |
+|  | POST | `/public_api/v1/widgets/delete` | Delete widgets | Edit |  |  |  |
 |  | POST | `/public_api/v1/issue` | Create a new issue | Edit |  |  |  |
-|  | POST | `/public_api/v1/issue/search` | Retrieve issues based on filters | View |  |  |  |
+| ✓ | POST | `/public_api/v1/issue/search` | Retrieve issues based on filters | View | `Cortex.Api.Issues` | `issues search` | `issues.bats` |
 |  | POST | `/public_api/v1/issue/{issue-id}` | Update existing issue | Edit |  |  |  |
 |  | POST | `/public_api/v1/issue/schema` | Retrieve issue schema | View |  |  |  |
 |  | POST | `/public_api/v1/case/search` | Retrieve Cases based on filters | View |  |  |  |
@@ -144,23 +144,23 @@ Source: `cortex-platform-papi.json`
 |  | GET | `/public_api/v1/case/artifacts/{case-id}` | Retrieve Case Artifacts by Case ID | View |  |  |  |
 |  | POST | `/public_api/v1/entries/get` | Get War Room entries | View |  |  |  |
 |  | POST | `/public_api/v1/entries/insert` | Add War Room entries | Edit |  |  |  |
-|  | POST | `/public_api/v1/assets` | Get all or filtered assets | View |  |  |  |
+| ✓ | POST | `/public_api/v1/assets` | Get all or filtered assets | View | `Cortex.Api.Assets` | `assets list` | `assets.bats` |
 |  | GET | `/public_api/v1/assets/{id}` | Get asset by ID | View |  |  |  |
 |  | GET | `/public_api/v1/assets/{id}/raw_fields` | Get raw fields of asset by ID | View |  |  |  |
-|  | GET | `/public_api/v1/assets/schema` | Get schema of asset inventory | View |  |  |  |
+| ✓ | GET | `/public_api/v1/assets/schema` | Get schema of asset inventory | View | `Cortex.Api.Assets` | `assets schema` | `assets.bats` |
 |  | GET | `/public_api/v1/assets/enum/{field_name}` | Get enum values of specified field | View |  |  |  |
-|  | POST | `/public_api/v1/asset-groups` | Get all or filtered asset groups | View |  |  |  |
+| ✓ | POST | `/public_api/v1/asset-groups` | Get all or filtered asset groups | View | `Cortex.Api.AssetGroups` | `asset-groups list` | `asset_groups.bats` |
 |  | POST | `/public_api/v1/asset-groups/create` | Create an Asset Group | Edit |  |  |  |
 |  | POST | `/public_api/v1/asset-groups/update/{group_id}` | Update an Asset Group | Edit |  |  |  |
 |  | POST | `/public_api/v1/asset-groups/delete/{group_id}` | Delete an Asset Group | Edit |  |  |  |
 |  | POST | `/public_api/v1/api_keys/get_api_keys` | Get existing API keys | View |  |  |  |
-|  | POST | `/public_api/v1/api_keys/generate` | Generate an API key | View |  |  |  |
+|  | POST | `/public_api/v1/api_keys/generate` | Generate an API key | Edit |  |  |  |
 |  | POST | `/public_api/v1/api_keys/delete` | Delete API keys | Edit |  |  |  |
 |  | POST | `/public_api/v1/tags/agents/delete_permanently` | Delete Tags Permanently | Edit |  |  |  |
 |  | POST | `/public_api/v1/endpoints/upgrade` | Upgrade Agents | Edit |  |  |  |
 |  | POST | `/public_api/v1/endpoints/get_profiles` | Get endpoint security profiles | View |  |  |  |
-|  | POST | `/public_api/v1/legacy_exceptions/get_modules` | Get Legacy Exceptions Modules | View |  |  |  |
-|  | POST | `/public_api/v1/legacy_exceptions/fetch` | Fetch Legacy Exception Rules | View |  |  |  |
+| ✓ | POST | `/public_api/v1/legacy_exceptions/get_modules` | Get Legacy Exceptions Modules | View | `Cortex.Api.LegacyExceptions` | `legacy-exceptions get-modules` | `legacy_exceptions.bats` |
+| ✓ | POST | `/public_api/v1/legacy_exceptions/fetch` | Fetch Legacy Exception Rules | View | `Cortex.Api.LegacyExceptions` | `legacy-exceptions fetch` | `legacy_exceptions.bats` |
 |  | POST | `/public_api/v1/legacy_exceptions/add` | Add Legacy Exception Rule | Edit |  |  |  |
 |  | POST | `/public_api/v1/legacy_exceptions/edit` | Edit Legacy Exception Rule | Edit |  |  |  |
 |  | POST | `/public_api/v1/legacy_exceptions/delete` | Delete Legacy Exception Rules | Edit |  |  |  |
