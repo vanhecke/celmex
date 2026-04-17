@@ -1,7 +1,7 @@
 module Cortex.Request exposing
     ( Request
     , get, post, postEmpty
-    , map
+    , map, withDecoder
     , toInternal
     )
 
@@ -14,7 +14,7 @@ Only `GET` and `POST` are provided — the Cortex Advanced API does not use
 
 @docs Request
 @docs get, post, postEmpty
-@docs map
+@docs map, withDecoder
 @docs toInternal
 
 -}
@@ -82,6 +82,22 @@ map f (Request r) =
         , query = r.query
         , body = r.body
         , decoder = Json.Decode.map f r.decoder
+        }
+
+
+{-| Replace the response decoder entirely. Useful when a caller wants the
+raw JSON (for logging, cache, or piping to another tool) instead of the
+typed shape the endpoint module provides: `Request.withDecoder Decode.value
+req` turns any `Request a` into a `Request Value`.
+-}
+withDecoder : Decoder b -> Request a -> Request b
+withDecoder decoder (Request r) =
+    Request
+        { method = r.method
+        , path = r.path
+        , query = r.query
+        , body = r.body
+        , decoder = decoder
         }
 
 

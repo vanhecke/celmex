@@ -1,24 +1,5 @@
 module Cli.Commands exposing (Msg(..), dispatch, handleResult)
 
-import Cli.Encode.AssetGroups as AssetGroupsEnc
-import Cli.Encode.Assets as AssetsEnc
-import Cli.Encode.AttackSurface as AttackSurfaceEnc
-import Cli.Encode.AuditLogs as AuditLogsEnc
-import Cli.Encode.AuthSettings as AuthSettingsEnc
-import Cli.Encode.Biocs as BiocsEnc
-import Cli.Encode.Cli as CliEnc
-import Cli.Encode.Correlations as CorrelationsEnc
-import Cli.Encode.DeviceControl as DeviceControlEnc
-import Cli.Encode.Distributions as DistributionsEnc
-import Cli.Encode.Endpoints as EndpointsEnc
-import Cli.Encode.Healthcheck as HealthcheckEnc
-import Cli.Encode.Indicators as IndicatorsEnc
-import Cli.Encode.Issues as IssuesEnc
-import Cli.Encode.LegacyExceptions as LegacyExceptionsEnc
-import Cli.Encode.Rbac as RbacEnc
-import Cli.Encode.ScheduledQueries as ScheduledQueriesEnc
-import Cli.Encode.TenantInfo as TenantInfoEnc
-import Cli.Encode.Xql as XqlEnc
 import Cli.Ports as Ports
 import Cortex.Api.AssetGroups as AssetGroups
 import Cortex.Api.Assets as Assets
@@ -43,6 +24,7 @@ import Cortex.Auth as Auth
 import Cortex.Client as Client exposing (Config)
 import Cortex.Error exposing (Error(..))
 import Cortex.Request as Request exposing (Request)
+import Json.Decode as Decode
 import Json.Encode as Encode
 
 
@@ -53,106 +35,118 @@ type Msg
 dispatch : Auth.Stamp -> Config -> List String -> Result String (Cmd Msg)
 dispatch stamp config args =
     let
-        run : Request a -> (a -> Encode.Value) -> Cmd Msg
-        run req encoder =
-            Client.sendWith stamp config GotResponse (Request.map encoder req)
+        run : Request a -> Cmd Msg
+        run req =
+            Client.sendWith stamp config GotResponse (Request.withDecoder rawDecoder req)
     in
     case args of
         [ "healthcheck" ] ->
-            Ok (run Healthcheck.check HealthcheckEnc.encode)
+            Ok (run Healthcheck.check)
 
         [ "tenant-info" ] ->
-            Ok (run TenantInfo.get TenantInfoEnc.encode)
+            Ok (run TenantInfo.get)
 
         [ "endpoints", "list" ] ->
-            Ok (run Endpoints.list EndpointsEnc.encode)
+            Ok (run Endpoints.list)
 
         [ "audit-logs", "search" ] ->
-            Ok (run AuditLogs.search AuditLogsEnc.encode)
+            Ok (run AuditLogs.search)
 
         [ "audit-logs", "agents-reports" ] ->
-            Ok (run AuditLogs.agentsReports AuditLogsEnc.encodeAgentsReports)
+            Ok (run AuditLogs.agentsReports)
 
         [ "cli", "version" ] ->
-            Ok (run Cli.getVersion CliEnc.encode)
+            Ok (run Cli.getVersion)
 
         [ "distributions", "get-versions" ] ->
-            Ok (run Distributions.getVersions DistributionsEnc.encodeVersions)
+            Ok (run Distributions.getVersions)
 
         [ "distributions", "list" ] ->
-            Ok (run Distributions.getDistributions DistributionsEnc.encodeDistributions)
+            Ok (run Distributions.getDistributions)
 
         [ "rbac", "get-users" ] ->
-            Ok (run Rbac.getUsers RbacEnc.encodeUsers)
+            Ok (run Rbac.getUsers)
 
         [ "xql", "get-quota" ] ->
-            Ok (run Xql.getQuota XqlEnc.encodeQuota)
+            Ok (run Xql.getQuota)
 
         [ "xql", "get-datasets" ] ->
-            Ok (run Xql.getDatasets XqlEnc.encodeDatasets)
+            Ok (run Xql.getDatasets)
 
         [ "xql-library", "get" ] ->
-            Ok (run Xql.getLibrary XqlEnc.encodeLibrary)
+            Ok (run Xql.getLibrary)
 
         [ "device-control", "get-violations" ] ->
-            Ok (run DeviceControl.getViolations DeviceControlEnc.encodeViolations)
+            Ok (run DeviceControl.getViolations)
 
         [ "authentication-settings", "get" ] ->
-            Ok (run AuthSettings.get AuthSettingsEnc.encode)
+            Ok (run AuthSettings.get)
 
         [ "attack-surface", "get-rules" ] ->
-            Ok (run AttackSurface.getRules AttackSurfaceEnc.encode)
+            Ok (run AttackSurface.getRules)
 
         [ "scheduled-queries", "list" ] ->
-            Ok (run ScheduledQueries.list ScheduledQueriesEnc.encode)
+            Ok (run ScheduledQueries.list)
 
         [ "indicators", "get" ] ->
-            Ok (run Indicators.get IndicatorsEnc.encode)
+            Ok (run Indicators.get)
 
         [ "bioc", "get" ] ->
-            Ok (run Biocs.get BiocsEnc.encode)
+            Ok (run Biocs.get)
 
         [ "correlations", "get" ] ->
-            Ok (run Correlations.get CorrelationsEnc.encode)
+            Ok (run Correlations.get)
 
         [ "issues", "search" ] ->
-            Ok (run Issues.search IssuesEnc.encodeSearch)
+            Ok (run Issues.search)
 
         [ "legacy-exceptions", "get-modules" ] ->
-            Ok (run LegacyExceptions.getModules LegacyExceptionsEnc.encodeModules)
+            Ok (run LegacyExceptions.getModules)
 
         [ "legacy-exceptions", "fetch" ] ->
-            Ok (run LegacyExceptions.fetch LegacyExceptionsEnc.encodeFetch)
+            Ok (run LegacyExceptions.fetch)
 
         [ "assets", "list" ] ->
-            Ok (run Assets.list AssetsEnc.encodeAssets)
+            Ok (run Assets.list)
 
         [ "assets", "schema" ] ->
-            Ok (run Assets.getSchema AssetsEnc.encodeSchema)
+            Ok (run Assets.getSchema)
 
         [ "assets", "external-services" ] ->
-            Ok (run Assets.getExternalServices AssetsEnc.encodeExternalServices)
+            Ok (run Assets.getExternalServices)
 
         [ "assets", "internet-exposures" ] ->
-            Ok (run Assets.getInternetExposures AssetsEnc.encodeInternetExposures)
+            Ok (run Assets.getInternetExposures)
 
         [ "assets", "ip-ranges" ] ->
-            Ok (run Assets.getExternalIpRanges AssetsEnc.encodeExternalIpRanges)
+            Ok (run Assets.getExternalIpRanges)
 
         [ "assets", "vulnerability-tests" ] ->
-            Ok (run Assets.getVulnerabilityTests AssetsEnc.encodeVulnerabilityTests)
+            Ok (run Assets.getVulnerabilityTests)
 
         [ "assets", "external-websites" ] ->
-            Ok (run Assets.getExternalWebsites AssetsEnc.encodeExternalWebsites)
+            Ok (run Assets.getExternalWebsites)
 
         [ "assets", "websites-last-assessment" ] ->
-            Ok (run Assets.getWebsitesLastAssessment AssetsEnc.encodeWebsitesLastAssessment)
+            Ok (run Assets.getWebsitesLastAssessment)
 
         [ "asset-groups", "list" ] ->
-            Ok (run AssetGroups.list AssetGroupsEnc.encode)
+            Ok (run AssetGroups.list)
 
         _ ->
             Err (usage args)
+
+
+{-| Most Cortex responses wrap their body in a top-level `reply` envelope,
+but a handful (healthcheck, cli version, biocs, correlations, indicators)
+do not. Unwrap when present, otherwise pass the value through.
+-}
+rawDecoder : Decode.Decoder Encode.Value
+rawDecoder =
+    Decode.oneOf
+        [ Decode.field "reply" Decode.value
+        , Decode.value
+        ]
 
 
 handleResult : Msg -> Cmd msg

@@ -11,11 +11,11 @@ setup() {
     echo "$output" | jq -e '.data | type == "array"' > /dev/null
 }
 
-@test "assets schema returns valid JSON array" {
+@test "assets schema returns valid JSON with data array" {
     run "$CORTEX" assets schema
     [ "$status" -eq 0 ]
     echo "$output" | jq . > /dev/null
-    echo "$output" | jq -e 'type == "array"' > /dev/null
+    echo "$output" | jq -e '.data | type == "array"' > /dev/null
 }
 
 @test "assets external-services returns valid JSON with external_services array" {
