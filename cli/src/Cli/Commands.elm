@@ -1,168 +1,243 @@
-module Cli.Commands exposing (Msg(..), dispatch, handleResult)
+module Cli.Commands exposing
+    ( Endpoint(..)
+    , argvToEndpoint
+    , endpointName
+    , errorToString
+    , usage
+    )
 
-import Cli.Ports as Ports
-import Cortex.Api.AssetGroups as AssetGroups
-import Cortex.Api.Assets as Assets
-import Cortex.Api.AttackSurface as AttackSurface
-import Cortex.Api.AuditLogs as AuditLogs
-import Cortex.Api.AuthSettings as AuthSettings
-import Cortex.Api.Biocs as Biocs
-import Cortex.Api.Cli as Cli
-import Cortex.Api.Correlations as Correlations
-import Cortex.Api.DeviceControl as DeviceControl
-import Cortex.Api.Distributions as Distributions
-import Cortex.Api.Endpoints as Endpoints
-import Cortex.Api.Healthcheck as Healthcheck
-import Cortex.Api.Indicators as Indicators
-import Cortex.Api.Issues as Issues
-import Cortex.Api.LegacyExceptions as LegacyExceptions
-import Cortex.Api.Rbac as Rbac
-import Cortex.Api.ScheduledQueries as ScheduledQueries
-import Cortex.Api.TenantInfo as TenantInfo
-import Cortex.Api.Xql as Xql
-import Cortex.Auth as Auth
-import Cortex.Client as Client exposing (Config)
 import Cortex.Error exposing (Error(..))
-import Cortex.Request as Request exposing (Request)
-import Json.Decode as Decode
-import Json.Encode as Encode
 
 
-type Msg
-    = GotResponse (Result Error Encode.Value)
+type Endpoint
+    = Healthcheck
+    | TenantInfo
+    | CliVersion
+    | EndpointsList
+    | AuditLogsSearch
+    | AuditLogsAgentsReports
+    | DistributionsGetVersions
+    | DistributionsList
+    | RbacGetUsers
+    | AuthSettingsGet
+    | DeviceControlGetViolations
+    | AttackSurfaceGetRules
+    | XqlGetQuota
+    | XqlGetDatasets
+    | XqlLibraryGet
+    | ScheduledQueriesList
+    | IndicatorsGet
+    | BiocsGet
+    | CorrelationsGet
+    | IssuesSearch
+    | LegacyExceptionsGetModules
+    | LegacyExceptionsFetch
+    | AssetsList
+    | AssetsSchema
+    | AssetsExternalServices
+    | AssetsInternetExposures
+    | AssetsIpRanges
+    | AssetsVulnerabilityTests
+    | AssetsExternalWebsites
+    | AssetsWebsitesLastAssessment
+    | AssetGroupsList
 
 
-dispatch : Auth.Stamp -> Config -> List String -> Result String (Cmd Msg)
-dispatch stamp config args =
-    let
-        run : Request a -> Cmd Msg
-        run req =
-            Client.sendWith stamp config GotResponse (Request.withDecoder rawDecoder req)
-    in
+argvToEndpoint : List String -> Result String Endpoint
+argvToEndpoint args =
     case args of
         [ "healthcheck" ] ->
-            Ok (run Healthcheck.check)
+            Ok Healthcheck
 
         [ "tenant-info" ] ->
-            Ok (run TenantInfo.get)
-
-        [ "endpoints", "list" ] ->
-            Ok (run Endpoints.list)
-
-        [ "audit-logs", "search" ] ->
-            Ok (run AuditLogs.search)
-
-        [ "audit-logs", "agents-reports" ] ->
-            Ok (run AuditLogs.agentsReports)
+            Ok TenantInfo
 
         [ "cli", "version" ] ->
-            Ok (run Cli.getVersion)
+            Ok CliVersion
+
+        [ "endpoints", "list" ] ->
+            Ok EndpointsList
+
+        [ "audit-logs", "search" ] ->
+            Ok AuditLogsSearch
+
+        [ "audit-logs", "agents-reports" ] ->
+            Ok AuditLogsAgentsReports
 
         [ "distributions", "get-versions" ] ->
-            Ok (run Distributions.getVersions)
+            Ok DistributionsGetVersions
 
         [ "distributions", "list" ] ->
-            Ok (run Distributions.getDistributions)
+            Ok DistributionsList
 
         [ "rbac", "get-users" ] ->
-            Ok (run Rbac.getUsers)
-
-        [ "xql", "get-quota" ] ->
-            Ok (run Xql.getQuota)
-
-        [ "xql", "get-datasets" ] ->
-            Ok (run Xql.getDatasets)
-
-        [ "xql-library", "get" ] ->
-            Ok (run Xql.getLibrary)
-
-        [ "device-control", "get-violations" ] ->
-            Ok (run DeviceControl.getViolations)
+            Ok RbacGetUsers
 
         [ "authentication-settings", "get" ] ->
-            Ok (run AuthSettings.get)
+            Ok AuthSettingsGet
+
+        [ "device-control", "get-violations" ] ->
+            Ok DeviceControlGetViolations
 
         [ "attack-surface", "get-rules" ] ->
-            Ok (run AttackSurface.getRules)
+            Ok AttackSurfaceGetRules
+
+        [ "xql", "get-quota" ] ->
+            Ok XqlGetQuota
+
+        [ "xql", "get-datasets" ] ->
+            Ok XqlGetDatasets
+
+        [ "xql-library", "get" ] ->
+            Ok XqlLibraryGet
 
         [ "scheduled-queries", "list" ] ->
-            Ok (run ScheduledQueries.list)
+            Ok ScheduledQueriesList
 
         [ "indicators", "get" ] ->
-            Ok (run Indicators.get)
+            Ok IndicatorsGet
 
         [ "bioc", "get" ] ->
-            Ok (run Biocs.get)
+            Ok BiocsGet
 
         [ "correlations", "get" ] ->
-            Ok (run Correlations.get)
+            Ok CorrelationsGet
 
         [ "issues", "search" ] ->
-            Ok (run Issues.search)
+            Ok IssuesSearch
 
         [ "legacy-exceptions", "get-modules" ] ->
-            Ok (run LegacyExceptions.getModules)
+            Ok LegacyExceptionsGetModules
 
         [ "legacy-exceptions", "fetch" ] ->
-            Ok (run LegacyExceptions.fetch)
+            Ok LegacyExceptionsFetch
 
         [ "assets", "list" ] ->
-            Ok (run Assets.list)
+            Ok AssetsList
 
         [ "assets", "schema" ] ->
-            Ok (run Assets.getSchema)
+            Ok AssetsSchema
 
         [ "assets", "external-services" ] ->
-            Ok (run Assets.getExternalServices)
+            Ok AssetsExternalServices
 
         [ "assets", "internet-exposures" ] ->
-            Ok (run Assets.getInternetExposures)
+            Ok AssetsInternetExposures
 
         [ "assets", "ip-ranges" ] ->
-            Ok (run Assets.getExternalIpRanges)
+            Ok AssetsIpRanges
 
         [ "assets", "vulnerability-tests" ] ->
-            Ok (run Assets.getVulnerabilityTests)
+            Ok AssetsVulnerabilityTests
 
         [ "assets", "external-websites" ] ->
-            Ok (run Assets.getExternalWebsites)
+            Ok AssetsExternalWebsites
 
         [ "assets", "websites-last-assessment" ] ->
-            Ok (run Assets.getWebsitesLastAssessment)
+            Ok AssetsWebsitesLastAssessment
 
         [ "asset-groups", "list" ] ->
-            Ok (run AssetGroups.list)
+            Ok AssetGroupsList
 
         _ ->
             Err (usage args)
 
 
-{-| Most Cortex responses wrap their body in a top-level `reply` envelope,
-but a handful (healthcheck, cli version, biocs, correlations, indicators)
-do not. Unwrap when present, otherwise pass the value through.
--}
-rawDecoder : Decode.Decoder Encode.Value
-rawDecoder =
-    Decode.oneOf
-        [ Decode.field "reply" Decode.value
-        , Decode.value
-        ]
+endpointName : Endpoint -> String
+endpointName endpoint =
+    case endpoint of
+        Healthcheck ->
+            "healthcheck"
 
+        TenantInfo ->
+            "tenant-info"
 
-handleResult : Msg -> Cmd msg
-handleResult (GotResponse result) =
-    case result of
-        Ok value ->
-            Cmd.batch
-                [ Ports.stdout (Encode.encode 2 value ++ "\n")
-                , Ports.exit 0
-                ]
+        CliVersion ->
+            "cli version"
 
-        Err err ->
-            Cmd.batch
-                [ Ports.stderr (errorToString err ++ "\n")
-                , Ports.exit 1
-                ]
+        EndpointsList ->
+            "endpoints list"
+
+        AuditLogsSearch ->
+            "audit-logs search"
+
+        AuditLogsAgentsReports ->
+            "audit-logs agents-reports"
+
+        DistributionsGetVersions ->
+            "distributions get-versions"
+
+        DistributionsList ->
+            "distributions list"
+
+        RbacGetUsers ->
+            "rbac get-users"
+
+        AuthSettingsGet ->
+            "authentication-settings get"
+
+        DeviceControlGetViolations ->
+            "device-control get-violations"
+
+        AttackSurfaceGetRules ->
+            "attack-surface get-rules"
+
+        XqlGetQuota ->
+            "xql get-quota"
+
+        XqlGetDatasets ->
+            "xql get-datasets"
+
+        XqlLibraryGet ->
+            "xql-library get"
+
+        ScheduledQueriesList ->
+            "scheduled-queries list"
+
+        IndicatorsGet ->
+            "indicators get"
+
+        BiocsGet ->
+            "bioc get"
+
+        CorrelationsGet ->
+            "correlations get"
+
+        IssuesSearch ->
+            "issues search"
+
+        LegacyExceptionsGetModules ->
+            "legacy-exceptions get-modules"
+
+        LegacyExceptionsFetch ->
+            "legacy-exceptions fetch"
+
+        AssetsList ->
+            "assets list"
+
+        AssetsSchema ->
+            "assets schema"
+
+        AssetsExternalServices ->
+            "assets external-services"
+
+        AssetsInternetExposures ->
+            "assets internet-exposures"
+
+        AssetsIpRanges ->
+            "assets ip-ranges"
+
+        AssetsVulnerabilityTests ->
+            "assets vulnerability-tests"
+
+        AssetsExternalWebsites ->
+            "assets external-websites"
+
+        AssetsWebsitesLastAssessment ->
+            "assets websites-last-assessment"
+
+        AssetGroupsList ->
+            "asset-groups list"
 
 
 errorToString : Error -> String

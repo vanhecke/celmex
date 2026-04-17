@@ -13,6 +13,11 @@ setup() {
     echo "$output" | jq -e '.data | type == "array"' > /dev/null
 }
 
+@test "audit-logs search typed decode succeeds" {
+    run "$CORTEX_TEST" audit-logs search
+    [ "$status" -eq 0 ]
+}
+
 @test "unknown command exits non-zero" {
     run "$CORTEX" nonexistent
     [ "$status" -eq 1 ]

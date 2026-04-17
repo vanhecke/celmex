@@ -10,3 +10,8 @@ setup() {
     echo "$output" | jq . > /dev/null
     echo "$output" | jq -e '.violations | type == "array"' > /dev/null
 }
+
+@test "device-control get-violations typed decode succeeds" {
+    run "$CORTEX_TEST" device-control get-violations
+    [ "$status" -eq 0 ]
+}

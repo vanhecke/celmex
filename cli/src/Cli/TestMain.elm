@@ -1,4 +1,4 @@
-module Cli.Main exposing (main)
+module Cli.TestMain exposing (main)
 
 import Cli.Commands as Commands exposing (Endpoint)
 import Cli.Flags as Flags
@@ -26,13 +26,20 @@ import Cortex.Auth as Auth
 import Cortex.Client as Client exposing (Config)
 import Cortex.Error exposing (Error)
 import Cortex.Request as Request exposing (Request)
-import Json.Decode as Decode exposing (Decoder)
-import Json.Encode as Encode
+import Json.Decode as Decode
 import Platform
 
 
+{-| Integration test runner for the typed SDK decoders. Same argv surface as
+`cortex`, but instead of emitting the response body it runs each endpoint
+through its typed decoder and reports `ok` / `fail` to stdout / stderr.
+
+A `fail` means the tenant returned JSON that the library's typed decoder
+could not parse — i.e., the library and the API have drifted.
+
+-}
 type Msg
-    = GotResponse (Result Error Encode.Value)
+    = Decoded String (Result Error ())
 
 
 main : Program Decode.Value () Msg
@@ -94,128 +101,119 @@ update msg _ =
 run : Auth.Stamp -> Config -> Endpoint -> Cmd Msg
 run stamp config endpoint =
     let
-        raw : Request a -> Cmd Msg
-        raw req =
-            Client.sendWith stamp config GotResponse (Request.withDecoder rawDecoder req)
+        name =
+            Commands.endpointName endpoint
+
+        typed : Request a -> Cmd Msg
+        typed req =
+            Client.sendWith stamp config (Decoded name) (Request.map (\_ -> ()) req)
     in
     case endpoint of
         Commands.Healthcheck ->
-            raw Healthcheck.check
+            typed Healthcheck.check
 
         Commands.TenantInfo ->
-            raw TenantInfo.get
+            typed TenantInfo.get
 
         Commands.CliVersion ->
-            raw Cli.getVersion
+            typed Cli.getVersion
 
         Commands.EndpointsList ->
-            raw Endpoints.list
+            typed Endpoints.list
 
         Commands.AuditLogsSearch ->
-            raw AuditLogs.search
+            typed AuditLogs.search
 
         Commands.AuditLogsAgentsReports ->
-            raw AuditLogs.agentsReports
+            typed AuditLogs.agentsReports
 
         Commands.DistributionsGetVersions ->
-            raw Distributions.getVersions
+            typed Distributions.getVersions
 
         Commands.DistributionsList ->
-            raw Distributions.getDistributions
+            typed Distributions.getDistributions
 
         Commands.RbacGetUsers ->
-            raw Rbac.getUsers
+            typed Rbac.getUsers
 
         Commands.AuthSettingsGet ->
-            raw AuthSettings.get
+            typed AuthSettings.get
 
         Commands.DeviceControlGetViolations ->
-            raw DeviceControl.getViolations
+            typed DeviceControl.getViolations
 
         Commands.AttackSurfaceGetRules ->
-            raw AttackSurface.getRules
+            typed AttackSurface.getRules
 
         Commands.XqlGetQuota ->
-            raw Xql.getQuota
+            typed Xql.getQuota
 
         Commands.XqlGetDatasets ->
-            raw Xql.getDatasets
+            typed Xql.getDatasets
 
         Commands.XqlLibraryGet ->
-            raw Xql.getLibrary
+            typed Xql.getLibrary
 
         Commands.ScheduledQueriesList ->
-            raw ScheduledQueries.list
+            typed ScheduledQueries.list
 
         Commands.IndicatorsGet ->
-            raw Indicators.get
+            typed Indicators.get
 
         Commands.BiocsGet ->
-            raw Biocs.get
+            typed Biocs.get
 
         Commands.CorrelationsGet ->
-            raw Correlations.get
+            typed Correlations.get
 
         Commands.IssuesSearch ->
-            raw Issues.search
+            typed Issues.search
 
         Commands.LegacyExceptionsGetModules ->
-            raw LegacyExceptions.getModules
+            typed LegacyExceptions.getModules
 
         Commands.LegacyExceptionsFetch ->
-            raw LegacyExceptions.fetch
+            typed LegacyExceptions.fetch
 
         Commands.AssetsList ->
-            raw Assets.list
+            typed Assets.list
 
         Commands.AssetsSchema ->
-            raw Assets.getSchema
+            typed Assets.getSchema
 
         Commands.AssetsExternalServices ->
-            raw Assets.getExternalServices
+            typed Assets.getExternalServices
 
         Commands.AssetsInternetExposures ->
-            raw Assets.getInternetExposures
+            typed Assets.getInternetExposures
 
         Commands.AssetsIpRanges ->
-            raw Assets.getExternalIpRanges
+            typed Assets.getExternalIpRanges
 
         Commands.AssetsVulnerabilityTests ->
-            raw Assets.getVulnerabilityTests
+            typed Assets.getVulnerabilityTests
 
         Commands.AssetsExternalWebsites ->
-            raw Assets.getExternalWebsites
+            typed Assets.getExternalWebsites
 
         Commands.AssetsWebsitesLastAssessment ->
-            raw Assets.getWebsitesLastAssessment
+            typed Assets.getWebsitesLastAssessment
 
         Commands.AssetGroupsList ->
-            raw AssetGroups.list
-
-
-{-| Most Cortex responses wrap their body in a top-level `reply` envelope,
-but a handful (healthcheck, cli version, biocs, correlations, indicators)
-do not. Unwrap when present, otherwise pass the value through.
--}
-rawDecoder : Decoder Encode.Value
-rawDecoder =
-    Decode.oneOf
-        [ Decode.field "reply" Decode.value
-        , Decode.value
-        ]
+            typed AssetGroups.list
 
 
 handleResult : Msg -> Cmd Msg
-handleResult (GotResponse result) =
+handleResult (Decoded name result) =
     case result of
-        Ok value ->
+        Ok () ->
             Cmd.batch
-                [ Ports.stdout (Encode.encode 2 value ++ "\n")
+                [ Ports.stdout ("ok: " ++ name ++ "\n")
                 , Ports.exit 0
                 ]
 
         Err err ->
             Cmd.batch
-                [ Ports.stderr (Commands.errorToString err ++ "\n")
+                [ Ports.stderr ("fail: " ++ name ++ ": " ++ Commands.errorToString err ++ "\n")
                 , Ports.exit 1
                 ]

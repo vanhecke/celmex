@@ -10,3 +10,8 @@ setup() {
     echo "$output" | jq . > /dev/null
     echo "$output" | jq -e '.version' > /dev/null
 }
+
+@test "cli version typed decode succeeds" {
+    run "$CORTEX_TEST" cli version
+    [ "$status" -eq 0 ]
+}

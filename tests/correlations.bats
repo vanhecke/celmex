@@ -10,3 +10,8 @@ setup() {
     echo "$output" | jq . > /dev/null
     echo "$output" | jq -e '.objects | type == "array"' > /dev/null
 }
+
+@test "correlations get typed decode succeeds" {
+    run "$CORTEX_TEST" correlations get
+    [ "$status" -eq 0 ]
+}

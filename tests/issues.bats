@@ -10,3 +10,8 @@ setup() {
     echo "$output" | jq . > /dev/null
     echo "$output" | jq -e '.DATA | type == "array"' > /dev/null
 }
+
+@test "issues search typed decode succeeds" {
+    run "$CORTEX_TEST" issues search
+    [ "$status" -eq 0 ]
+}

@@ -10,3 +10,8 @@ setup() {
     echo "$output" | jq . > /dev/null
     echo "$output" | jq -e '.data | type == "array"' > /dev/null
 }
+
+@test "asset-groups list typed decode succeeds" {
+    run "$CORTEX_TEST" asset-groups list
+    [ "$status" -eq 0 ]
+}

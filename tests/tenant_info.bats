@@ -10,3 +10,8 @@ setup() {
     echo "$output" | jq . > /dev/null
     echo "$output" | jq -e 'type == "object"' > /dev/null
 }
+
+@test "tenant-info typed decode succeeds" {
+    run "$CORTEX_TEST" tenant-info
+    [ "$status" -eq 0 ]
+}

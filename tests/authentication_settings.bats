@@ -10,3 +10,8 @@ setup() {
     echo "$output" | jq . > /dev/null
     echo "$output" | jq -e 'type == "array"' > /dev/null
 }
+
+@test "authentication-settings get typed decode succeeds" {
+    run "$CORTEX_TEST" authentication-settings get
+    [ "$status" -eq 0 ]
+}

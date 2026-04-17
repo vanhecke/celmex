@@ -11,6 +11,11 @@ setup() {
     echo "$output" | jq -e 'type == "object"' > /dev/null
 }
 
+@test "xql get-quota typed decode succeeds" {
+    run "$CORTEX_TEST" xql get-quota
+    [ "$status" -eq 0 ]
+}
+
 @test "xql get-datasets returns valid JSON array" {
     run "$CORTEX" xql get-datasets
     [ "$status" -eq 0 ]
@@ -18,9 +23,19 @@ setup() {
     echo "$output" | jq -e 'type == "array"' > /dev/null
 }
 
+@test "xql get-datasets typed decode succeeds" {
+    run "$CORTEX_TEST" xql get-datasets
+    [ "$status" -eq 0 ]
+}
+
 @test "xql-library get returns valid JSON with xql_queries array" {
     run "$CORTEX" xql-library get
     [ "$status" -eq 0 ]
     echo "$output" | jq . > /dev/null
     echo "$output" | jq -e '.xql_queries | type == "array"' > /dev/null
+}
+
+@test "xql-library get typed decode succeeds" {
+    run "$CORTEX_TEST" xql-library get
+    [ "$status" -eq 0 ]
 }

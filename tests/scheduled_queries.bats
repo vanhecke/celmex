@@ -10,3 +10,8 @@ setup() {
     echo "$output" | jq . > /dev/null
     echo "$output" | jq -e '.DATA | type == "array"' > /dev/null
 }
+
+@test "scheduled-queries list typed decode succeeds" {
+    run "$CORTEX_TEST" scheduled-queries list
+    [ "$status" -eq 0 ]
+}

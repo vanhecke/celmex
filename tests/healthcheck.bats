@@ -10,3 +10,8 @@ setup() {
     echo "$output" | jq . > /dev/null
     echo "$output" | jq -e '.status' > /dev/null
 }
+
+@test "healthcheck typed decode succeeds" {
+    run "$CORTEX_TEST" healthcheck
+    [ "$status" -eq 0 ]
+}

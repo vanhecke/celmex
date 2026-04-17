@@ -10,3 +10,8 @@ setup() {
     echo "$output" | jq . > /dev/null
     echo "$output" | jq -e 'type == "array"' > /dev/null
 }
+
+@test "endpoints list typed decode succeeds" {
+    run "$CORTEX_TEST" endpoints list
+    [ "$status" -eq 0 ]
+}

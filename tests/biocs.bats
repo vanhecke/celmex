@@ -10,3 +10,8 @@ setup() {
     echo "$output" | jq . > /dev/null
     echo "$output" | jq -e '.objects | type == "array"' > /dev/null
 }
+
+@test "bioc get typed decode succeeds" {
+    run "$CORTEX_TEST" bioc get
+    [ "$status" -eq 0 ]
+}

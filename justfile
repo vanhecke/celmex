@@ -5,6 +5,7 @@ format:
 
 build: format
     cd cli && elm make src/Cli/Main.elm --optimize --output=dist/elm.js
+    cd cli && elm make src/Cli/TestMain.elm --optimize --output=dist/elm-test.js
 
 test: build
     bats tests/
