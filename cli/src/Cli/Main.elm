@@ -3,22 +3,28 @@ module Cli.Main exposing (main)
 import Cli.Commands as Commands exposing (Endpoint)
 import Cli.Flags as Flags
 import Cli.Ports as Ports
+import Cortex.Api.AgentConfig as AgentConfig
+import Cortex.Api.ApiKeys as ApiKeys
 import Cortex.Api.AssetGroups as AssetGroups
 import Cortex.Api.Assets as Assets
 import Cortex.Api.AttackSurface as AttackSurface
 import Cortex.Api.AuditLogs as AuditLogs
 import Cortex.Api.AuthSettings as AuthSettings
 import Cortex.Api.Biocs as Biocs
+import Cortex.Api.Cases as Cases
 import Cortex.Api.Cli as Cli
 import Cortex.Api.Correlations as Correlations
 import Cortex.Api.DeviceControl as DeviceControl
+import Cortex.Api.DisablePrevention as DisablePrevention
 import Cortex.Api.Distributions as Distributions
 import Cortex.Api.Endpoints as Endpoints
 import Cortex.Api.Healthcheck as Healthcheck
 import Cortex.Api.Indicators as Indicators
 import Cortex.Api.Issues as Issues
 import Cortex.Api.LegacyExceptions as LegacyExceptions
+import Cortex.Api.Profiles as Profiles
 import Cortex.Api.Rbac as Rbac
+import Cortex.Api.Risk as Risk
 import Cortex.Api.ScheduledQueries as ScheduledQueries
 import Cortex.Api.TenantInfo as TenantInfo
 import Cortex.Api.Xql as Xql
@@ -164,6 +170,57 @@ run stamp config endpoint =
 
         Commands.LegacyExceptionsFetch ->
             raw LegacyExceptions.fetch
+
+        Commands.ProfilesList profileType ->
+            raw (Profiles.getProfiles { type_ = profileType })
+
+        Commands.ProfilesGetPolicy endpointId ->
+            raw (Profiles.getPolicy { endpointId = endpointId })
+
+        Commands.AgentConfigContentManagement ->
+            raw AgentConfig.getContentManagement
+
+        Commands.AgentConfigAutoUpgrade ->
+            raw AgentConfig.getAutoUpgrade
+
+        Commands.AgentConfigWildfireAnalysis ->
+            raw AgentConfig.getWildfireAnalysis
+
+        Commands.AgentConfigCriticalEnvironmentVersions ->
+            raw AgentConfig.getCriticalEnvironmentVersions
+
+        Commands.AgentConfigAdvancedAnalysis ->
+            raw AgentConfig.getAdvancedAnalysis
+
+        Commands.RbacGetRoles roleName ->
+            raw (Rbac.getRoles { roleNames = [ roleName ] })
+
+        Commands.RbacGetUserGroups groupName ->
+            raw (Rbac.getUserGroups { groupNames = [ groupName ] })
+
+        Commands.ApiKeysList ->
+            raw ApiKeys.getApiKeys
+
+        Commands.RiskScore id ->
+            raw (Risk.getRiskScore { id = id })
+
+        Commands.RiskUsers ->
+            raw Risk.getRiskyUsers
+
+        Commands.RiskHosts ->
+            raw Risk.getRiskyHosts
+
+        Commands.CasesSearch ->
+            raw Cases.search
+
+        Commands.IssuesSchema ->
+            raw Issues.schema
+
+        Commands.DisablePreventionFetch ->
+            raw DisablePrevention.fetchRules
+
+        Commands.DisablePreventionFetchInjection ->
+            raw DisablePrevention.fetchInjectionRules
 
         Commands.AssetsList ->
             raw Assets.list

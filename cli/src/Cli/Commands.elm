@@ -32,6 +32,23 @@ type Endpoint
     | IssuesSearch
     | LegacyExceptionsGetModules
     | LegacyExceptionsFetch
+    | ProfilesList String
+    | ProfilesGetPolicy String
+    | AgentConfigContentManagement
+    | AgentConfigAutoUpgrade
+    | AgentConfigWildfireAnalysis
+    | AgentConfigCriticalEnvironmentVersions
+    | AgentConfigAdvancedAnalysis
+    | RbacGetRoles String
+    | RbacGetUserGroups String
+    | ApiKeysList
+    | RiskScore String
+    | RiskUsers
+    | RiskHosts
+    | CasesSearch
+    | IssuesSchema
+    | DisablePreventionFetch
+    | DisablePreventionFetchInjection
     | AssetsList
     | AssetsSchema
     | AssetsExternalServices
@@ -111,6 +128,57 @@ argvToEndpoint args =
 
         [ "legacy-exceptions", "fetch" ] ->
             Ok LegacyExceptionsFetch
+
+        [ "profiles", "list", profileType ] ->
+            Ok (ProfilesList profileType)
+
+        [ "profiles", "get-policy", endpointId ] ->
+            Ok (ProfilesGetPolicy endpointId)
+
+        [ "agent-config", "content-management" ] ->
+            Ok AgentConfigContentManagement
+
+        [ "agent-config", "auto-upgrade" ] ->
+            Ok AgentConfigAutoUpgrade
+
+        [ "agent-config", "wildfire-analysis" ] ->
+            Ok AgentConfigWildfireAnalysis
+
+        [ "agent-config", "critical-environment-versions" ] ->
+            Ok AgentConfigCriticalEnvironmentVersions
+
+        [ "agent-config", "advanced-analysis" ] ->
+            Ok AgentConfigAdvancedAnalysis
+
+        [ "rbac", "get-roles", roleName ] ->
+            Ok (RbacGetRoles roleName)
+
+        [ "rbac", "get-user-groups", groupName ] ->
+            Ok (RbacGetUserGroups groupName)
+
+        [ "api-keys", "list" ] ->
+            Ok ApiKeysList
+
+        [ "risk", "score", id ] ->
+            Ok (RiskScore id)
+
+        [ "risk", "users" ] ->
+            Ok RiskUsers
+
+        [ "risk", "hosts" ] ->
+            Ok RiskHosts
+
+        [ "cases", "search" ] ->
+            Ok CasesSearch
+
+        [ "issues", "schema" ] ->
+            Ok IssuesSchema
+
+        [ "disable-prevention", "fetch" ] ->
+            Ok DisablePreventionFetch
+
+        [ "disable-prevention", "fetch-injection" ] ->
+            Ok DisablePreventionFetchInjection
 
         [ "assets", "list" ] ->
             Ok AssetsList
@@ -212,6 +280,57 @@ endpointName endpoint =
         LegacyExceptionsFetch ->
             "legacy-exceptions fetch"
 
+        ProfilesList profileType ->
+            "profiles list " ++ profileType
+
+        ProfilesGetPolicy _ ->
+            "profiles get-policy"
+
+        AgentConfigContentManagement ->
+            "agent-config content-management"
+
+        AgentConfigAutoUpgrade ->
+            "agent-config auto-upgrade"
+
+        AgentConfigWildfireAnalysis ->
+            "agent-config wildfire-analysis"
+
+        AgentConfigCriticalEnvironmentVersions ->
+            "agent-config critical-environment-versions"
+
+        AgentConfigAdvancedAnalysis ->
+            "agent-config advanced-analysis"
+
+        RbacGetRoles _ ->
+            "rbac get-roles"
+
+        RbacGetUserGroups _ ->
+            "rbac get-user-groups"
+
+        ApiKeysList ->
+            "api-keys list"
+
+        RiskScore _ ->
+            "risk score"
+
+        RiskUsers ->
+            "risk users"
+
+        RiskHosts ->
+            "risk hosts"
+
+        CasesSearch ->
+            "cases search"
+
+        IssuesSchema ->
+            "issues schema"
+
+        DisablePreventionFetch ->
+            "disable-prevention fetch"
+
+        DisablePreventionFetchInjection ->
+            "disable-prevention fetch-injection"
+
         AssetsList ->
             "assets list"
 
@@ -282,6 +401,9 @@ usage args =
             , "  cortex distributions list                   List agent distributions"
             , ""
             , "  cortex rbac get-users                       List users"
+            , "  cortex rbac get-roles <name>                Get details for a role by name"
+            , "  cortex rbac get-user-groups <name>          Get details for a user group by name"
+            , "  cortex api-keys list                        List API keys"
             , "  cortex authentication-settings get          Get IdP/SSO settings"
             , ""
             , "  cortex device-control get-violations        List device-control violations"
@@ -296,6 +418,15 @@ usage args =
             , "  cortex bioc get                             List BIOCs"
             , "  cortex correlations get                     List correlation rules"
             , "  cortex issues search                        Search issues"
+            , "  cortex issues schema                        Get issue field schema"
+            , "  cortex cases search                         Search cases"
+            , ""
+            , "  cortex risk score <id>                      Get risk score for a user or endpoint"
+            , "  cortex risk users                           List highest-risk users"
+            , "  cortex risk hosts                           List highest-risk hosts"
+            , ""
+            , "  cortex disable-prevention fetch             List disable-prevention rules"
+            , "  cortex disable-prevention fetch-injection   List disable-injection-prevention rules"
             , ""
             , "  cortex assets list                          List assets"
             , "  cortex assets schema                        Get asset inventory schema"
@@ -309,4 +440,13 @@ usage args =
             , ""
             , "  cortex legacy-exceptions get-modules        List legacy exception modules"
             , "  cortex legacy-exceptions fetch              Fetch legacy exception rules"
+            , ""
+            , "  cortex profiles list <type>                 List endpoint security profiles (type: prevention|extension)"
+            , "  cortex profiles get-policy <endpoint-id>    Get policy assigned to an endpoint"
+            , ""
+            , "  cortex agent-config content-management              Get content management settings"
+            , "  cortex agent-config auto-upgrade                    Get agent auto-upgrade settings"
+            , "  cortex agent-config wildfire-analysis               Get WildFire analysis settings"
+            , "  cortex agent-config critical-environment-versions   Get critical environment versions settings"
+            , "  cortex agent-config advanced-analysis               Get advanced analysis settings"
             ]

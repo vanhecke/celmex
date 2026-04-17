@@ -12,7 +12,7 @@ Complete inventory of all API endpoints from the OpenAPI specs in `docs/cortex-a
 > 9 endpoints appear in multiple specs (CWP / Trusted Images / Registry Connectors) — listed in each relevant section.
 > Raw total across all 22 spec files: 521. After removing the 2 duplicate files: 341 listed below.
 
-**Progress:** 31/341 endpoints implemented | 174 View | 167 Edit
+**Progress:** 48/341 endpoints implemented | 174 View | 167 Edit
 
 
 ## Cortex Platform
@@ -28,7 +28,7 @@ Source: `cortex-platform-papi.json`
 |  | POST | `/public_api/v1/xql/get_query_results_stream` | Get XQL query results Stream | View |  |  |  |
 | ✓ | POST | `/public_api/v1/distributions/get_versions` | Get Distribution version | View | `Cortex.Api.Distributions` | `distributions get-versions` | `distributions.bats` |
 | ✓ | POST | `/public_api/v1/endpoints/get_endpoints` | Get all Endpoints | View | `Cortex.Api.Endpoints` | `endpoints list` | `endpoints.bats` |
-|  | POST | `/public_api/v1/endpoints/get_policy` | Get Policy | View |  |  |  |
+| ✓ | POST | `/public_api/v1/endpoints/get_policy` | Get Policy | View | `Cortex.Api.Profiles` | `profiles get-policy` | `profiles.bats` |
 |  | POST | `/public_api/v1/endpoints/delete` | Delete Endpoints | Edit |  |  |  |
 |  | POST | `/public_api/v1/distributions/create` | Create distributions | Edit |  |  |  |
 | ✓ | POST | `/public_api/v1/distributions/get_distributions` | Get Distributions | View | `Cortex.Api.Distributions` | `distributions list` | `distributions.bats` |
@@ -62,13 +62,13 @@ Source: `cortex-platform-papi.json`
 | ✓ | GET | `/public_api/v1/healthcheck` | System Health Check | View | `Cortex.Api.Healthcheck` | `healthcheck` | `healthcheck.bats` |
 | ✓ | POST | `/public_api/v1/system/get_tenant_info` | Get Tenant Info | View | `Cortex.Api.TenantInfo` | `tenant-info` | `tenant_info.bats` |
 | ✓ | POST | `/public_api/v1/rbac/get_users` | Get Users | View | `Cortex.Api.Rbac` | `rbac get-users` | `rbac.bats` |
-|  | POST | `/public_api/v1/rbac/get_roles` | Get Roles | View |  |  |  |
-|  | POST | `/public_api/v1/rbac/get_user_group` | Get User Groups | View |  |  |  |
+| ✓ | POST | `/public_api/v1/rbac/get_roles` | Get Roles | View | `Cortex.Api.Rbac` | `rbac get-roles` | `rbac.bats` |
+| ✓ | POST | `/public_api/v1/rbac/get_user_group` | Get User Groups | View | `Cortex.Api.Rbac` | `rbac get-user-groups` | `rbac.bats` |
 |  | POST | `/public_api/v1/rbac/set_user_role` | Set a User Role | Edit |  |  |  |
 |  | POST | `/public_api/v1/endpoints/get_endpoint` | Get Endpoint | View |  |  |  |
-|  | POST | `/public_api/v1/get_risk_score` | Get Risk Score | View |  |  |  |
-|  | POST | `/public_api/v1/get_risky_users` | Get Risky Users | View |  |  |  |
-|  | POST | `/public_api/v1/get_risky_hosts` | Get Risky Hosts | View |  |  |  |
+| ✓ | POST | `/public_api/v1/get_risk_score` | Get Risk Score | View | `Cortex.Api.Risk` | `risk score` | `risk.bats` |
+| ✓ | POST | `/public_api/v1/get_risky_users` | Get Risky Users | View | `Cortex.Api.Risk` | `risk users` | `risk.bats` |
+| ✓ | POST | `/public_api/v1/get_risky_hosts` | Get Risky Hosts | View | `Cortex.Api.Risk` | `risk hosts` | `risk.bats` |
 |  | POST | `/public_api/v1/endpoints/file_retrieval` | Retrieve File | Edit |  |  |  |
 |  | POST | `/public_api/v1/endpoints/isolate` | Isolate Endpoints | Edit |  |  |  |
 | ✓ | POST | `/public_api/v1/audits/agents_reports` | Get Audit Agent Report | View | `Cortex.Api.AuditLogs` | `audit-logs agents-reports` | `audit_logs_agents_reports.bats` |
@@ -138,8 +138,8 @@ Source: `cortex-platform-papi.json`
 |  | POST | `/public_api/v1/issue` | Create a new issue | Edit |  |  |  |
 | ✓ | POST | `/public_api/v1/issue/search` | Retrieve issues based on filters | View | `Cortex.Api.Issues` | `issues search` | `issues.bats` |
 |  | POST | `/public_api/v1/issue/{issue-id}` | Update existing issue | Edit |  |  |  |
-|  | POST | `/public_api/v1/issue/schema` | Retrieve issue schema | View |  |  |  |
-|  | POST | `/public_api/v1/case/search` | Retrieve Cases based on filters | View |  |  |  |
+| ✓ | POST | `/public_api/v1/issue/schema` | Retrieve issue schema | View | `Cortex.Api.Issues` | `issues schema` | `issues.bats` |
+| ✓ | POST | `/public_api/v1/case/search` | Retrieve Cases based on filters | View | `Cortex.Api.Cases` | `cases search` | `cases.bats` |
 |  | POST | `/public_api/v1/case/update/{case-id}` | Update existing case | Edit |  |  |  |
 |  | GET | `/public_api/v1/case/artifacts/{case-id}` | Retrieve Case Artifacts by Case ID | View |  |  |  |
 |  | POST | `/public_api/v1/entries/get` | Get War Room entries | View |  |  |  |
@@ -153,12 +153,12 @@ Source: `cortex-platform-papi.json`
 |  | POST | `/public_api/v1/asset-groups/create` | Create an Asset Group | Edit |  |  |  |
 |  | POST | `/public_api/v1/asset-groups/update/{group_id}` | Update an Asset Group | Edit |  |  |  |
 |  | POST | `/public_api/v1/asset-groups/delete/{group_id}` | Delete an Asset Group | Edit |  |  |  |
-|  | POST | `/public_api/v1/api_keys/get_api_keys` | Get existing API keys | View |  |  |  |
+| ✓ | POST | `/public_api/v1/api_keys/get_api_keys` | Get existing API keys | View | `Cortex.Api.ApiKeys` | `api-keys list` | `api_keys.bats` |
 |  | POST | `/public_api/v1/api_keys/generate` | Generate an API key | Edit |  |  |  |
 |  | POST | `/public_api/v1/api_keys/delete` | Delete API keys | Edit |  |  |  |
 |  | POST | `/public_api/v1/tags/agents/delete_permanently` | Delete Tags Permanently | Edit |  |  |  |
 |  | POST | `/public_api/v1/endpoints/upgrade` | Upgrade Agents | Edit |  |  |  |
-|  | POST | `/public_api/v1/endpoints/get_profiles` | Get endpoint security profiles | View |  |  |  |
+| ✓ | POST | `/public_api/v1/endpoints/get_profiles` | Get endpoint security profiles | View | `Cortex.Api.Profiles` | `profiles list` | `profiles.bats` |
 | ✓ | POST | `/public_api/v1/legacy_exceptions/get_modules` | Get Legacy Exceptions Modules | View | `Cortex.Api.LegacyExceptions` | `legacy-exceptions get-modules` | `legacy_exceptions.bats` |
 | ✓ | POST | `/public_api/v1/legacy_exceptions/fetch` | Fetch Legacy Exception Rules | View | `Cortex.Api.LegacyExceptions` | `legacy-exceptions fetch` | `legacy_exceptions.bats` |
 |  | POST | `/public_api/v1/legacy_exceptions/add` | Add Legacy Exception Rule | Edit |  |  |  |
@@ -175,13 +175,13 @@ Source: `agent-configurations-papi.yaml`
 
 | ✓ | Method | Path | Description | Type | Elm | CLI | Test |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-|  | GET | `/public_api/v1/configurations/agent/content_management` | Retrieve content management settings | View |  |  |  |
+| ✓ | GET | `/public_api/v1/configurations/agent/content_management` | Retrieve content management settings | View | `Cortex.Api.AgentConfig` | `agent-config content-management` | `agent_config.bats` |
 |  | POST | `/public_api/v1/configurations/agent/content_management/set` | Update content management settings | Edit |  |  |  |
 |  | GET | `/public_api/v1/configurations/agent/agent_status` | Retrieve agent status timeout settings | View |  |  |  |
 |  | POST | `/public_api/v1/configurations/agent/agent_status/set` | Update agent status timeout settings | View |  |  |  |
-|  | GET | `/public_api/v1/configurations/agent/auto_upgrade` | Retrieve agent auto-upgrade settings | View |  |  |  |
+| ✓ | GET | `/public_api/v1/configurations/agent/auto_upgrade` | Retrieve agent auto-upgrade settings | View | `Cortex.Api.AgentConfig` | `agent-config auto-upgrade` | `agent_config.bats` |
 |  | POST | `/public_api/v1/configurations/agent/auto_upgrade/set` | Update agent auto-upgrade settings | Edit |  |  |  |
-|  | GET | `/public_api/v1/configurations/agent/wildfire_analysis` | Retrieve WildFire analysis settings | View |  |  |  |
+| ✓ | GET | `/public_api/v1/configurations/agent/wildfire_analysis` | Retrieve WildFire analysis settings | View | `Cortex.Api.AgentConfig` | `agent-config wildfire-analysis` | `agent_config.bats` |
 |  | POST | `/public_api/v1/configurations/agent/wildfire_analysis/set` | Update WildFire analysis settings | Edit |  |  |  |
 |  | GET | `/public_api/v1/configurations/agent/informative_btp_issues` | Retrieve informative BTP issues settings | View |  |  |  |
 |  | POST | `/public_api/v1/configurations/agent/informative_btp_issues/set` | Update informative BTP issues settings | Edit |  |  |  |
@@ -189,9 +189,9 @@ Source: `agent-configurations-papi.yaml`
 |  | POST | `/public_api/v1/configurations/agent/cortex_xdr_log_collection/set` | Update log collection settings | Edit |  |  |  |
 |  | GET | `/public_api/v1/configurations/agent/action_center_expiration` | Retrieve action center expiration settings | View |  |  |  |
 |  | POST | `/public_api/v1/configurations/agent/action_center_expiration/set` | Update action center expiration settings | Edit |  |  |  |
-|  | GET | `/public_api/v1/configurations/agent/critical_environment_versions` | Retrieve critical environment versions settings | View |  |  |  |
+| ✓ | GET | `/public_api/v1/configurations/agent/critical_environment_versions` | Retrieve critical environment versions settings | View | `Cortex.Api.AgentConfig` | `agent-config critical-environment-versions` | `agent_config.bats` |
 |  | POST | `/public_api/v1/configurations/agent/critical_environment_versions/set` | Update critical environment versions settings | View |  |  |  |
-|  | GET | `/public_api/v1/configurations/agent/advanced_analysis` | Retrieve advanced analysis settings | View |  |  |  |
+| ✓ | GET | `/public_api/v1/configurations/agent/advanced_analysis` | Retrieve advanced analysis settings | View | `Cortex.Api.AgentConfig` | `agent-config advanced-analysis` | `agent_config.bats` |
 |  | POST | `/public_api/v1/configurations/agent/advanced_analysis/set` | Update advanced analysis settings | Edit |  |  |  |
 |  | GET | `/public_api/v1/configurations/agent/endpoint_administration_cleanup` | Retrieve endpoint administration cleanup settings | View |  |  |  |
 |  | POST | `/public_api/v1/configurations/agent/endpoint_administration_cleanup/set` | Update endpoint administration cleanup settings | Edit |  |  |  |
@@ -423,7 +423,7 @@ Source: `disable-prevention-rule-papi.json`
 
 | ✓ | Method | Path | Description | Type | Elm | CLI | Test |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-|  | POST | `/public_api/v1/disable_prevention/fetch` | Get Disable Prevention Rules | View |  |  |  |
+| ✓ | POST | `/public_api/v1/disable_prevention/fetch` | Get Disable Prevention Rules | View | `Cortex.Api.DisablePrevention` | `disable-prevention fetch` | `disable_prevention.bats` |
 |  | POST | `/public_api/v1/disable_prevention/get_modules` | Get Disable Prevention Modules | View |  |  |  |
 |  | POST | `/public_api/v1/disable_prevention/add` | Add Disable Prevention Rule | Edit |  |  |  |
 |  | POST | `/public_api/v1/disable_prevention/edit` | Edit Disable Prevention Rule | Edit |  |  |  |
@@ -435,7 +435,7 @@ Source: `disable-injection-prevention-rule-papi.json`
 
 | ✓ | Method | Path | Description | Type | Elm | CLI | Test |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-|  | POST | `/public_api/v1/disable_injection_prevention_rules/fetch` | Get Disable Injection and Prevention rules | View |  |  |  |
+| ✓ | POST | `/public_api/v1/disable_injection_prevention_rules/fetch` | Get Disable Injection and Prevention rules | View | `Cortex.Api.DisablePrevention` | `disable-prevention fetch-injection` | `disable_prevention.bats` |
 |  | POST | `/public_api/v1/disable_injection_prevention_rules/add` | Add Disable Injection and Prevention rule | Edit |  |  |  |
 |  | POST | `/public_api/v1/disable_injection_prevention_rules/disable` | Disable Disable Injection and Prevention Rules | Edit |  |  |  |
 

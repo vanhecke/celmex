@@ -1,5 +1,6 @@
 module Cortex.Api.Issues exposing
     ( SearchResponse
+    , schema
     , search
     )
 
@@ -26,6 +27,20 @@ search =
     Request.postEmpty
         [ "public_api", "v1", "issue", "search" ]
         (reply searchResponseDecoder)
+
+
+{-| POST /public\_api/v1/issue/schema
+
+Returns the issue field schema (field names, types, allowed operators).
+The schema is a large variable-shape object; surfaced as raw JSON so
+callers can drill in to whichever parts they need.
+
+-}
+schema : Request Encode.Value
+schema =
+    Request.postEmpty
+        [ "public_api", "v1", "issue", "schema" ]
+        (reply Decode.value)
 
 
 searchResponseDecoder : Decoder SearchResponse
