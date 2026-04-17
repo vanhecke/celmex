@@ -1,6 +1,5 @@
 module Cortex.Api.ScheduledQueries exposing
     ( ScheduledQueriesResponse
-    , encode
     , list
     )
 
@@ -52,15 +51,4 @@ responseDecoder =
                 , Decode.field "total_count" Decode.int
                 ]
             )
-        )
-
-
-encode : ScheduledQueriesResponse -> Encode.Value
-encode r =
-    Encode.object
-        (List.filterMap identity
-            [ Just ( "DATA", Encode.list identity r.data )
-            , Maybe.map (\v -> ( "FILTER_COUNT", Encode.int v )) r.filterCount
-            , Maybe.map (\v -> ( "TOTAL_COUNT", Encode.int v )) r.totalCount
-            ]
         )

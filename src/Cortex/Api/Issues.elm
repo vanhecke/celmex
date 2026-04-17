@@ -1,6 +1,5 @@
 module Cortex.Api.Issues exposing
     ( SearchResponse
-    , encodeSearch
     , search
     )
 
@@ -51,15 +50,4 @@ searchResponseDecoder =
                 , Decode.field "total_count" Decode.int
                 ]
             )
-        )
-
-
-encodeSearch : SearchResponse -> Encode.Value
-encodeSearch r =
-    Encode.object
-        (List.filterMap identity
-            [ Just ( "DATA", Encode.list identity r.data )
-            , Maybe.map (\v -> ( "FILTER_COUNT", Encode.int v )) r.filterCount
-            , Maybe.map (\v -> ( "TOTAL_COUNT", Encode.int v )) r.totalCount
-            ]
         )

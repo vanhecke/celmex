@@ -1,25 +1,58 @@
 module Cortex.Auth exposing
-    ( Credentials
-    , Stamp
-    , nonceGenerator
-    , sign
+    ( Credentials, Stamp
+    , credentials, stamp
+    , sign, nonceGenerator
     )
+
+{-| Advanced-API Auth signing for Cortex. Each authenticated request carries
+a SHA-256 hash of `apiKey ++ nonce ++ timestamp` plus three sidecar headers.
+
+@docs Credentials, Stamp
+@docs credentials, stamp
+@docs sign, nonceGenerator
+
+-}
 
 import Http
 import Random
 import SHA256
 
 
-type alias Credentials =
-    { apiKeyId : String
-    , apiKey : String
-    }
+{-| Opaque container for an Advanced API key pair. Construct via
+[`credentials`](#credentials); the raw `apiKey` is kept inaccessible to
+prevent accidental logging.
+-}
+type Credentials
+    = Credentials
+        { apiKeyId : String
+        , apiKey : String
+        }
 
 
-type alias Stamp =
-    { timestamp : Int
-    , nonce : String
-    }
+{-| Build a `Credentials` from the raw API Key ID and API Key strings
+(typically sourced from `CORTEX_API_KEY_ID` / `CORTEX_API_KEY`).
+-}
+credentials : { apiKeyId : String, apiKey : String } -> Credentials
+credentials =
+    Credentials
+
+
+{-| Opaque container for the timestamp + nonce pair that signs a single
+request. The timestamp is milliseconds since epoch; the nonce is a random
+string of at least 32 characters per the Cortex Advanced Auth spec.
+-}
+type Stamp
+    = Stamp
+        { timestamp : Int
+        , nonce : String
+        }
+
+
+{-| Build a `Stamp` from a millis-since-epoch timestamp and a random nonce.
+-}
+stamp : { timestamp : Int, nonce : String } -> Stamp
+stamp =
+    Stamp
 
 
 {-| Produce the four Advanced API Auth headers.
@@ -36,18 +69,18 @@ Headers sent:
 
 -}
 sign : Credentials -> Stamp -> List Http.Header
-sign creds stamp =
+sign (Credentials c) (Stamp s) =
     let
         hashInput =
-            creds.apiKey ++ stamp.nonce ++ String.fromInt stamp.timestamp
+            c.apiKey ++ s.nonce ++ String.fromInt s.timestamp
 
         hash =
             SHA256.fromString hashInput |> SHA256.toHex
     in
     [ Http.header "Authorization" hash
-    , Http.header "x-xdr-auth-id" creds.apiKeyId
-    , Http.header "x-xdr-timestamp" (String.fromInt stamp.timestamp)
-    , Http.header "x-xdr-nonce" stamp.nonce
+    , Http.header "x-xdr-auth-id" c.apiKeyId
+    , Http.header "x-xdr-timestamp" (String.fromInt s.timestamp)
+    , Http.header "x-xdr-nonce" s.nonce
     ]
 
 

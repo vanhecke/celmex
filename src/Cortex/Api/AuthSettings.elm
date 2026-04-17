@@ -1,7 +1,4 @@
-module Cortex.Api.AuthSettings exposing
-    ( encode
-    , get
-    )
+module Cortex.Api.AuthSettings exposing (get)
 
 import Cortex.Decode exposing (reply)
 import Cortex.Request as Request exposing (Request)
@@ -29,8 +26,3 @@ decoder =
         [ reply (Decode.list Decode.value)
         , Decode.succeed []
         ]
-
-
-encode : List Encode.Value -> Encode.Value
-encode settings =
-    Encode.list identity settings

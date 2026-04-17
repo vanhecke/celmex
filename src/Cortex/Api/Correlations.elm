@@ -1,6 +1,5 @@
 module Cortex.Api.Correlations exposing
     ( CorrelationsResponse
-    , encode
     , get
     )
 
@@ -44,14 +43,3 @@ correlationsResponseDecoder =
             ]
         )
         (Decode.maybe (Decode.field "objects_type" Decode.string))
-
-
-encode : CorrelationsResponse -> Encode.Value
-encode r =
-    Encode.object
-        (List.filterMap identity
-            [ Maybe.map (\v -> ( "objects_count", Encode.int v )) r.objectsCount
-            , Just ( "objects", Encode.list identity r.objects )
-            , Maybe.map (\v -> ( "objects_type", Encode.string v )) r.objectsType
-            ]
-        )

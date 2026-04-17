@@ -1,12 +1,10 @@
 module Cortex.Api.Cli exposing
     ( VersionResponse
-    , encode
     , getVersion
     )
 
 import Cortex.Request as Request exposing (Request)
 import Json.Decode as Decode exposing (Decoder)
-import Json.Encode as Encode
 
 
 type alias VersionResponse =
@@ -30,10 +28,3 @@ versionResponseDecoder : Decoder VersionResponse
 versionResponseDecoder =
     Decode.map VersionResponse
         (Decode.field "version" Decode.string)
-
-
-encode : VersionResponse -> Encode.Value
-encode response =
-    Encode.object
-        [ ( "version", Encode.string response.version )
-        ]

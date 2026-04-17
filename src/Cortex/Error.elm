@@ -1,14 +1,33 @@
 module Cortex.Error exposing
-    ( ApiError
-    , Error(..)
+    ( Error(..), ApiError
     , decodeApiError
     )
+
+{-| Errors produced by [`Cortex.Client.send`](Cortex-Client#send). Wraps the
+four standard `elm/http` failure modes and adds a normalized decoding of the
+four different error envelopes the Cortex API returns.
+
+@docs Error, ApiError
+@docs decodeApiError
+
+-}
 
 import Cortex.Decode exposing (reply)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
 
 
+{-| What can go wrong when sending a request.
+
+  - `NetworkError` — the request never reached the server.
+  - `Timeout` — no response within the configured timeout.
+  - `BadStatus code maybeApiError` — the server responded with a 4xx/5xx.
+    The payload is parsed into an [`ApiError`](#ApiError) if it matches one
+    of the known envelope shapes; otherwise it's `Nothing`.
+  - `BadBody detail` — a 2xx response whose body did not match the decoder.
+  - `BadUrl url` — the URL was rejected by `elm/http` before dispatch.
+
+-}
 type Error
     = NetworkError
     | Timeout
@@ -17,6 +36,10 @@ type Error
     | BadUrl String
 
 
+{-| A server-reported error, normalized across the four envelope shapes the
+Cortex API is known to return. `errCode` and `errExtra` are optional because
+not every envelope includes them.
+-}
 type alias ApiError =
     { errCode : Maybe String
     , errMsg : String
@@ -75,7 +98,7 @@ directWithMetadataDecoder =
 
 
 
--- Direct flat: { "err_msg": ..., "err_extra": ... }
+-- Direct flat: { "err_code": ..., "err_msg": ..., "err_extra": ... }
 
 
 directFlatDecoder : Decoder ApiError

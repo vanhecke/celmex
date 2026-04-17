@@ -4,14 +4,6 @@ module Cortex.Api.Assets exposing
     , LastAssessment
     , SchemaEntry
     , WebsitesLastAssessment
-    , encodeAssets
-    , encodeExternalIpRanges
-    , encodeExternalServices
-    , encodeExternalWebsites
-    , encodeInternetExposures
-    , encodeSchema
-    , encodeVulnerabilityTests
-    , encodeWebsitesLastAssessment
     , getExternalIpRanges
     , getExternalServices
     , getExternalWebsites
@@ -92,21 +84,6 @@ assetsResponseDecoder =
         (Decode.maybe (Decode.at [ "metadata", "total_count" ] Decode.int))
 
 
-encodeAssets : AssetsResponse -> Encode.Value
-encodeAssets r =
-    Encode.object
-        [ ( "data", Encode.list identity r.data )
-        , ( "metadata"
-          , Encode.object
-                (List.filterMap identity
-                    [ Maybe.map (\v -> ( "filter_count", Encode.int v )) r.filterCount
-                    , Maybe.map (\v -> ( "total_count", Encode.int v )) r.totalCount
-                    ]
-                )
-          )
-        ]
-
-
 
 -- ------- GET /public_api/v1/assets/schema -------
 
@@ -126,22 +103,6 @@ schemaEntryDecoder =
         (Decode.maybe (Decode.field "data_type" Decode.string))
 
 
-encodeSchema : List SchemaEntry -> Encode.Value
-encodeSchema entries =
-    Encode.list encodeSchemaEntry entries
-
-
-encodeSchemaEntry : SchemaEntry -> Encode.Value
-encodeSchemaEntry e =
-    Encode.object
-        (List.filterMap identity
-            [ Maybe.map (\v -> ( "field_name", Encode.string v )) e.fieldName
-            , Maybe.map (\v -> ( "field_pretty_name", Encode.string v )) e.fieldPrettyName
-            , Maybe.map (\v -> ( "data_type", Encode.string v )) e.dataType
-            ]
-        )
-
-
 
 -- ------- POST /public_api/v1/assets/get_external_services -------
 
@@ -151,11 +112,6 @@ getExternalServices =
     countedRequest
         [ "public_api", "v1", "assets", "get_external_services" ]
         "external_services"
-
-
-encodeExternalServices : CountedResponse -> Encode.Value
-encodeExternalServices r =
-    encodeCounted "external_services" r
 
 
 
@@ -169,11 +125,6 @@ getInternetExposures =
         "assets_internet_exposure"
 
 
-encodeInternetExposures : CountedResponse -> Encode.Value
-encodeInternetExposures r =
-    encodeCounted "assets_internet_exposure" r
-
-
 
 -- ------- POST /public_api/v1/assets/get_external_ip_address_ranges -------
 
@@ -183,11 +134,6 @@ getExternalIpRanges =
     countedRequest
         [ "public_api", "v1", "assets", "get_external_ip_address_ranges" ]
         "external_ip_address_ranges"
-
-
-encodeExternalIpRanges : CountedResponse -> Encode.Value
-encodeExternalIpRanges r =
-    encodeCounted "external_ip_address_ranges" r
 
 
 
@@ -201,11 +147,6 @@ getVulnerabilityTests =
         "vulnerability_tests"
 
 
-encodeVulnerabilityTests : CountedResponse -> Encode.Value
-encodeVulnerabilityTests r =
-    encodeCounted "vulnerability_tests" r
-
-
 
 -- ------- POST /public_api/v1/assets/get_external_websites -------
 
@@ -215,11 +156,6 @@ getExternalWebsites =
     countedRequest
         [ "public_api", "v1", "assets", "get_external_websites" ]
         "websites"
-
-
-encodeExternalWebsites : CountedResponse -> Encode.Value
-encodeExternalWebsites r =
-    encodeCounted "websites" r
 
 
 
@@ -246,23 +182,6 @@ lastAssessmentDecoder =
         (Decode.maybe (Decode.field "time" Decode.int))
 
 
-encodeWebsitesLastAssessment : WebsitesLastAssessment -> Encode.Value
-encodeWebsitesLastAssessment r =
-    Encode.object
-        [ ( "last_external_assessment", encodeLastAssessment r.lastExternalAssessment )
-        ]
-
-
-encodeLastAssessment : LastAssessment -> Encode.Value
-encodeLastAssessment a =
-    Encode.object
-        (List.filterMap identity
-            [ Maybe.map (\v -> ( "status", Encode.bool v )) a.status
-            , Maybe.map (\v -> ( "time", Encode.int v )) a.time
-            ]
-        )
-
-
 
 -- ------- shared helpers for the "counted list" response shape -------
 
@@ -281,16 +200,5 @@ countedResponseDecoder itemKey =
         (Decode.oneOf
             [ Decode.field itemKey (Decode.list Decode.value)
             , Decode.succeed []
-            ]
-        )
-
-
-encodeCounted : String -> CountedResponse -> Encode.Value
-encodeCounted itemKey r =
-    Encode.object
-        (List.filterMap identity
-            [ Maybe.map (\v -> ( "total_count", Encode.int v )) r.totalCount
-            , Maybe.map (\v -> ( "result_count", Encode.int v )) r.resultCount
-            , Just ( itemKey, Encode.list identity r.items )
             ]
         )

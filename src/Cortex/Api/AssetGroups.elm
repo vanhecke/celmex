@@ -1,6 +1,5 @@
 module Cortex.Api.AssetGroups exposing
     ( AssetGroupsResponse
-    , encode
     , list
     )
 
@@ -52,15 +51,4 @@ responseDecoder =
                 , Decode.at [ "metadata", "total_count" ] Decode.int
                 ]
             )
-        )
-
-
-encode : AssetGroupsResponse -> Encode.Value
-encode r =
-    Encode.object
-        (List.filterMap identity
-            [ Just ( "data", Encode.list identity r.data )
-            , Maybe.map (\v -> ( "filter_count", Encode.int v )) r.filterCount
-            , Maybe.map (\v -> ( "total_count", Encode.int v )) r.totalCount
-            ]
         )

@@ -41,17 +41,20 @@ init flagsValue =
         Ok flags ->
             let
                 config =
-                    { tenant = flags.tenant
-                    , credentials =
-                        { apiKeyId = flags.apiKeyId
-                        , apiKey = flags.apiKey
+                    Client.config
+                        { tenant = flags.tenant
+                        , credentials =
+                            Auth.credentials
+                                { apiKeyId = flags.apiKeyId
+                                , apiKey = flags.apiKey
+                                }
                         }
-                    }
 
                 stamp =
-                    { timestamp = flags.timestamp
-                    , nonce = flags.nonce
-                    }
+                    Auth.stamp
+                        { timestamp = flags.timestamp
+                        , nonce = flags.nonce
+                        }
             in
             case Commands.dispatch stamp config flags.argv of
                 Ok cmd ->

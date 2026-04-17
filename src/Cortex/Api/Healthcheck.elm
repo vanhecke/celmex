@@ -1,12 +1,10 @@
 module Cortex.Api.Healthcheck exposing
     ( HealthcheckResponse
     , check
-    , encode
     )
 
 import Cortex.Request as Request exposing (Request)
 import Json.Decode as Decode exposing (Decoder)
-import Json.Encode as Encode
 
 
 type alias HealthcheckResponse =
@@ -31,10 +29,3 @@ healthcheckResponseDecoder : Decoder HealthcheckResponse
 healthcheckResponseDecoder =
     Decode.map HealthcheckResponse
         (Decode.field "status" Decode.string)
-
-
-encode : HealthcheckResponse -> Encode.Value
-encode response =
-    Encode.object
-        [ ( "status", Encode.string response.status )
-        ]

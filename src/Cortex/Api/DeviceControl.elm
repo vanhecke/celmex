@@ -1,6 +1,5 @@
 module Cortex.Api.DeviceControl exposing
     ( ViolationsResponse
-    , encodeViolations
     , getViolations
     )
 
@@ -34,16 +33,5 @@ violationsResponseDecoder =
         (Decode.oneOf
             [ Decode.field "violations" (Decode.list Decode.value)
             , Decode.succeed []
-            ]
-        )
-
-
-encodeViolations : ViolationsResponse -> Encode.Value
-encodeViolations r =
-    Encode.object
-        (List.filterMap identity
-            [ Maybe.map (\v -> ( "total_count", Encode.int v )) r.totalCount
-            , Maybe.map (\v -> ( "result_count", Encode.int v )) r.resultCount
-            , Just ( "violations", Encode.list identity r.violations )
             ]
         )
