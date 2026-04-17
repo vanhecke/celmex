@@ -1,12 +1,27 @@
 module Cortex.Api.Xql exposing
     ( Dataset, DatasetRange, Library, LibraryQuery, Quota
     , getDatasets, getLibrary, getQuota
+    , QueryStatus(..), Timeframe(..)
+    , StartQueryArgs, GetResultsArgs, QueryResults, StreamArgs
+    , startQuery, getQueryResults, getQueryResultsStream
+    , LookupAddArgs, LookupAddResult
+    , LookupGetArgs, LookupGetResult
+    , LookupRemoveArgs, LookupRemoveResult
+    , lookupsAddData, lookupsGetData, lookupsRemoveData
     )
 
-{-| XQL: saved queries, available datasets, and tenant quota counters.
+{-| XQL: saved queries, available datasets, tenant quota counters, query
+execution (async start/poll), and lookup-dataset row management.
 
 @docs Dataset, DatasetRange, Library, LibraryQuery, Quota
 @docs getDatasets, getLibrary, getQuota
+@docs QueryStatus, Timeframe
+@docs StartQueryArgs, GetResultsArgs, QueryResults, StreamArgs
+@docs startQuery, getQueryResults, getQueryResultsStream
+@docs LookupAddArgs, LookupAddResult
+@docs LookupGetArgs, LookupGetResult
+@docs LookupRemoveArgs, LookupRemoveResult
+@docs lookupsAddData, lookupsGetData, lookupsRemoveData
 
 -}
 
@@ -94,6 +109,139 @@ type alias LibraryQuery =
     }
 
 
+{-| Status of an async XQL query. `OtherStatus` is a forward-compatibility
+escape hatch — the documented values are `PENDING` / `SUCCESS` / `FAIL`.
+-}
+type QueryStatus
+    = Pending
+    | Success
+    | Fail
+    | OtherStatus String
+
+
+{-| Time window for a query. `Relative` is a duration in epoch-milliseconds
+(e.g. `Relative 86400000` = last 24 hours); `Range` is an absolute
+`from`/`to` epoch-millisecond window.
+-}
+type Timeframe
+    = Relative Int
+    | Range { from : Int, to : Int }
+
+
+{-| Arguments to [`startQuery`](#startQuery). `tenants` is only meaningful in
+MSSP multi-tenant deployments — leave it `[]` for a single-tenant query.
+-}
+type alias StartQueryArgs =
+    { query : String
+    , timeframe : Maybe Timeframe
+    , tenants : List String
+    }
+
+
+{-| Arguments to [`getQueryResults`](#getQueryResults). `pendingFlag = Just
+False` makes the server block until the query completes (subject to the
+per-request HTTP timeout); the default `Nothing` / `Just True` returns
+whatever status the server has right now.
+-}
+type alias GetResultsArgs =
+    { queryId : String
+    , pendingFlag : Maybe Bool
+    , limit : Maybe Int
+    , format : Maybe String
+    }
+
+
+{-| Typed decoding of a `get_query_results` response. `data` and `streamId`
+are flattened up out of the nested `results` sub-object for ergonomic access.
+
+The wire format exposes the per-tenant cost map under `query_cost_charged`
+(not `query_cost` as the current OpenAPI revision documents) and includes a
+`remaining_yearly_quota` counter alongside the daily `remaining_quota` — both
+are captured here so the typed decoder doesn't silently drop real response
+fields.
+
+-}
+type alias QueryResults =
+    { status : QueryStatus
+    , numberOfResults : Maybe Int
+    , queryCostCharged : Encode.Value
+    , remainingQuota : Maybe Float
+    , remainingYearlyQuota : Maybe Float
+    , data : List Encode.Value
+    , streamId : Maybe String
+    }
+
+
+{-| Arguments to [`getQueryResultsStream`](#getQueryResultsStream). The
+`stream_id` comes from a prior [`QueryResults`](#QueryResults) whose result
+set exceeded the single-response `limit`.
+-}
+type alias StreamArgs =
+    { streamId : String
+    , isGzipCompressed : Maybe Bool
+    }
+
+
+{-| Arguments to [`lookupsAddData`](#lookupsAddData). Each row in `data`
+should be an object mapping field names to string values (the lookup dataset
+schema enforces per-field types server-side). With `keyFields = []` the
+server inserts only; with non-empty `keyFields` the server upserts using
+those fields as the identity.
+-}
+type alias LookupAddArgs =
+    { datasetName : String
+    , keyFields : List String
+    , data : Encode.Value
+    }
+
+
+{-| Counts returned by [`lookupsAddData`](#lookupsAddData).
+-}
+type alias LookupAddResult =
+    { added : Maybe Int
+    , updated : Maybe Int
+    , skipped : Maybe Int
+    }
+
+
+{-| Arguments to [`lookupsGetData`](#lookupsGetData). Each entry in `filters`
+is a full object of AND-ed `(field, value)` pairs; multiple entries OR
+together.
+-}
+type alias LookupGetArgs =
+    { datasetName : String
+    , filters : List (List ( String, String ))
+    , limit : Maybe Int
+    }
+
+
+{-| Payload returned by [`lookupsGetData`](#lookupsGetData). `data` shape
+varies by the lookup dataset schema so it's passed through as raw JSON.
+-}
+type alias LookupGetResult =
+    { data : Encode.Value
+    , filterCount : Maybe Int
+    , totalCount : Maybe Int
+    }
+
+
+{-| Arguments to [`lookupsRemoveData`](#lookupsRemoveData). `filters` is a
+single AND-ed filter object (not the list-of-objects shape that
+[`lookupsGetData`](#lookupsGetData) uses).
+-}
+type alias LookupRemoveArgs =
+    { datasetName : String
+    , filters : List ( String, String )
+    }
+
+
+{-| Row-count returned by [`lookupsRemoveData`](#lookupsRemoveData).
+-}
+type alias LookupRemoveResult =
+    { deleted : Maybe Int
+    }
+
+
 {-| POST /public\_api/v1/xql/get\_quota
 -}
 getQuota : Request Quota
@@ -119,6 +267,196 @@ getLibrary =
     Request.postEmpty
         [ "public_api", "xql_library", "get" ]
         (reply libraryDecoder)
+
+
+{-| POST /public\_api/v1/xql/start\_xql\_query — kicks off an XQL query and
+returns the `query_id` string to poll with [`getQueryResults`](#getQueryResults).
+-}
+startQuery : StartQueryArgs -> Request String
+startQuery args =
+    Request.post
+        [ "public_api", "v1", "xql", "start_xql_query" ]
+        (encodeStartQueryBody args)
+        (reply Decode.string)
+
+
+{-| POST /public\_api/v1/xql/get\_query\_results — fetches the status and (when
+ready) results for a previously-started query. If `status = Pending`, call
+again after a short delay; if results exceeded the single-response `limit`,
+continue fetching via [`getQueryResultsStream`](#getQueryResultsStream)
+with the returned `streamId`.
+-}
+getQueryResults : GetResultsArgs -> Request QueryResults
+getQueryResults args =
+    Request.post
+        [ "public_api", "v1", "xql", "get_query_results" ]
+        (encodeGetResultsBody args)
+        (reply queryResultsDecoder)
+
+
+{-| POST /public\_api/v1/xql/get\_query\_results\_stream — pulls the tail of a
+large result set. The response shape is not in the OpenAPI schema (the
+Cortex API sends it chunked, optionally gzipped) so we pass it through as
+raw JSON.
+-}
+getQueryResultsStream : StreamArgs -> Request Encode.Value
+getQueryResultsStream args =
+    Request.post
+        [ "public_api", "v1", "xql", "get_query_results_stream" ]
+        (encodeStreamBody args)
+        Decode.value
+
+
+{-| POST /public\_api/v1/xql/lookups/add\_data — insert or upsert rows into a
+lookup dataset.
+-}
+lookupsAddData : LookupAddArgs -> Request LookupAddResult
+lookupsAddData args =
+    Request.post
+        [ "public_api", "v1", "xql", "lookups", "add_data" ]
+        (encodeLookupAddBody args)
+        (maybeReply lookupAddResultDecoder)
+
+
+{-| POST /public\_api/v1/xql/lookups/get\_data — query rows in a lookup
+dataset with optional AND/OR-ed filter objects.
+-}
+lookupsGetData : LookupGetArgs -> Request LookupGetResult
+lookupsGetData args =
+    Request.post
+        [ "public_api", "v1", "xql", "lookups", "get_data" ]
+        (encodeLookupGetBody args)
+        (maybeReply lookupGetResultDecoder)
+
+
+{-| POST /public\_api/v1/xql/lookups/remove\_data — delete rows in a lookup
+dataset matching the given filter object.
+-}
+lookupsRemoveData : LookupRemoveArgs -> Request LookupRemoveResult
+lookupsRemoveData args =
+    Request.post
+        [ "public_api", "v1", "xql", "lookups", "remove_data" ]
+        (encodeLookupRemoveBody args)
+        (maybeReply lookupRemoveResultDecoder)
+
+
+
+-- ENCODERS
+
+
+encodeStartQueryBody : StartQueryArgs -> Encode.Value
+encodeStartQueryBody args =
+    let
+        fields =
+            List.filterMap identity
+                [ Just ( "query", Encode.string args.query )
+                , if List.isEmpty args.tenants then
+                    Nothing
+
+                  else
+                    Just ( "tenants", Encode.list Encode.string args.tenants )
+                , Maybe.map (\tf -> ( "timeframe", encodeTimeframe tf )) args.timeframe
+                ]
+    in
+    Encode.object [ ( "request_data", Encode.object fields ) ]
+
+
+encodeGetResultsBody : GetResultsArgs -> Encode.Value
+encodeGetResultsBody args =
+    let
+        fields =
+            List.filterMap identity
+                [ Just ( "query_id", Encode.string args.queryId )
+                , Maybe.map (\f -> ( "pending_flag", Encode.bool f )) args.pendingFlag
+                , Maybe.map (\l -> ( "limit", Encode.int l )) args.limit
+                , Maybe.map (\f -> ( "format", Encode.string f )) args.format
+                ]
+    in
+    Encode.object [ ( "request_data", Encode.object fields ) ]
+
+
+encodeStreamBody : StreamArgs -> Encode.Value
+encodeStreamBody args =
+    let
+        fields =
+            List.filterMap identity
+                [ Just ( "stream_id", Encode.string args.streamId )
+                , Maybe.map (\g -> ( "is_gzip_compressed", Encode.bool g )) args.isGzipCompressed
+                ]
+    in
+    Encode.object [ ( "request_data", Encode.object fields ) ]
+
+
+encodeTimeframe : Timeframe -> Encode.Value
+encodeTimeframe tf =
+    case tf of
+        Relative ms ->
+            Encode.object [ ( "relativeTime", Encode.int ms ) ]
+
+        Range r ->
+            Encode.object
+                [ ( "from", Encode.int r.from )
+                , ( "to", Encode.int r.to )
+                ]
+
+
+encodeLookupAddBody : LookupAddArgs -> Encode.Value
+encodeLookupAddBody args =
+    let
+        fields =
+            List.filterMap identity
+                [ Just ( "dataset_name", Encode.string args.datasetName )
+                , if List.isEmpty args.keyFields then
+                    Nothing
+
+                  else
+                    Just ( "key_fields", Encode.list Encode.string args.keyFields )
+                , Just ( "data", args.data )
+                ]
+    in
+    Encode.object [ ( "request_data", Encode.object fields ) ]
+
+
+encodeLookupGetBody : LookupGetArgs -> Encode.Value
+encodeLookupGetBody args =
+    let
+        encodePairs : List ( String, String ) -> Encode.Value
+        encodePairs pairs =
+            Encode.object (List.map (\( k, v ) -> ( k, Encode.string v )) pairs)
+
+        fields =
+            List.filterMap identity
+                [ Just ( "dataset_name", Encode.string args.datasetName )
+                , if List.isEmpty args.filters then
+                    Nothing
+
+                  else
+                    Just ( "filters", Encode.list encodePairs args.filters )
+                , Maybe.map (\l -> ( "limit", Encode.int l )) args.limit
+                ]
+    in
+    Encode.object [ ( "request_data", Encode.object fields ) ]
+
+
+encodeLookupRemoveBody : LookupRemoveArgs -> Encode.Value
+encodeLookupRemoveBody args =
+    let
+        filterObject =
+            Encode.object
+                (List.map (\( k, v ) -> ( k, Encode.string v )) args.filters)
+    in
+    Encode.object
+        [ ( "request_data"
+          , Encode.object
+                [ ( "dataset_name", Encode.string args.datasetName )
+                , ( "filters", filterObject )
+                ]
+          )
+        ]
+
+
+
+-- DECODERS
 
 
 quotaDecoder : Decoder Quota
@@ -193,3 +531,79 @@ libraryQueryDecoder =
             )
         |> andMap (Decode.maybe (Decode.field "is_private" Decode.bool))
         |> andMap (optionalList "labels" Decode.string)
+
+
+statusDecoder : Decoder QueryStatus
+statusDecoder =
+    Decode.string
+        |> Decode.map
+            (\s ->
+                case s of
+                    "PENDING" ->
+                        Pending
+
+                    "SUCCESS" ->
+                        Success
+
+                    "FAIL" ->
+                        Fail
+
+                    other ->
+                        OtherStatus other
+            )
+
+
+queryResultsDecoder : Decoder QueryResults
+queryResultsDecoder =
+    Decode.map7 QueryResults
+        (Decode.field "status" statusDecoder)
+        (Decode.maybe (Decode.field "number_of_results" Decode.int))
+        (Decode.oneOf
+            [ Decode.field "query_cost_charged" Decode.value
+            , Decode.field "query_cost" Decode.value
+            , Decode.succeed Encode.null
+            ]
+        )
+        (Decode.maybe (Decode.field "remaining_quota" Decode.float))
+        (Decode.maybe (Decode.field "remaining_yearly_quota" Decode.float))
+        (Decode.oneOf
+            [ Decode.at [ "results", "data" ] (Decode.list Decode.value)
+            , Decode.succeed []
+            ]
+        )
+        (Decode.maybe (Decode.at [ "results", "stream_id" ] Decode.string))
+
+
+{-| Lookup endpoints in the OpenAPI spec return their payload at the top
+level, but individual tenants sometimes wrap it in the usual `reply`
+envelope. Try both.
+-}
+maybeReply : Decoder a -> Decoder a
+maybeReply inner =
+    Decode.oneOf [ reply inner, inner ]
+
+
+lookupAddResultDecoder : Decoder LookupAddResult
+lookupAddResultDecoder =
+    Decode.map3 LookupAddResult
+        (Decode.maybe (Decode.field "added" Decode.int))
+        (Decode.maybe (Decode.field "updated" Decode.int))
+        (Decode.maybe (Decode.field "skipped" Decode.int))
+
+
+lookupGetResultDecoder : Decoder LookupGetResult
+lookupGetResultDecoder =
+    Decode.map3 LookupGetResult
+        (Decode.oneOf
+            [ Decode.field "data" Decode.value
+            , Decode.succeed Encode.null
+            ]
+        )
+        (Decode.maybe (Decode.field "filter_count" Decode.int))
+        (Decode.maybe (Decode.field "total_count" Decode.int))
+
+
+lookupRemoveResultDecoder : Decoder LookupRemoveResult
+lookupRemoveResultDecoder =
+    Decode.map LookupRemoveResult
+        (Decode.maybe (Decode.field "deleted" Decode.int))

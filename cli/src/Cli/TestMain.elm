@@ -113,6 +113,13 @@ run stamp config endpoint =
         typed : Request a -> Cmd Msg
         typed req =
             Client.sendWith stamp config (Decoded name) (Request.map (\_ -> ()) req)
+
+        skip : Cmd Msg
+        skip =
+            Cmd.batch
+                [ Ports.stdout ("ok: " ++ name ++ " (typed test skipped)\n")
+                , Ports.exit 0
+                ]
     in
     case endpoint of
         Commands.Healthcheck ->
@@ -159,6 +166,35 @@ run stamp config endpoint =
 
         Commands.XqlLibraryGet ->
             typed Xql.getLibrary
+
+        Commands.XqlStartQuery args ->
+            typed (Xql.startQuery args)
+
+        Commands.XqlQueryPoll args _ ->
+            -- Only validate the initial startQuery typed decode; the polling
+            -- loop is a CLI-runtime concern, not a decoder concern.
+            typed (Xql.startQuery args)
+
+        Commands.XqlGetResults args ->
+            typed (Xql.getQueryResults args)
+
+        Commands.XqlGetResultsPoll args _ ->
+            typed (Xql.getQueryResults args)
+
+        Commands.XqlGetResultsStream _ ->
+            -- Response is raw Encode.Value; nothing to typed-decode.
+            skip
+
+        Commands.XqlLookupsAddData _ ->
+            -- Mutating endpoint; do not exercise against live tenants in the
+            -- typed test runner.
+            skip
+
+        Commands.XqlLookupsGetData args ->
+            typed (Xql.lookupsGetData args)
+
+        Commands.XqlLookupsRemoveData _ ->
+            skip
 
         Commands.ScheduledQueriesList ->
             typed ScheduledQueries.list

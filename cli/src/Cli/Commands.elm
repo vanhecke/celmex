@@ -6,7 +6,10 @@ module Cli.Commands exposing
     , usage
     )
 
+import Cortex.Api.Xql as Xql
 import Cortex.Error exposing (Error(..))
+import Json.Decode as Decode
+import Json.Encode as Encode
 
 
 type Endpoint
@@ -25,6 +28,14 @@ type Endpoint
     | XqlGetQuota
     | XqlGetDatasets
     | XqlLibraryGet
+    | XqlStartQuery Xql.StartQueryArgs
+    | XqlQueryPoll Xql.StartQueryArgs Float
+    | XqlGetResults Xql.GetResultsArgs
+    | XqlGetResultsPoll Xql.GetResultsArgs Float
+    | XqlGetResultsStream Xql.StreamArgs
+    | XqlLookupsAddData Xql.LookupAddArgs
+    | XqlLookupsGetData Xql.LookupGetArgs
+    | XqlLookupsRemoveData Xql.LookupRemoveArgs
     | ScheduledQueriesList
     | IndicatorsGet
     | BiocsGet
@@ -63,6 +74,9 @@ type Endpoint
 argvToEndpoint : List String -> Result String Endpoint
 argvToEndpoint args =
     case args of
+        "xql" :: rest ->
+            parseXql rest
+
         [ "healthcheck" ] ->
             Ok Healthcheck
 
@@ -98,12 +112,6 @@ argvToEndpoint args =
 
         [ "attack-surface", "get-rules" ] ->
             Ok AttackSurfaceGetRules
-
-        [ "xql", "get-quota" ] ->
-            Ok XqlGetQuota
-
-        [ "xql", "get-datasets" ] ->
-            Ok XqlGetDatasets
 
         [ "xql-library", "get" ] ->
             Ok XqlLibraryGet
@@ -211,6 +219,415 @@ argvToEndpoint args =
             Err (usage args)
 
 
+parseXql : List String -> Result String Endpoint
+parseXql sub =
+    case sub of
+        [ "get-quota" ] ->
+            Ok XqlGetQuota
+
+        [ "get-datasets" ] ->
+            Ok XqlGetDatasets
+
+        "query" :: rest ->
+            parseXqlQueryCmd rest
+
+        "get-results" :: rest ->
+            parseXqlGetResultsCmd rest
+
+        "get-results-stream" :: rest ->
+            parseXqlStreamCmd rest
+
+        "lookups" :: rest ->
+            parseXqlLookups rest
+
+        _ ->
+            Err ("Unknown xql subcommand: xql " ++ String.join " " sub)
+
+
+parseXqlQueryCmd : List String -> Result String Endpoint
+parseXqlQueryCmd args =
+    splitArgs [ "--poll" ] args
+        |> Result.andThen
+            (\( positionals, flags ) ->
+                case positionals of
+                    [ queryString ] ->
+                        buildStartArgs queryString flags
+                            |> Result.andThen
+                                (\startArgs ->
+                                    if hasFlag "--poll" flags then
+                                        parseIntervalMs flags
+                                            |> Result.map (XqlQueryPoll startArgs)
+
+                                    else
+                                        Ok (XqlStartQuery startArgs)
+                                )
+
+                    _ ->
+                        Err "xql query: expected exactly one positional argument <QUERY>"
+            )
+
+
+parseXqlGetResultsCmd : List String -> Result String Endpoint
+parseXqlGetResultsCmd args =
+    splitArgs [ "--poll" ] args
+        |> Result.andThen
+            (\( positionals, flags ) ->
+                case positionals of
+                    [ queryId ] ->
+                        buildResultsArgs queryId flags
+                            |> Result.andThen
+                                (\resArgs ->
+                                    if hasFlag "--poll" flags then
+                                        parseIntervalMs flags
+                                            |> Result.map (XqlGetResultsPoll resArgs)
+
+                                    else
+                                        Ok (XqlGetResults resArgs)
+                                )
+
+                    _ ->
+                        Err "xql get-results: expected exactly one positional argument <QUERY_ID>"
+            )
+
+
+parseXqlStreamCmd : List String -> Result String Endpoint
+parseXqlStreamCmd args =
+    splitArgs [ "--gzip" ] args
+        |> Result.andThen
+            (\( positionals, flags ) ->
+                case positionals of
+                    [ streamId ] ->
+                        Ok
+                            (XqlGetResultsStream
+                                { streamId = streamId
+                                , isGzipCompressed =
+                                    if hasFlag "--gzip" flags then
+                                        Just True
+
+                                    else
+                                        Nothing
+                                }
+                            )
+
+                    _ ->
+                        Err "xql get-results-stream: expected exactly one positional argument <STREAM_ID>"
+            )
+
+
+parseXqlLookups : List String -> Result String Endpoint
+parseXqlLookups args =
+    case args of
+        "add-data" :: rest ->
+            parseLookupsAdd rest
+
+        "get-data" :: rest ->
+            parseLookupsGet rest
+
+        "remove-data" :: rest ->
+            parseLookupsRemove rest
+
+        _ ->
+            Err "xql lookups: expected add-data | get-data | remove-data"
+
+
+parseLookupsAdd : List String -> Result String Endpoint
+parseLookupsAdd args =
+    splitArgs [] args
+        |> Result.andThen
+            (\( positionals, flags ) ->
+                case positionals of
+                    [ dataset, jsonStr ] ->
+                        parseJsonValue jsonStr
+                            |> Result.map
+                                (\data ->
+                                    XqlLookupsAddData
+                                        { datasetName = dataset
+                                        , keyFields = parseCommaList "--key-fields" flags
+                                        , data = data
+                                        }
+                                )
+
+                    _ ->
+                        Err "xql lookups add-data: expected two positional arguments <DATASET> <JSON>"
+            )
+
+
+parseLookupsGet : List String -> Result String Endpoint
+parseLookupsGet args =
+    splitArgs [] args
+        |> Result.andThen
+            (\( positionals, flags ) ->
+                case positionals of
+                    [ dataset ] ->
+                        Result.map2
+                            (\limit filters ->
+                                XqlLookupsGetData
+                                    { datasetName = dataset
+                                    , filters = filters
+                                    , limit = limit
+                                    }
+                            )
+                            (parseOptionalInt "--limit" flags)
+                            (parseGetFilters flags)
+
+                    _ ->
+                        Err "xql lookups get-data: expected one positional argument <DATASET>"
+            )
+
+
+parseLookupsRemove : List String -> Result String Endpoint
+parseLookupsRemove args =
+    splitArgs [] args
+        |> Result.andThen
+            (\( positionals, flags ) ->
+                case positionals of
+                    [ dataset ] ->
+                        parseRemoveFilters flags
+                            |> Result.andThen
+                                (\filters ->
+                                    if List.isEmpty filters then
+                                        Err "xql lookups remove-data: needs at least one --filter k=v"
+
+                                    else
+                                        Ok
+                                            (XqlLookupsRemoveData
+                                                { datasetName = dataset
+                                                , filters = filters
+                                                }
+                                            )
+                                )
+
+                    _ ->
+                        Err "xql lookups remove-data: expected one positional argument <DATASET>"
+            )
+
+
+
+-- ARGUMENT / FLAG HELPERS
+
+
+splitArgs : List String -> List String -> Result String ( List String, List ( String, Maybe String ) )
+splitArgs boolFlags args =
+    let
+        go remaining positionals flags =
+            case remaining of
+                [] ->
+                    Ok ( List.reverse positionals, List.reverse flags )
+
+                head :: rest ->
+                    if String.startsWith "--" head then
+                        if List.member head boolFlags then
+                            go rest positionals (( head, Nothing ) :: flags)
+
+                        else
+                            case rest of
+                                value :: more ->
+                                    go more positionals (( head, Just value ) :: flags)
+
+                                [] ->
+                                    Err (head ++ ": expected a value")
+
+                    else
+                        go rest (head :: positionals) flags
+    in
+    go args [] []
+
+
+hasFlag : String -> List ( String, Maybe String ) -> Bool
+hasFlag name flags =
+    List.any (\( n, _ ) -> n == name) flags
+
+
+flagValue : String -> List ( String, Maybe String ) -> Maybe String
+flagValue name flags =
+    flags
+        |> List.filterMap
+            (\( n, v ) ->
+                if n == name then
+                    v
+
+                else
+                    Nothing
+            )
+        |> List.head
+
+
+allFlagValues : String -> List ( String, Maybe String ) -> List String
+allFlagValues name flags =
+    List.filterMap
+        (\( n, v ) ->
+            if n == name then
+                v
+
+            else
+                Nothing
+        )
+        flags
+
+
+parseOptionalInt : String -> List ( String, Maybe String ) -> Result String (Maybe Int)
+parseOptionalInt name flags =
+    case flagValue name flags of
+        Nothing ->
+            Ok Nothing
+
+        Just s ->
+            case String.toInt s of
+                Just n ->
+                    Ok (Just n)
+
+                Nothing ->
+                    Err (name ++ ": expected integer, got " ++ s)
+
+
+parseIntervalMs : List ( String, Maybe String ) -> Result String Float
+parseIntervalMs flags =
+    case flagValue "--interval" flags of
+        Nothing ->
+            Ok 2000
+
+        Just s ->
+            case String.toFloat s of
+                Just n ->
+                    Ok (n * 1000)
+
+                Nothing ->
+                    Err ("--interval: expected number of seconds, got " ++ s)
+
+
+parseCommaList : String -> List ( String, Maybe String ) -> List String
+parseCommaList name flags =
+    case flagValue name flags of
+        Just s ->
+            String.split "," s
+                |> List.map String.trim
+                |> List.filter (not << String.isEmpty)
+
+        Nothing ->
+            []
+
+
+parseKeyValuePair : String -> Maybe ( String, String )
+parseKeyValuePair s =
+    case String.indexes "=" s of
+        i :: _ ->
+            let
+                k =
+                    String.slice 0 i s
+
+                v =
+                    String.dropLeft (i + 1) s
+            in
+            if String.isEmpty k then
+                Nothing
+
+            else
+                Just ( k, v )
+
+        [] ->
+            Nothing
+
+
+buildStartArgs : String -> List ( String, Maybe String ) -> Result String Xql.StartQueryArgs
+buildStartArgs q flags =
+    Result.map3
+        (\rel from_ to_ -> ( rel, from_, to_ ))
+        (parseOptionalInt "--relative" flags)
+        (parseOptionalInt "--from" flags)
+        (parseOptionalInt "--to" flags)
+        |> Result.andThen
+            (\( rel, fromMs, toMs ) ->
+                buildTimeframe rel fromMs toMs
+                    |> Result.map
+                        (\tf ->
+                            { query = q
+                            , timeframe = tf
+                            , tenants = parseCommaList "--tenants" flags
+                            }
+                        )
+            )
+
+
+buildTimeframe : Maybe Int -> Maybe Int -> Maybe Int -> Result String (Maybe Xql.Timeframe)
+buildTimeframe rel fromMs toMs =
+    case ( rel, fromMs, toMs ) of
+        ( Nothing, Nothing, Nothing ) ->
+            Ok Nothing
+
+        ( Just ms, Nothing, Nothing ) ->
+            Ok (Just (Xql.Relative ms))
+
+        ( Nothing, Just f, Just t ) ->
+            Ok (Just (Xql.Range { from = f, to = t }))
+
+        ( Nothing, Just _, Nothing ) ->
+            Err "xql query: --from requires --to"
+
+        ( Nothing, Nothing, Just _ ) ->
+            Err "xql query: --to requires --from"
+
+        _ ->
+            Err "xql query: use --relative OR --from/--to, not both"
+
+
+buildResultsArgs : String -> List ( String, Maybe String ) -> Result String Xql.GetResultsArgs
+buildResultsArgs qid flags =
+    parseOptionalInt "--limit" flags
+        |> Result.map
+            (\limit ->
+                { queryId = qid
+                , pendingFlag = Nothing
+                , limit = limit
+                , format = flagValue "--format" flags
+                }
+            )
+
+
+parseGetFilters : List ( String, Maybe String ) -> Result String (List (List ( String, String )))
+parseGetFilters flags =
+    allFlagValues "--filter" flags
+        |> List.map
+            (\raw ->
+                case parseKeyValuePair raw of
+                    Just kv ->
+                        Ok [ kv ]
+
+                    Nothing ->
+                        Err ("--filter: invalid pair " ++ raw)
+            )
+        |> resultSequence
+
+
+parseRemoveFilters : List ( String, Maybe String ) -> Result String (List ( String, String ))
+parseRemoveFilters flags =
+    allFlagValues "--filter" flags
+        |> List.map
+            (\raw ->
+                case parseKeyValuePair raw of
+                    Just kv ->
+                        Ok kv
+
+                    Nothing ->
+                        Err ("--filter: invalid pair " ++ raw)
+            )
+        |> resultSequence
+
+
+parseJsonValue : String -> Result String Encode.Value
+parseJsonValue s =
+    case Decode.decodeString Decode.value s of
+        Ok v ->
+            Ok v
+
+        Err e ->
+            Err ("invalid JSON: " ++ Decode.errorToString e)
+
+
+resultSequence : List (Result e a) -> Result e (List a)
+resultSequence results =
+    List.foldr (\r acc -> Result.map2 (::) r acc) (Ok []) results
+
+
 endpointName : Endpoint -> String
 endpointName endpoint =
     case endpoint of
@@ -258,6 +675,30 @@ endpointName endpoint =
 
         XqlLibraryGet ->
             "xql-library get"
+
+        XqlStartQuery _ ->
+            "xql query"
+
+        XqlQueryPoll _ _ ->
+            "xql query --poll"
+
+        XqlGetResults _ ->
+            "xql get-results"
+
+        XqlGetResultsPoll _ _ ->
+            "xql get-results --poll"
+
+        XqlGetResultsStream _ ->
+            "xql get-results-stream"
+
+        XqlLookupsAddData _ ->
+            "xql lookups add-data"
+
+        XqlLookupsGetData _ ->
+            "xql lookups get-data"
+
+        XqlLookupsRemoveData _ ->
+            "xql lookups remove-data"
 
         ScheduledQueriesList ->
             "scheduled-queries list"
@@ -413,6 +854,27 @@ usage args =
             , "  cortex xql get-datasets                     List XQL datasets"
             , "  cortex xql-library get                      List XQL library queries"
             , "  cortex scheduled-queries list               List scheduled queries"
+            , ""
+            , "  cortex xql query <QUERY> [flags]            Start an XQL query; prints query_id"
+            , "    --poll                                      Poll until SUCCESS/FAIL, print results"
+            , "    --interval <SECONDS>                        Poll interval (default 2)"
+            , "    --relative <MS>                             Relative timeframe, e.g. 86400000"
+            , "    --from <MS> --to <MS>                       Absolute epoch-ms timeframe"
+            , "    --tenants a,b,c                             MSSP tenant IDs"
+            , "  cortex xql get-results <QUERY_ID> [flags]   Fetch results for a query id"
+            , "    --poll                                      Poll until SUCCESS/FAIL"
+            , "    --interval <SECONDS>                        Poll interval (default 2)"
+            , "    --limit <N>                                 Max rows"
+            , "    --format json|csv                           Response format"
+            , "  cortex xql get-results-stream <STREAM_ID>   Fetch streaming tail for >1000 rows"
+            , "    --gzip                                      Request gzip-compressed response"
+            , "  cortex xql lookups add-data <DATASET> <JSON>"
+            , "    --key-fields a,b,c                          Identity fields for upsert"
+            , "  cortex xql lookups get-data <DATASET>"
+            , "    --filter k=v                                Repeatable; each one is a filter object"
+            , "    --limit <N>"
+            , "  cortex xql lookups remove-data <DATASET>"
+            , "    --filter k=v                                Repeatable; combined as AND"
             , ""
             , "  cortex indicators get                       List indicators (IOCs)"
             , "  cortex bioc get                             List BIOCs"

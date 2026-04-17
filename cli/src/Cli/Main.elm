@@ -35,13 +35,42 @@ import Cortex.Request as Request exposing (Request)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
 import Platform
+import Process
+import Task
+
+
+type Model
+    = Idle
+    | Polling PollState
+
+
+type alias PollState =
+    { config : Config
+    , queryId : String
+    , limit : Maybe Int
+    , format : Maybe String
+    , intervalMs : Float
+    }
 
 
 type Msg
     = GotResponse (Result Error Encode.Value)
+    | GotStartForPoll Config PollInit (Result Error String)
+    | GotPollResult (Result Error Encode.Value)
+    | PollTick
 
 
-main : Program Decode.Value () Msg
+{-| Fields carried from the initial `--poll` startQuery dispatch into the
+polling loop once the server returns a `query_id`.
+-}
+type alias PollInit =
+    { limit : Maybe Int
+    , format : Maybe String
+    , intervalMs : Float
+    }
+
+
+main : Program Decode.Value Model Msg
 main =
     Platform.worker
         { init = init
@@ -50,7 +79,7 @@ main =
         }
 
 
-init : Decode.Value -> ( (), Cmd Msg )
+init : Decode.Value -> ( Model, Cmd Msg )
 init flagsValue =
     case Decode.decodeValue Flags.decoder flagsValue of
         Ok flags ->
@@ -73,10 +102,10 @@ init flagsValue =
             in
             case Commands.argvToEndpoint flags.argv of
                 Ok endpoint ->
-                    ( (), run stamp config endpoint )
+                    run stamp config endpoint
 
                 Err msg ->
-                    ( ()
+                    ( Idle
                     , Cmd.batch
                         [ Ports.stderr (msg ++ "\n")
                         , Ports.exit 1
@@ -84,7 +113,7 @@ init flagsValue =
                     )
 
         Err err ->
-            ( ()
+            ( Idle
             , Cmd.batch
                 [ Ports.stderr ("Failed to decode flags: " ++ Decode.errorToString err ++ "\n")
                 , Ports.exit 1
@@ -92,12 +121,115 @@ init flagsValue =
             )
 
 
-update : Msg -> () -> ( (), Cmd Msg )
-update msg _ =
-    ( (), handleResult msg )
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
+    case msg of
+        GotResponse result ->
+            ( model, handleTerminal result )
+
+        GotStartForPoll config init_ result ->
+            case result of
+                Ok queryId ->
+                    let
+                        state =
+                            { config = config
+                            , queryId = queryId
+                            , limit = init_.limit
+                            , format = init_.format
+                            , intervalMs = init_.intervalMs
+                            }
+                    in
+                    ( Polling state, sendPoll state )
+
+                Err err ->
+                    ( model
+                    , Cmd.batch
+                        [ Ports.stderr (Commands.errorToString err ++ "\n")
+                        , Ports.exit 1
+                        ]
+                    )
+
+        GotPollResult result ->
+            case result of
+                Ok value ->
+                    if isPending value then
+                        case model of
+                            Polling state ->
+                                ( model
+                                , Process.sleep state.intervalMs
+                                    |> Task.perform (always PollTick)
+                                )
+
+                            Idle ->
+                                ( model, emitTerminal value )
+
+                    else
+                        ( model, emitTerminal value )
+
+                Err err ->
+                    ( model
+                    , Cmd.batch
+                        [ Ports.stderr (Commands.errorToString err ++ "\n")
+                        , Ports.exit 1
+                        ]
+                    )
+
+        PollTick ->
+            case model of
+                Polling state ->
+                    ( model, sendPoll state )
+
+                Idle ->
+                    ( model, Cmd.none )
 
 
-run : Auth.Stamp -> Config -> Endpoint -> Cmd Msg
+isPending : Encode.Value -> Bool
+isPending value =
+    Decode.decodeValue (Decode.field "status" Decode.string) value
+        |> Result.map ((==) "PENDING")
+        |> Result.withDefault False
+
+
+emitTerminal : Encode.Value -> Cmd Msg
+emitTerminal value =
+    Cmd.batch
+        [ Ports.stdout (Encode.encode 2 value ++ "\n")
+        , Ports.exit 0
+        ]
+
+
+handleTerminal : Result Error Encode.Value -> Cmd Msg
+handleTerminal result =
+    case result of
+        Ok value ->
+            emitTerminal value
+
+        Err err ->
+            Cmd.batch
+                [ Ports.stderr (Commands.errorToString err ++ "\n")
+                , Ports.exit 1
+                ]
+
+
+sendPoll : PollState -> Cmd Msg
+sendPoll state =
+    Client.send state.config
+        GotPollResult
+        (pollRequest state)
+
+
+pollRequest : PollState -> Request Encode.Value
+pollRequest state =
+    Xql.getQueryResults
+        { queryId = state.queryId
+        , pendingFlag = Nothing
+        , limit = state.limit
+        , format = state.format
+        }
+        |> Request.withDecoder rawDecoder
+
+
+run : Auth.Stamp -> Config -> Endpoint -> ( Model, Cmd Msg )
 run stamp config endpoint =
     let
         raw : Request a -> Cmd Msg
@@ -106,148 +238,203 @@ run stamp config endpoint =
     in
     case endpoint of
         Commands.Healthcheck ->
-            raw Healthcheck.check
+            ( Idle, raw Healthcheck.check )
 
         Commands.TenantInfo ->
-            raw TenantInfo.get
+            ( Idle, raw TenantInfo.get )
 
         Commands.CliVersion ->
-            raw Cli.getVersion
+            ( Idle, raw Cli.getVersion )
 
         Commands.EndpointsList ->
-            raw Endpoints.list
+            ( Idle, raw Endpoints.list )
 
         Commands.AuditLogsSearch ->
-            raw AuditLogs.search
+            ( Idle, raw AuditLogs.search )
 
         Commands.AuditLogsAgentsReports ->
-            raw AuditLogs.agentsReports
+            ( Idle, raw AuditLogs.agentsReports )
 
         Commands.DistributionsGetVersions ->
-            raw Distributions.getVersions
+            ( Idle, raw Distributions.getVersions )
 
         Commands.DistributionsList ->
-            raw Distributions.getDistributions
+            ( Idle, raw Distributions.getDistributions )
 
         Commands.RbacGetUsers ->
-            raw Rbac.getUsers
+            ( Idle, raw Rbac.getUsers )
 
         Commands.AuthSettingsGet ->
-            raw AuthSettings.get
+            ( Idle, raw AuthSettings.get )
 
         Commands.DeviceControlGetViolations ->
-            raw DeviceControl.getViolations
+            ( Idle, raw DeviceControl.getViolations )
 
         Commands.AttackSurfaceGetRules ->
-            raw AttackSurface.getRules
+            ( Idle, raw AttackSurface.getRules )
 
         Commands.XqlGetQuota ->
-            raw Xql.getQuota
+            ( Idle, raw Xql.getQuota )
 
         Commands.XqlGetDatasets ->
-            raw Xql.getDatasets
+            ( Idle, raw Xql.getDatasets )
 
         Commands.XqlLibraryGet ->
-            raw Xql.getLibrary
+            ( Idle, raw Xql.getLibrary )
+
+        Commands.XqlStartQuery args ->
+            ( Idle
+            , Client.sendWith stamp
+                config
+                GotResponse
+                (Xql.startQuery args
+                    |> Request.map
+                        (\id -> Encode.object [ ( "query_id", Encode.string id ) ])
+                )
+            )
+
+        Commands.XqlQueryPoll args intervalMs ->
+            let
+                init_ =
+                    { limit = Nothing
+                    , format = Nothing
+                    , intervalMs = intervalMs
+                    }
+            in
+            ( Idle
+            , Client.sendWith stamp
+                config
+                (GotStartForPoll config init_)
+                (Xql.startQuery args)
+            )
+
+        Commands.XqlGetResults args ->
+            ( Idle, raw (Xql.getQueryResults args) )
+
+        Commands.XqlGetResultsPoll args intervalMs ->
+            let
+                state =
+                    { config = config
+                    , queryId = args.queryId
+                    , limit = args.limit
+                    , format = args.format
+                    , intervalMs = intervalMs
+                    }
+            in
+            ( Polling state
+            , Client.sendWith stamp config GotPollResult (pollRequest state)
+            )
+
+        Commands.XqlGetResultsStream args ->
+            ( Idle, raw (Xql.getQueryResultsStream args) )
+
+        Commands.XqlLookupsAddData args ->
+            ( Idle, raw (Xql.lookupsAddData args) )
+
+        Commands.XqlLookupsGetData args ->
+            ( Idle, raw (Xql.lookupsGetData args) )
+
+        Commands.XqlLookupsRemoveData args ->
+            ( Idle, raw (Xql.lookupsRemoveData args) )
 
         Commands.ScheduledQueriesList ->
-            raw ScheduledQueries.list
+            ( Idle, raw ScheduledQueries.list )
 
         Commands.IndicatorsGet ->
-            raw Indicators.get
+            ( Idle, raw Indicators.get )
 
         Commands.BiocsGet ->
-            raw Biocs.get
+            ( Idle, raw Biocs.get )
 
         Commands.CorrelationsGet ->
-            raw Correlations.get
+            ( Idle, raw Correlations.get )
 
         Commands.IssuesSearch ->
-            raw Issues.search
+            ( Idle, raw Issues.search )
 
         Commands.LegacyExceptionsGetModules ->
-            raw LegacyExceptions.getModules
+            ( Idle, raw LegacyExceptions.getModules )
 
         Commands.LegacyExceptionsFetch ->
-            raw LegacyExceptions.fetch
+            ( Idle, raw LegacyExceptions.fetch )
 
         Commands.ProfilesList profileType ->
-            raw (Profiles.getProfiles { type_ = profileType })
+            ( Idle, raw (Profiles.getProfiles { type_ = profileType }) )
 
         Commands.ProfilesGetPolicy endpointId ->
-            raw (Profiles.getPolicy { endpointId = endpointId })
+            ( Idle, raw (Profiles.getPolicy { endpointId = endpointId }) )
 
         Commands.AgentConfigContentManagement ->
-            raw AgentConfig.getContentManagement
+            ( Idle, raw AgentConfig.getContentManagement )
 
         Commands.AgentConfigAutoUpgrade ->
-            raw AgentConfig.getAutoUpgrade
+            ( Idle, raw AgentConfig.getAutoUpgrade )
 
         Commands.AgentConfigWildfireAnalysis ->
-            raw AgentConfig.getWildfireAnalysis
+            ( Idle, raw AgentConfig.getWildfireAnalysis )
 
         Commands.AgentConfigCriticalEnvironmentVersions ->
-            raw AgentConfig.getCriticalEnvironmentVersions
+            ( Idle, raw AgentConfig.getCriticalEnvironmentVersions )
 
         Commands.AgentConfigAdvancedAnalysis ->
-            raw AgentConfig.getAdvancedAnalysis
+            ( Idle, raw AgentConfig.getAdvancedAnalysis )
 
         Commands.RbacGetRoles roleName ->
-            raw (Rbac.getRoles { roleNames = [ roleName ] })
+            ( Idle, raw (Rbac.getRoles { roleNames = [ roleName ] }) )
 
         Commands.RbacGetUserGroups groupName ->
-            raw (Rbac.getUserGroups { groupNames = [ groupName ] })
+            ( Idle, raw (Rbac.getUserGroups { groupNames = [ groupName ] }) )
 
         Commands.ApiKeysList ->
-            raw ApiKeys.getApiKeys
+            ( Idle, raw ApiKeys.getApiKeys )
 
         Commands.RiskScore id ->
-            raw (Risk.getRiskScore { id = id })
+            ( Idle, raw (Risk.getRiskScore { id = id }) )
 
         Commands.RiskUsers ->
-            raw Risk.getRiskyUsers
+            ( Idle, raw Risk.getRiskyUsers )
 
         Commands.RiskHosts ->
-            raw Risk.getRiskyHosts
+            ( Idle, raw Risk.getRiskyHosts )
 
         Commands.CasesSearch ->
-            raw Cases.search
+            ( Idle, raw Cases.search )
 
         Commands.IssuesSchema ->
-            raw Issues.schema
+            ( Idle, raw Issues.schema )
 
         Commands.DisablePreventionFetch ->
-            raw DisablePrevention.fetchRules
+            ( Idle, raw DisablePrevention.fetchRules )
 
         Commands.DisablePreventionFetchInjection ->
-            raw DisablePrevention.fetchInjectionRules
+            ( Idle, raw DisablePrevention.fetchInjectionRules )
 
         Commands.AssetsList ->
-            raw Assets.list
+            ( Idle, raw Assets.list )
 
         Commands.AssetsSchema ->
-            raw Assets.getSchema
+            ( Idle, raw Assets.getSchema )
 
         Commands.AssetsExternalServices ->
-            raw Assets.getExternalServices
+            ( Idle, raw Assets.getExternalServices )
 
         Commands.AssetsInternetExposures ->
-            raw Assets.getInternetExposures
+            ( Idle, raw Assets.getInternetExposures )
 
         Commands.AssetsIpRanges ->
-            raw Assets.getExternalIpRanges
+            ( Idle, raw Assets.getExternalIpRanges )
 
         Commands.AssetsVulnerabilityTests ->
-            raw Assets.getVulnerabilityTests
+            ( Idle, raw Assets.getVulnerabilityTests )
 
         Commands.AssetsExternalWebsites ->
-            raw Assets.getExternalWebsites
+            ( Idle, raw Assets.getExternalWebsites )
 
         Commands.AssetsWebsitesLastAssessment ->
-            raw Assets.getWebsitesLastAssessment
+            ( Idle, raw Assets.getWebsitesLastAssessment )
 
         Commands.AssetGroupsList ->
-            raw AssetGroups.list
+            ( Idle, raw AssetGroups.list )
 
 
 {-| Most Cortex responses wrap their body in a top-level `reply` envelope,
@@ -260,19 +447,3 @@ rawDecoder =
         [ Decode.field "reply" Decode.value
         , Decode.value
         ]
-
-
-handleResult : Msg -> Cmd Msg
-handleResult (GotResponse result) =
-    case result of
-        Ok value ->
-            Cmd.batch
-                [ Ports.stdout (Encode.encode 2 value ++ "\n")
-                , Ports.exit 0
-                ]
-
-        Err err ->
-            Cmd.batch
-                [ Ports.stderr (Commands.errorToString err ++ "\n")
-                , Ports.exit 1
-                ]
