@@ -1,8 +1,14 @@
 module Cortex.Api.Issues exposing
     ( SearchResponse
-    , schema
-    , search
+    , search, schema
     )
+
+{-| Cortex issue records (alerts/incidents) and their tenant-defined schema.
+
+@docs SearchResponse
+@docs search, schema
+
+-}
 
 import Cortex.Decode exposing (reply)
 import Cortex.Request as Request exposing (Request)

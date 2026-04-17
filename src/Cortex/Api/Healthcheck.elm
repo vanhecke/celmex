@@ -3,10 +3,19 @@ module Cortex.Api.Healthcheck exposing
     , check
     )
 
+{-| Lightweight tenant reachability probe.
+
+@docs HealthcheckResponse
+@docs check
+
+-}
+
 import Cortex.Request as Request exposing (Request)
 import Json.Decode as Decode exposing (Decoder)
 
 
+{-| Single-field status response returned by [`check`](#check).
+-}
 type alias HealthcheckResponse =
     { status : String
     }

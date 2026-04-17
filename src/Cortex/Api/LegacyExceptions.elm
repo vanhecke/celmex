@@ -1,9 +1,14 @@
 module Cortex.Api.LegacyExceptions exposing
-    ( FetchResponse
-    , Module
-    , fetch
-    , getModules
+    ( Module, FetchResponse
+    , getModules, fetch
     )
+
+{-| Legacy policy exception modules and their current rule set.
+
+@docs Module, FetchResponse
+@docs getModules, fetch
+
+-}
 
 import Cortex.Decode exposing (reply)
 import Cortex.Request as Request exposing (Request)
@@ -11,6 +16,9 @@ import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
 
 
+{-| A single legacy-exception module definition. `conditionsDefinition` is a
+nested JSON tree whose shape depends on module type, so it is preserved as-is.
+-}
 type alias Module =
     { moduleId : Maybe Int
     , prettyName : Maybe String

@@ -3,10 +3,19 @@ module Cortex.Api.Cli exposing
     , getVersion
     )
 
+{-| Latest Cortex CLI version announced by the tenant.
+
+@docs VersionResponse
+@docs getVersion
+
+-}
+
 import Cortex.Request as Request exposing (Request)
 import Json.Decode as Decode exposing (Decoder)
 
 
+{-| Latest published CLI version string returned by [`getVersion`](#getVersion).
+-}
 type alias VersionResponse =
     { version : String
     }

@@ -1,5 +1,11 @@
 module Cortex.Api.AuthSettings exposing (get)
 
+{-| Cortex tenant IdP/SSO authentication settings.
+
+@docs get
+
+-}
+
 import Cortex.Decode exposing (reply)
 import Cortex.Request as Request exposing (Request)
 import Json.Decode as Decode exposing (Decoder)

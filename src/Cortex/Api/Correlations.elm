@@ -3,6 +3,13 @@ module Cortex.Api.Correlations exposing
     , get
     )
 
+{-| Cortex correlation rules.
+
+@docs CorrelationsResponse
+@docs get
+
+-}
+
 import Cortex.Request as Request exposing (Request)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode

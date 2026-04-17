@@ -1,10 +1,14 @@
 module Cortex.Api.AuditLogs exposing
-    ( AgentsReportsResponse
-    , AuditLog
-    , SearchResponse
-    , agentsReports
-    , search
+    ( AuditLog, SearchResponse, AgentsReportsResponse
+    , search, agentsReports
     )
+
+{-| Cortex tenant audit-log queries (management events and agent reports).
+
+@docs AuditLog, SearchResponse, AgentsReportsResponse
+@docs search, agentsReports
+
+-}
 
 import Cortex.Decode exposing (reply)
 import Cortex.Request as Request exposing (Request)
@@ -12,6 +16,8 @@ import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
 
 
+{-| Paginated envelope returned by [`search`](#search).
+-}
 type alias SearchResponse =
     { totalCount : Int
     , resultCount : Int
@@ -19,6 +25,8 @@ type alias SearchResponse =
     }
 
 
+{-| A single audit-management event (user action on the tenant).
+-}
 type alias AuditLog =
     { auditId : Int
     , ownerName : Maybe String

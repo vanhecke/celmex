@@ -1,8 +1,14 @@
 module Cortex.Api.Indicators exposing
-    ( Indicator
-    , IndicatorsResponse
+    ( Indicator, IndicatorsResponse
     , get
     )
+
+{-| Cortex threat intelligence indicators (IOCs).
+
+@docs Indicator, IndicatorsResponse
+@docs get
+
+-}
 
 import Cortex.Decode exposing (andMap)
 import Cortex.Request as Request exposing (Request)
@@ -10,6 +16,8 @@ import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
 
 
+{-| Envelope returned by [`get`](#get). Not wrapped in the standard `reply`.
+-}
 type alias IndicatorsResponse =
     { objectsCount : Maybe Int
     , objects : List Indicator
@@ -17,6 +25,10 @@ type alias IndicatorsResponse =
     }
 
 
+{-| A single threat-intelligence indicator (hash, domain, URL, IP, etc.).
+The `reputation` and `reliability` fields carry per-source sub-objects whose
+shape varies, so they are kept as raw JSON.
+-}
 type alias Indicator =
     { ruleId : Maybe Int
     , indicator : Maybe String

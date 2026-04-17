@@ -1,8 +1,14 @@
 module Cortex.Api.Endpoints exposing
-    ( Endpoint
-    , ListResponse
+    ( Endpoint, ListResponse
     , list
     )
+
+{-| Cortex endpoint inventory.
+
+@docs Endpoint, ListResponse
+@docs list
+
+-}
 
 import Cortex.Decode exposing (andMap, reply)
 import Cortex.Request as Request exposing (Request)
@@ -10,11 +16,15 @@ import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
 
 
+{-| Envelope wrapping the endpoint list returned by [`list`](#list).
+-}
 type alias ListResponse =
     { endpoints : List Endpoint
     }
 
 
+{-| A single Cortex endpoint (managed host running an agent).
+-}
 type alias Endpoint =
     { agentId : String
     , agentStatus : Maybe String

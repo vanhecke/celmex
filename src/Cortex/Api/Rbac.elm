@@ -1,11 +1,14 @@
 module Cortex.Api.Rbac exposing
-    ( Role
-    , User
-    , UserGroup
-    , getRoles
-    , getUserGroups
-    , getUsers
+    ( User, Role, UserGroup
+    , getUsers, getRoles, getUserGroups
     )
+
+{-| Cortex role-based access control: users, roles, and user groups.
+
+@docs User, Role, UserGroup
+@docs getUsers, getRoles, getUserGroups
+
+-}
 
 import Cortex.Decode exposing (andMap, optionalList, reply)
 import Cortex.Request as Request exposing (Request)
@@ -13,6 +16,8 @@ import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
 
 
+{-| A Cortex RBAC user record.
+-}
 type alias User =
     { userEmail : String
     , userFirstName : Maybe String
@@ -48,6 +53,8 @@ userDecoder =
         (optionalList "scope" Decode.value)
 
 
+{-| A Cortex RBAC role definition: permission list plus membership.
+-}
 type alias Role =
     { prettyName : Maybe String
     , permissions : List String
@@ -101,6 +108,8 @@ roleDecoder =
         |> andMap (optionalList "users" Decode.string)
 
 
+{-| A Cortex user-group definition, including member emails.
+-}
 type alias UserGroup =
     { groupName : Maybe String
     , description : Maybe String

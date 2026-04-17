@@ -1,10 +1,14 @@
 module Cortex.Api.Distributions exposing
-    ( Distribution
-    , DistributionsResponse
-    , Versions
-    , getDistributions
-    , getVersions
+    ( Distribution, DistributionsResponse, Versions
+    , getDistributions, getVersions
     )
+
+{-| Cortex agent installer distributions and available versions.
+
+@docs Distribution, DistributionsResponse, Versions
+@docs getDistributions, getVersions
+
+-}
 
 import Cortex.Decode exposing (andMap, optionalList, reply)
 import Cortex.Request as Request exposing (Request)
@@ -25,6 +29,8 @@ type alias Versions =
     }
 
 
+{-| Paginated envelope returned by [`getDistributions`](#getDistributions).
+-}
 type alias DistributionsResponse =
     { data : List Distribution
     , filterCount : Maybe Int
@@ -32,6 +38,8 @@ type alias DistributionsResponse =
     }
 
 
+{-| A single agent installer distribution.
+-}
 type alias Distribution =
     { distributionId : Maybe String
     , name : Maybe String

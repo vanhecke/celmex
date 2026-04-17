@@ -3,6 +3,13 @@ module Cortex.Api.ScheduledQueries exposing
     , list
     )
 
+{-| Cortex scheduled XQL queries configured on the tenant.
+
+@docs ScheduledQueriesResponse
+@docs list
+
+-}
+
 import Cortex.Decode exposing (reply)
 import Cortex.Request as Request exposing (Request)
 import Json.Decode as Decode exposing (Decoder)

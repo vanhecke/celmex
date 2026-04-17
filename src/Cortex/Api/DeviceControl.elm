@@ -3,12 +3,22 @@ module Cortex.Api.DeviceControl exposing
     , getViolations
     )
 
+{-| Cortex device-control policy violations.
+
+@docs ViolationsResponse
+@docs getViolations
+
+-}
+
 import Cortex.Decode exposing (reply)
 import Cortex.Request as Request exposing (Request)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
 
 
+{-| Paginated envelope of raw violation rows returned by [`getViolations`](#getViolations).
+Violations have too many variable fields to type exhaustively, so each row is preserved as JSON.
+-}
 type alias ViolationsResponse =
     { totalCount : Maybe Int
     , resultCount : Maybe Int

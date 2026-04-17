@@ -1,8 +1,14 @@
 module Cortex.Api.AttackSurface exposing
-    ( AttackSurfaceRule
-    , RulesResponse
+    ( AttackSurfaceRule, RulesResponse
     , getRules
     )
+
+{-| Cortex ASM (attack-surface management) rule configuration.
+
+@docs AttackSurfaceRule, RulesResponse
+@docs getRules
+
+-}
 
 import Cortex.Decode exposing (reply)
 import Cortex.Request as Request exposing (Request)
@@ -10,6 +16,8 @@ import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
 
 
+{-| Paginated envelope returned by [`getRules`](#getRules).
+-}
 type alias RulesResponse =
     { totalCount : Maybe Int
     , resultCount : Maybe Int
@@ -17,6 +25,8 @@ type alias RulesResponse =
     }
 
 
+{-| A single ASM rule row.
+-}
 type alias AttackSurfaceRule =
     { attackSurfaceRuleName : Maybe String
     , enabledStatus : Maybe String

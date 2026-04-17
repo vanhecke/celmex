@@ -1,15 +1,43 @@
 {
-    "name": "elm-cortex-cli",
-    "private": true,
-    "bin": {
-        "cortex": "./cli/bin/cortex"
+    "name": "celmex",
+    "version": "1.0.0",
+    "description": "CLI for the Cortex Platform REST API, built on the vanhecke/celmex Elm SDK",
+    "license": "MIT",
+    "author": "Joris Vanhecke <joris@joris.be>",
+    "homepage": "https://github.com/vanhecke/celmex",
+    "repository": {
+        "type": "git",
+        "url": "github:vanhecke/celmex"
     },
-    "devDependencies": {
+    "keywords": [
+        "cortex",
+        "palo-alto",
+        "xdr",
+        "xsiam",
+        "elm",
+        "cli"
+    ],
+    "bin": {
+        "cortex": "./cli/index.js"
+    },
+    "files": [
+        "cli/index.js",
+        "cli/bootstrap.js",
+        "cli/dist/elm.js",
+        "README.md",
+        "CHANGELOG.md",
+        "LICENSE"
+    ],
+    "dependencies": {
         "xhr2": "^0.2.1"
     },
     "scripts": {
         "build": "just build",
         "format": "just format",
-        "test": "just test"
+        "test": "just test",
+        "prepublishOnly": "just build"
+    },
+    "engines": {
+        "node": ">=18"
     }
 }

@@ -3,6 +3,13 @@ module Cortex.Api.TenantInfo exposing
     , get
     )
 
+{-| Cortex tenant license, SKU, and region metadata.
+
+@docs TenantInfo
+@docs get
+
+-}
+
 import Cortex.Decode exposing (reply)
 import Cortex.Request as Request exposing (Request)
 import Json.Decode as Decode exposing (Decoder)

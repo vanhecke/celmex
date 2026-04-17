@@ -3,6 +3,13 @@ module Cortex.Api.AssetGroups exposing
     , list
     )
 
+{-| Cortex asset-group listings.
+
+@docs AssetGroupsResponse
+@docs list
+
+-}
+
 import Cortex.Decode exposing (reply)
 import Cortex.Request as Request exposing (Request)
 import Json.Decode as Decode exposing (Decoder)

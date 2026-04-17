@@ -1,13 +1,14 @@
 module Cortex.Api.Xql exposing
-    ( Dataset
-    , DatasetRange
-    , Library
-    , LibraryQuery
-    , Quota
-    , getDatasets
-    , getLibrary
-    , getQuota
+    ( Dataset, DatasetRange, Library, LibraryQuery, Quota
+    , getDatasets, getLibrary, getQuota
     )
+
+{-| XQL: saved queries, available datasets, and tenant quota counters.
+
+@docs Dataset, DatasetRange, Library, LibraryQuery, Quota
+@docs getDatasets, getLibrary, getQuota
+
+-}
 
 import Cortex.Decode exposing (andMap, optionalList, reply)
 import Cortex.Request as Request exposing (Request)
@@ -39,6 +40,8 @@ type alias Quota =
     }
 
 
+{-| A dataset available to XQL queries, with its retention ranges and size stats.
+-}
 type alias Dataset =
     { datasetName : Maybe String
     , type_ : Maybe String
@@ -56,18 +59,24 @@ type alias Dataset =
     }
 
 
+{-| Epoch-millisecond `from`/`to` range inside [`Dataset`](#Dataset).
+-}
 type alias DatasetRange =
     { from : Maybe Int
     , to : Maybe Int
     }
 
 
+{-| Saved-query library returned by [`getLibrary`](#getLibrary).
+-}
 type alias Library =
     { queriesCount : Maybe Int
     , xqlQueries : List LibraryQuery
     }
 
 
+{-| A single saved XQL query inside the [`Library`](#Library).
+-}
 type alias LibraryQuery =
     { id : Maybe Int
     , name : Maybe String

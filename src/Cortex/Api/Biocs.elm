@@ -3,6 +3,13 @@ module Cortex.Api.Biocs exposing
     , get
     )
 
+{-| Cortex behavioral indicators of compromise (BIOCs).
+
+@docs BiocsResponse
+@docs get
+
+-}
+
 import Cortex.Request as Request exposing (Request)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode

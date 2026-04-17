@@ -1,18 +1,16 @@
 module Cortex.Api.Assets exposing
-    ( AssetsResponse
-    , CountedResponse
-    , LastAssessment
-    , SchemaEntry
-    , WebsitesLastAssessment
-    , getExternalIpRanges
-    , getExternalServices
-    , getExternalWebsites
-    , getInternetExposures
-    , getSchema
-    , getVulnerabilityTests
-    , getWebsitesLastAssessment
-    , list
+    ( AssetsResponse, CountedResponse, LastAssessment, SchemaEntry, WebsitesLastAssessment
+    , list, getSchema
+    , getExternalIpRanges, getExternalServices, getExternalWebsites, getInternetExposures, getVulnerabilityTests, getWebsitesLastAssessment
     )
+
+{-| Cortex asset inventory and external attack-surface views.
+
+@docs AssetsResponse, CountedResponse, LastAssessment, SchemaEntry, WebsitesLastAssessment
+@docs list, getSchema
+@docs getExternalIpRanges, getExternalServices, getExternalWebsites, getInternetExposures, getVulnerabilityTests, getWebsitesLastAssessment
+
+-}
 
 import Cortex.Decode exposing (reply)
 import Cortex.Request as Request exposing (Request)
@@ -43,6 +41,8 @@ type alias AssetsResponse =
     }
 
 
+{-| One row of the asset inventory schema returned by [`getSchema`](#getSchema).
+-}
 type alias SchemaEntry =
     { fieldName : Maybe String
     , fieldPrettyName : Maybe String
@@ -50,11 +50,16 @@ type alias SchemaEntry =
     }
 
 
+{-| Wrapper for [`getWebsitesLastAssessment`](#getWebsitesLastAssessment)'s
+single `last_external_assessment` field.
+-}
 type alias WebsitesLastAssessment =
     { lastExternalAssessment : LastAssessment
     }
 
 
+{-| Status + timestamp pair used inside [`WebsitesLastAssessment`](#WebsitesLastAssessment).
+-}
 type alias LastAssessment =
     { status : Maybe Bool
     , time : Maybe Int
@@ -65,6 +70,8 @@ type alias LastAssessment =
 -- ------- POST /public_api/v1/assets -------
 
 
+{-| POST /public\_api/v1/assets — the asset inventory list.
+-}
 list : Request AssetsResponse
 list =
     Request.postEmpty
@@ -88,6 +95,8 @@ assetsResponseDecoder =
 -- ------- GET /public_api/v1/assets/schema -------
 
 
+{-| GET /public\_api/v1/assets/schema — list the tenant's asset schema.
+-}
 getSchema : Request (List SchemaEntry)
 getSchema =
     Request.get
@@ -107,6 +116,8 @@ schemaEntryDecoder =
 -- ------- POST /public_api/v1/assets/get_external_services -------
 
 
+{-| POST /public\_api/v1/assets/get\_external\_services — externally reachable services.
+-}
 getExternalServices : Request CountedResponse
 getExternalServices =
     countedRequest
@@ -118,6 +129,8 @@ getExternalServices =
 -- ------- POST /public_api/v1/assets/get_assets_internet_exposure -------
 
 
+{-| POST /public\_api/v1/assets/get\_assets\_internet\_exposure — assets exposed to the public internet.
+-}
 getInternetExposures : Request CountedResponse
 getInternetExposures =
     countedRequest
@@ -129,6 +142,8 @@ getInternetExposures =
 -- ------- POST /public_api/v1/assets/get_external_ip_address_ranges -------
 
 
+{-| POST /public\_api/v1/assets/get\_external\_ip\_address\_ranges — discovered external IP ranges.
+-}
 getExternalIpRanges : Request CountedResponse
 getExternalIpRanges =
     countedRequest
@@ -140,6 +155,8 @@ getExternalIpRanges =
 -- ------- POST /public_api/v1/assets/get_vulnerability_tests -------
 
 
+{-| POST /public\_api/v1/assets/get\_vulnerability\_tests — vulnerability scanner results.
+-}
 getVulnerabilityTests : Request CountedResponse
 getVulnerabilityTests =
     countedRequest
@@ -151,6 +168,8 @@ getVulnerabilityTests =
 -- ------- POST /public_api/v1/assets/get_external_websites -------
 
 
+{-| POST /public\_api/v1/assets/get\_external\_websites — externally reachable websites.
+-}
 getExternalWebsites : Request CountedResponse
 getExternalWebsites =
     countedRequest
@@ -162,6 +181,9 @@ getExternalWebsites =
 -- ------- POST /public_api/v1/assets/get_external_websites/last_external_assessment -------
 
 
+{-| POST /public\_api/v1/assets/get\_external\_websites/last\_external\_assessment —
+status + timestamp of the most recent websites scan.
+-}
 getWebsitesLastAssessment : Request WebsitesLastAssessment
 getWebsitesLastAssessment =
     Request.postEmpty
