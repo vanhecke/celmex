@@ -5,6 +5,7 @@ module Cortex.Api.AttackSurface exposing
     , getRules
     )
 
+import Cortex.Decode exposing (reply)
 import Cortex.Request as Request exposing (Request)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
@@ -33,10 +34,9 @@ type alias AttackSurfaceRule =
 -}
 getRules : Request RulesResponse
 getRules =
-    Request.post
+    Request.postEmpty
         [ "public_api", "v1", "get_attack_surface_rules" ]
-        (Encode.object [ ( "request_data", Encode.object [] ) ])
-        (Decode.field "reply" rulesResponseDecoder)
+        (reply rulesResponseDecoder)
 
 
 rulesResponseDecoder : Decoder RulesResponse

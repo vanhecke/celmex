@@ -5,6 +5,7 @@ module Cortex.Api.Indicators exposing
     , get
     )
 
+import Cortex.Decode exposing (andMap)
 import Cortex.Request as Request exposing (Request)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
@@ -38,9 +39,8 @@ in the usual `reply` envelope.
 -}
 get : Request IndicatorsResponse
 get =
-    Request.post
+    Request.postEmpty
         [ "public_api", "v1", "indicators", "get" ]
-        (Encode.object [ ( "request_data", Encode.object [] ) ])
         indicatorsResponseDecoder
 
 
@@ -77,11 +77,6 @@ indicatorDecoder =
                 , Decode.succeed Encode.null
                 ]
             )
-
-
-andMap : Decoder a -> Decoder (a -> b) -> Decoder b
-andMap valDecoder funcDecoder =
-    Decode.map2 (\f v -> f v) funcDecoder valDecoder
 
 
 encode : IndicatorsResponse -> Encode.Value

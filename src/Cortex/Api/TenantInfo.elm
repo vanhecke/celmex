@@ -4,6 +4,7 @@ module Cortex.Api.TenantInfo exposing
     , get
     )
 
+import Cortex.Decode exposing (reply)
 import Cortex.Request as Request exposing (Request)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
@@ -26,17 +27,14 @@ Response uses the `reply` envelope.
 -}
 get : Request TenantInfo
 get =
-    Request.post
+    Request.postEmpty
         [ "public_api", "v1", "system", "get_tenant_info" ]
-        (Encode.object
-            [ ( "request_data", Encode.object [] ) ]
-        )
         tenantInfoDecoder
 
 
 tenantInfoDecoder : Decoder TenantInfo
 tenantInfoDecoder =
-    Decode.field "reply" Decode.value
+    reply Decode.value
         |> Decode.map TenantInfo
 
 

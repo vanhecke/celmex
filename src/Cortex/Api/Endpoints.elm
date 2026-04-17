@@ -5,6 +5,7 @@ module Cortex.Api.Endpoints exposing
     , list
     )
 
+import Cortex.Decode exposing (andMap, reply)
 import Cortex.Request as Request exposing (Request)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
@@ -36,17 +37,14 @@ Response uses the `reply` envelope containing a flat array.
 -}
 list : Request ListResponse
 list =
-    Request.post
+    Request.postEmpty
         [ "public_api", "v1", "endpoints", "get_endpoints" ]
-        (Encode.object
-            [ ( "request_data", Encode.object [] ) ]
-        )
         listResponseDecoder
 
 
 listResponseDecoder : Decoder ListResponse
 listResponseDecoder =
-    Decode.field "reply" (Decode.list endpointDecoder)
+    reply (Decode.list endpointDecoder)
         |> Decode.map ListResponse
 
 
@@ -75,13 +73,6 @@ endpointDecoder =
                 , Decode.succeed []
                 ]
             )
-
-
-{-| Pipeline-style helper to apply an additional decoder when map8 is not enough.
--}
-andMap : Decoder a -> Decoder (a -> b) -> Decoder b
-andMap valDecoder funcDecoder =
-    Decode.map2 (\f v -> f v) funcDecoder valDecoder
 
 
 encode : ListResponse -> Encode.Value

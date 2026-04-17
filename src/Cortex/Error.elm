@@ -4,6 +4,7 @@ module Cortex.Error exposing
     , decodeApiError
     )
 
+import Cortex.Decode exposing (reply)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
 
@@ -25,23 +26,31 @@ type alias ApiError =
 
 {-| Try multiple known error envelope shapes, in priority order.
 Returns the first successful parse as an ApiError.
+
+The body is parsed to a `Decode.Value` once up-front; each candidate decoder
+is then attempted against that parsed value rather than re-parsing the
+original string. Matters on large error bodies.
+
 -}
 decodeApiError : String -> Maybe ApiError
 decodeApiError body =
-    let
-        decoders =
+    case Decode.decodeString Decode.value body of
+        Err _ ->
+            Nothing
+
+        Ok parsed ->
+            let
+                tryDecode decoder =
+                    Decode.decodeValue decoder parsed
+                        |> Result.toMaybe
+            in
             [ replyEnvelopeDecoder
             , directWithMetadataDecoder
             , directFlatDecoder
             , errorCodeMessageDecoder
             ]
-
-        tryDecode decoder =
-            Decode.decodeString decoder body
-                |> Result.toMaybe
-    in
-    List.filterMap tryDecode decoders
-        |> List.head
+                |> List.filterMap tryDecode
+                |> List.head
 
 
 
@@ -50,7 +59,7 @@ decodeApiError body =
 
 replyEnvelopeDecoder : Decoder ApiError
 replyEnvelopeDecoder =
-    Decode.field "reply" apiErrorFieldsDecoder
+    reply apiErrorFieldsDecoder
 
 
 

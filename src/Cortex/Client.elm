@@ -13,6 +13,7 @@ import Json.Decode as Decode exposing (Decoder)
 import Random
 import Task
 import Time
+import Url
 
 
 type alias Config =
@@ -129,7 +130,10 @@ buildUrl tenant path query =
                 params ->
                     "?"
                         ++ String.join "&"
-                            (List.map (\( k, v ) -> k ++ "=" ++ v) params)
+                            (List.map
+                                (\( k, v ) -> Url.percentEncode k ++ "=" ++ Url.percentEncode v)
+                                params
+                            )
     in
     base ++ queryString
 

@@ -7,6 +7,7 @@ module Cortex.Api.LegacyExceptions exposing
     , getModules
     )
 
+import Cortex.Decode exposing (reply)
 import Cortex.Request as Request exposing (Request)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
@@ -44,17 +45,16 @@ getModules =
     Request.post
         [ "public_api", "v1", "legacy_exceptions", "get_modules" ]
         (Encode.object [])
-        (Decode.field "reply" (Decode.list moduleDecoder))
+        (reply (Decode.list moduleDecoder))
 
 
 {-| POST /public\_api/v1/legacy\_exceptions/fetch
 -}
 fetch : Request FetchResponse
 fetch =
-    Request.post
+    Request.postEmpty
         [ "public_api", "v1", "legacy_exceptions", "fetch" ]
-        (Encode.object [ ( "request_data", Encode.object [] ) ])
-        (Decode.field "reply" fetchResponseDecoder)
+        (reply fetchResponseDecoder)
 
 
 moduleDecoder : Decoder Module

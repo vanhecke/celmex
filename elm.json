@@ -21,6 +21,7 @@
         "elm/json": "1.0.0 <= v < 2.0.0",
         "elm/time": "1.0.0 <= v < 2.0.0",
         "elm/random": "1.0.0 <= v < 2.0.0",
+        "elm/url": "1.0.0 <= v < 2.0.0",
         "elm/bytes": "1.0.0 <= v < 2.0.0",
         "folkertdev/elm-sha2": "1.0.0 <= v < 2.0.0",
         "rtfeldman/elm-hex": "1.0.0 <= v < 2.0.0",

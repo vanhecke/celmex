@@ -3,8 +3,8 @@ module Cortex.Request exposing
     , get
     , map
     , post
+    , postEmpty
     , toInternal
-    , withQuery
     )
 
 import Json.Decode exposing (Decoder)
@@ -43,9 +43,12 @@ post path body decoder =
         }
 
 
-withQuery : List ( String, String ) -> Request a -> Request a
-withQuery params (Request r) =
-    Request { r | query = r.query ++ params }
+{-| POST with the empty advanced-API envelope `{"request_data": {}}` as the
+body. Used by endpoints that take no filters or paging arguments.
+-}
+postEmpty : List String -> Decoder a -> Request a
+postEmpty path decoder =
+    post path (Encode.object [ ( "request_data", Encode.object [] ) ]) decoder
 
 
 map : (a -> b) -> Request a -> Request b

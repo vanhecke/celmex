@@ -4,6 +4,7 @@ module Cortex.Api.DeviceControl exposing
     , getViolations
     )
 
+import Cortex.Decode exposing (reply)
 import Cortex.Request as Request exposing (Request)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
@@ -20,10 +21,9 @@ type alias ViolationsResponse =
 -}
 getViolations : Request ViolationsResponse
 getViolations =
-    Request.post
+    Request.postEmpty
         [ "public_api", "v1", "device_control", "get_violations" ]
-        (Encode.object [ ( "request_data", Encode.object [] ) ])
-        (Decode.field "reply" violationsResponseDecoder)
+        (reply violationsResponseDecoder)
 
 
 violationsResponseDecoder : Decoder ViolationsResponse

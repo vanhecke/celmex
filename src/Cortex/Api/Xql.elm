@@ -12,6 +12,7 @@ module Cortex.Api.Xql exposing
     , getQuota
     )
 
+import Cortex.Decode exposing (andMap, optionalList, reply)
 import Cortex.Request as Request exposing (Request)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
@@ -91,30 +92,27 @@ type alias LibraryQuery =
 -}
 getQuota : Request Quota
 getQuota =
-    Request.post
+    Request.postEmpty
         [ "public_api", "v1", "xql", "get_quota" ]
-        (Encode.object [ ( "request_data", Encode.object [] ) ])
-        (Decode.field "reply" quotaDecoder)
+        (reply quotaDecoder)
 
 
 {-| POST /public\_api/v1/xql/get\_datasets
 -}
 getDatasets : Request (List Dataset)
 getDatasets =
-    Request.post
+    Request.postEmpty
         [ "public_api", "v1", "xql", "get_datasets" ]
-        (Encode.object [ ( "request_data", Encode.object [] ) ])
-        (Decode.field "reply" (Decode.list datasetDecoder))
+        (reply (Decode.list datasetDecoder))
 
 
 {-| POST /public\_api/xql\_library/get
 -}
 getLibrary : Request Library
 getLibrary =
-    Request.post
+    Request.postEmpty
         [ "public_api", "xql_library", "get" ]
-        (Encode.object [ ( "request_data", Encode.object [] ) ])
-        (Decode.field "reply" libraryDecoder)
+        (reply libraryDecoder)
 
 
 quotaDecoder : Decoder Quota
@@ -189,19 +187,6 @@ libraryQueryDecoder =
             )
         |> andMap (Decode.maybe (Decode.field "is_private" Decode.bool))
         |> andMap (optionalList "labels" Decode.string)
-
-
-optionalList : String -> Decoder a -> Decoder (List a)
-optionalList field itemDecoder =
-    Decode.oneOf
-        [ Decode.field field (Decode.list itemDecoder)
-        , Decode.succeed []
-        ]
-
-
-andMap : Decoder a -> Decoder (a -> b) -> Decoder b
-andMap valDecoder funcDecoder =
-    Decode.map2 (\f v -> f v) funcDecoder valDecoder
 
 
 encodeQuota : Quota -> Encode.Value

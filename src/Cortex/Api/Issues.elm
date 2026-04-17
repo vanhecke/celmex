@@ -4,6 +4,7 @@ module Cortex.Api.Issues exposing
     , search
     )
 
+import Cortex.Decode exposing (reply)
 import Cortex.Request as Request exposing (Request)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
@@ -23,10 +24,9 @@ type alias SearchResponse =
 -}
 search : Request SearchResponse
 search =
-    Request.post
+    Request.postEmpty
         [ "public_api", "v1", "issue", "search" ]
-        (Encode.object [ ( "request_data", Encode.object [] ) ])
-        (Decode.field "reply" searchResponseDecoder)
+        (reply searchResponseDecoder)
 
 
 searchResponseDecoder : Decoder SearchResponse

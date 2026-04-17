@@ -8,6 +8,7 @@ module Cortex.Api.AuditLogs exposing
     , search
     )
 
+import Cortex.Decode exposing (reply)
 import Cortex.Request as Request exposing (Request)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
@@ -39,17 +40,14 @@ Response uses the `reply` envelope.
 -}
 search : Request SearchResponse
 search =
-    Request.post
+    Request.postEmpty
         [ "public_api", "v1", "audits", "management_logs" ]
-        (Encode.object
-            [ ( "request_data", Encode.object [] ) ]
-        )
         searchResponseDecoder
 
 
 searchResponseDecoder : Decoder SearchResponse
 searchResponseDecoder =
-    Decode.field "reply"
+    reply
         (Decode.map3 SearchResponse
             (Decode.field "total_count" Decode.int)
             (Decode.field "result_count" Decode.int)
@@ -94,10 +92,9 @@ type alias AgentsReportsResponse =
 -}
 agentsReports : Request AgentsReportsResponse
 agentsReports =
-    Request.post
+    Request.postEmpty
         [ "public_api", "v1", "audits", "agents_reports" ]
-        (Encode.object [ ( "request_data", Encode.object [] ) ])
-        (Decode.field "reply" agentsReportsResponseDecoder)
+        (reply agentsReportsResponseDecoder)
 
 
 agentsReportsResponseDecoder : Decoder AgentsReportsResponse

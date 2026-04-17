@@ -8,6 +8,7 @@ module Cortex.Api.Distributions exposing
     , getVersions
     )
 
+import Cortex.Decode exposing (andMap, optionalList, reply)
 import Cortex.Request as Request exposing (Request)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
@@ -57,17 +58,16 @@ getVersions =
     Request.post
         [ "public_api", "v1", "distributions", "get_versions" ]
         (Encode.object [])
-        (Decode.field "reply" versionsDecoder)
+        (reply versionsDecoder)
 
 
 {-| POST /public\_api/v1/distributions/get\_distributions
 -}
 getDistributions : Request DistributionsResponse
 getDistributions =
-    Request.post
+    Request.postEmpty
         [ "public_api", "v1", "distributions", "get_distributions" ]
-        (Encode.object [ ( "request_data", Encode.object [] ) ])
-        (Decode.field "reply" distributionsResponseDecoder)
+        (reply distributionsResponseDecoder)
 
 
 versionsDecoder : Decoder Versions
@@ -104,19 +104,6 @@ distributionDecoder =
         |> andMap (Decode.maybe (Decode.field "creation_time" Decode.int))
         |> andMap (Decode.maybe (Decode.field "modification_time" Decode.int))
         |> andMap (optionalList "supported_packages" Decode.string)
-
-
-optionalList : String -> Decoder a -> Decoder (List a)
-optionalList field itemDecoder =
-    Decode.oneOf
-        [ Decode.field field (Decode.list itemDecoder)
-        , Decode.succeed []
-        ]
-
-
-andMap : Decoder a -> Decoder (a -> b) -> Decoder b
-andMap valDecoder funcDecoder =
-    Decode.map2 (\f v -> f v) funcDecoder valDecoder
 
 
 encodeVersions : Versions -> Encode.Value

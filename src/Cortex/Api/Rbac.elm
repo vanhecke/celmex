@@ -4,6 +4,7 @@ module Cortex.Api.Rbac exposing
     , getUsers
     )
 
+import Cortex.Decode exposing (optionalList, reply)
 import Cortex.Request as Request exposing (Request)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
@@ -28,7 +29,7 @@ getUsers =
     Request.post
         [ "public_api", "v1", "rbac", "get_users" ]
         (Encode.object [])
-        (Decode.field "reply" (Decode.list userDecoder))
+        (reply (Decode.list userDecoder))
 
 
 userDecoder : Decoder User
@@ -42,14 +43,6 @@ userDecoder =
         (Decode.maybe (Decode.field "user_type" Decode.string))
         (optionalList "groups" Decode.value)
         (optionalList "scope" Decode.value)
-
-
-optionalList : String -> Decoder a -> Decoder (List a)
-optionalList field itemDecoder =
-    Decode.oneOf
-        [ Decode.field field (Decode.list itemDecoder)
-        , Decode.succeed []
-        ]
 
 
 encodeUsers : List User -> Encode.Value

@@ -22,6 +22,7 @@ module Cortex.Api.Assets exposing
     , list
     )
 
+import Cortex.Decode exposing (reply)
 import Cortex.Request as Request exposing (Request)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
@@ -74,10 +75,9 @@ type alias LastAssessment =
 
 list : Request AssetsResponse
 list =
-    Request.post
+    Request.postEmpty
         [ "public_api", "v1", "assets" ]
-        (Encode.object [ ( "request_data", Encode.object [] ) ])
-        (Decode.field "reply" assetsResponseDecoder)
+        (reply assetsResponseDecoder)
 
 
 assetsResponseDecoder : Decoder AssetsResponse
@@ -228,9 +228,8 @@ encodeExternalWebsites r =
 
 getWebsitesLastAssessment : Request WebsitesLastAssessment
 getWebsitesLastAssessment =
-    Request.post
+    Request.postEmpty
         [ "public_api", "v1", "assets", "get_external_websites", "last_external_assessment" ]
-        (Encode.object [ ( "request_data", Encode.object [] ) ])
         websitesLastAssessmentDecoder
 
 
@@ -270,9 +269,8 @@ encodeLastAssessment a =
 
 countedRequest : List String -> String -> Request CountedResponse
 countedRequest path itemKey =
-    Request.post path
-        (Encode.object [ ( "request_data", Encode.object [] ) ])
-        (Decode.field "reply" (countedResponseDecoder itemKey))
+    Request.postEmpty path
+        (reply (countedResponseDecoder itemKey))
 
 
 countedResponseDecoder : String -> Decoder CountedResponse

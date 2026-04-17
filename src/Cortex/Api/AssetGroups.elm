@@ -4,6 +4,7 @@ module Cortex.Api.AssetGroups exposing
     , list
     )
 
+import Cortex.Decode exposing (reply)
 import Cortex.Request as Request exposing (Request)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
@@ -24,10 +25,9 @@ type alias AssetGroupsResponse =
 -}
 list : Request AssetGroupsResponse
 list =
-    Request.post
+    Request.postEmpty
         [ "public_api", "v1", "asset-groups" ]
-        (Encode.object [ ( "request_data", Encode.object [] ) ])
-        (Decode.field "reply" responseDecoder)
+        (reply responseDecoder)
 
 
 responseDecoder : Decoder AssetGroupsResponse
