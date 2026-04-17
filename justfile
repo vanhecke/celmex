@@ -48,9 +48,9 @@ publish VERSION: check-docs
     npm version --no-git-tag-version {{VERSION}}
     sed -i '' 's/"version": "[^"]*"/"version": "{{VERSION}}"/' elm.json
     git add elm.json package.json package-lock.json
-    git commit -m "chore: release v{{VERSION}}"
-    git tag v{{VERSION}}
+    git commit -m "chore: release {{VERSION}}"
+    git tag {{VERSION}}
     git push origin main
-    git push origin v{{VERSION}}
+    git push origin {{VERSION}}
     just publish-elm
     just publish-npm

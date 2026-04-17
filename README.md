@@ -36,14 +36,14 @@ export CORTEX_TENANT_URL="https://api-yourfqdn.xdr.eu.paloaltonetworks.com"
 export CORTEX_API_KEY_ID="..."
 export CORTEX_API_KEY="..."
 
-npx celmex healthcheck
-npx celmex audit-logs search
+npx @vanhecke/celmex healthcheck
+npx @vanhecke/celmex audit-logs search
 ```
 
 Persistent install (adds `cortex` to your PATH):
 
 ```bash
-npm install -g celmex
+npm install -g @vanhecke/celmex
 cortex audit-logs search
 ```
 

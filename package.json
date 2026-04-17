@@ -1,7 +1,10 @@
 {
-    "name": "celmex",
+    "name": "@vanhecke/celmex",
     "version": "1.0.0",
     "description": "CLI for the Cortex Platform REST API, built on the vanhecke/celmex Elm SDK",
+    "publishConfig": {
+        "access": "public"
+    },
     "license": "MIT",
     "author": "Joris Vanhecke <joris@joris.be>",
     "homepage": "https://github.com/vanhecke/celmex",
