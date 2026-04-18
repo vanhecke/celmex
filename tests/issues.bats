@@ -16,6 +16,28 @@ setup() {
     [ "$status" -eq 0 ]
 }
 
+@test "issues search --limit 1 caps DATA length" {
+    run "$CORTEX" issues search --limit 1
+    [ "$status" -eq 0 ]
+    echo "$output" | jq -e '.DATA | length <= 1' > /dev/null
+}
+
+@test "issues search --sort severity:desc succeeds" {
+    run "$CORTEX" issues search --sort severity:desc --limit 1
+    [ "$status" -eq 0 ]
+    echo "$output" | jq . > /dev/null
+}
+
+@test "issues search invalid --filter exits non-zero" {
+    run "$CORTEX" issues search --filter bad
+    [ "$status" -ne 0 ]
+}
+
+@test "issues search invalid --extra JSON exits non-zero" {
+    run "$CORTEX" issues search --extra foo=not-json
+    [ "$status" -ne 0 ]
+}
+
 # Some tenants surface `issue/schema` access denials as HTTP 500 with a
 # non-standard envelope; skip rather than fail when the schema isn't reachable.
 skip_if_unsupported() {

@@ -6,6 +6,10 @@ module Cli.Commands exposing
     , usage
     )
 
+import Cli.StandardFlags as StandardFlags
+import Cortex.Api.AuditLogs as AuditLogs
+import Cortex.Api.Cases as Cases
+import Cortex.Api.Issues as Issues
 import Cortex.Api.Xql as Xql
 import Cortex.Error exposing (Error(..))
 import Json.Decode as Decode
@@ -17,7 +21,7 @@ type Endpoint
     | TenantInfo
     | CliVersion
     | EndpointsList
-    | AuditLogsSearch
+    | AuditLogsSearch AuditLogs.SearchArgs
     | AuditLogsAgentsReports
     | DistributionsGetVersions
     | DistributionsList
@@ -40,7 +44,7 @@ type Endpoint
     | IndicatorsGet
     | BiocsGet
     | CorrelationsGet
-    | IssuesSearch
+    | IssuesSearch Issues.SearchArgs
     | LegacyExceptionsGetModules
     | LegacyExceptionsFetch
     | ProfilesList String
@@ -56,7 +60,7 @@ type Endpoint
     | RiskScore String
     | RiskUsers
     | RiskHosts
-    | CasesSearch
+    | CasesSearch Cases.SearchArgs
     | IssuesSchema
     | DisablePreventionFetch
     | DisablePreventionFetchInjection
@@ -89,8 +93,9 @@ argvToEndpoint args =
         [ "endpoints", "list" ] ->
             Ok EndpointsList
 
-        [ "audit-logs", "search" ] ->
-            Ok AuditLogsSearch
+        "audit-logs" :: "search" :: rest ->
+            parseStandardSearch rest
+                |> Result.map (\sa -> AuditLogsSearch (toAuditLogsArgs sa))
 
         [ "audit-logs", "agents-reports" ] ->
             Ok AuditLogsAgentsReports
@@ -128,8 +133,9 @@ argvToEndpoint args =
         [ "correlations", "get" ] ->
             Ok CorrelationsGet
 
-        [ "issues", "search" ] ->
-            Ok IssuesSearch
+        "issues" :: "search" :: rest ->
+            parseStandardSearch rest
+                |> Result.map (\sa -> IssuesSearch (toIssuesArgs sa))
 
         [ "legacy-exceptions", "get-modules" ] ->
             Ok LegacyExceptionsGetModules
@@ -176,8 +182,9 @@ argvToEndpoint args =
         [ "risk", "hosts" ] ->
             Ok RiskHosts
 
-        [ "cases", "search" ] ->
-            Ok CasesSearch
+        "cases" :: "search" :: rest ->
+            parseStandardSearch rest
+                |> Result.map (\sa -> CasesSearch (toCasesArgs sa))
 
         [ "issues", "schema" ] ->
             Ok IssuesSchema
@@ -628,6 +635,49 @@ resultSequence results =
     List.foldr (\r acc -> Result.map2 (::) r acc) (Ok []) results
 
 
+parseStandardSearch : List String -> Result String StandardFlags.StandardArgs
+parseStandardSearch args =
+    splitArgs [] args
+        |> Result.andThen
+            (\( positionals, flags ) ->
+                if not (List.isEmpty positionals) then
+                    Err ("unexpected positional arguments: " ++ String.join " " positionals)
+
+                else
+                    StandardFlags.parse flags
+            )
+
+
+toAuditLogsArgs : StandardFlags.StandardArgs -> AuditLogs.SearchArgs
+toAuditLogsArgs sa =
+    { filters = sa.filters
+    , sort = sa.sort
+    , range = sa.range
+    , timeframe = sa.timeframe
+    , extra = sa.extra
+    }
+
+
+toIssuesArgs : StandardFlags.StandardArgs -> Issues.SearchArgs
+toIssuesArgs sa =
+    { filters = sa.filters
+    , sort = sa.sort
+    , range = sa.range
+    , timeframe = sa.timeframe
+    , extra = sa.extra
+    }
+
+
+toCasesArgs : StandardFlags.StandardArgs -> Cases.SearchArgs
+toCasesArgs sa =
+    { filters = sa.filters
+    , sort = sa.sort
+    , range = sa.range
+    , timeframe = sa.timeframe
+    , extra = sa.extra
+    }
+
+
 endpointName : Endpoint -> String
 endpointName endpoint =
     case endpoint of
@@ -643,7 +693,7 @@ endpointName endpoint =
         EndpointsList ->
             "endpoints list"
 
-        AuditLogsSearch ->
+        AuditLogsSearch _ ->
             "audit-logs search"
 
         AuditLogsAgentsReports ->
@@ -712,7 +762,7 @@ endpointName endpoint =
         CorrelationsGet ->
             "correlations get"
 
-        IssuesSearch ->
+        IssuesSearch _ ->
             "issues search"
 
         LegacyExceptionsGetModules ->
@@ -760,7 +810,7 @@ endpointName endpoint =
         RiskHosts ->
             "risk hosts"
 
-        CasesSearch ->
+        CasesSearch _ ->
             "cases search"
 
         IssuesSchema ->

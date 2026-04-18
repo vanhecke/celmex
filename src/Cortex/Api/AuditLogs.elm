@@ -1,19 +1,50 @@
 module Cortex.Api.AuditLogs exposing
-    ( AuditLog, SearchResponse, AgentsReportsResponse
+    ( SearchArgs, defaultSearchArgs
+    , AuditLog, SearchResponse, AgentsReportsResponse
     , search, agentsReports
     )
 
 {-| Cortex tenant audit-log queries (management events and agent reports).
 
+@docs SearchArgs, defaultSearchArgs
 @docs AuditLog, SearchResponse, AgentsReportsResponse
 @docs search, agentsReports
 
 -}
 
 import Cortex.Decode exposing (reply)
+import Cortex.Query exposing (Filter, Range, Sort, Timeframe)
 import Cortex.Request as Request exposing (Request)
+import Cortex.RequestData as RequestData
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
+
+
+{-| Arguments to [`search`](#search). All fields are optional; pass
+[`defaultSearchArgs`](#defaultSearchArgs) for an unfiltered request. `extra`
+is merged last into `request_data` and overrides any SDK-generated key on
+collision.
+-}
+type alias SearchArgs =
+    { filters : List Filter
+    , sort : Maybe Sort
+    , range : Maybe Range
+    , timeframe : Maybe Timeframe
+    , extra : List ( String, Encode.Value )
+    }
+
+
+{-| A [`SearchArgs`](#SearchArgs) with no filters, sort, pagination, or
+timeframe.
+-}
+defaultSearchArgs : SearchArgs
+defaultSearchArgs =
+    { filters = []
+    , sort = Nothing
+    , range = Nothing
+    , timeframe = Nothing
+    , extra = []
+    }
 
 
 {-| Paginated envelope returned by [`search`](#search).
@@ -40,14 +71,23 @@ type alias AuditLog =
 
 {-| POST /public\_api/v1/audits/management\_logs
 
-Retrieve audit management logs. Sends an empty request\_data to get all results.
-Response uses the `reply` envelope.
+Retrieve audit management logs. Filters, pagination and timeframe are
+carried in [`SearchArgs`](#SearchArgs); pass
+[`defaultSearchArgs`](#defaultSearchArgs) to get all results.
 
 -}
-search : Request SearchResponse
-search =
-    Request.postEmpty
+search : SearchArgs -> Request SearchResponse
+search args =
+    Request.post
         [ "public_api", "v1", "audits", "management_logs" ]
+        (RequestData.encode
+            { filters = args.filters
+            , sort = args.sort
+            , range = args.range
+            , timeframe = args.timeframe
+            , extra = args.extra
+            }
+        )
         searchResponseDecoder
 
 

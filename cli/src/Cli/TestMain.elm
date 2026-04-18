@@ -134,8 +134,8 @@ run stamp config endpoint =
         Commands.EndpointsList ->
             typed Endpoints.list
 
-        Commands.AuditLogsSearch ->
-            typed AuditLogs.search
+        Commands.AuditLogsSearch args ->
+            typed (AuditLogs.search args)
 
         Commands.AuditLogsAgentsReports ->
             typed AuditLogs.agentsReports
@@ -208,8 +208,8 @@ run stamp config endpoint =
         Commands.CorrelationsGet ->
             typed Correlations.get
 
-        Commands.IssuesSearch ->
-            typed Issues.search
+        Commands.IssuesSearch args ->
+            typed (Issues.search args)
 
         Commands.LegacyExceptionsGetModules ->
             typed LegacyExceptions.getModules
@@ -256,8 +256,8 @@ run stamp config endpoint =
         Commands.RiskHosts ->
             typed Risk.getRiskyHosts
 
-        Commands.CasesSearch ->
-            typed Cases.search
+        Commands.CasesSearch args ->
+            typed (Cases.search args)
 
         Commands.IssuesSchema ->
             typed Issues.schema

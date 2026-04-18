@@ -249,8 +249,8 @@ run stamp config endpoint =
         Commands.EndpointsList ->
             ( Idle, raw Endpoints.list )
 
-        Commands.AuditLogsSearch ->
-            ( Idle, raw AuditLogs.search )
+        Commands.AuditLogsSearch args ->
+            ( Idle, raw (AuditLogs.search args) )
 
         Commands.AuditLogsAgentsReports ->
             ( Idle, raw AuditLogs.agentsReports )
@@ -349,8 +349,8 @@ run stamp config endpoint =
         Commands.CorrelationsGet ->
             ( Idle, raw Correlations.get )
 
-        Commands.IssuesSearch ->
-            ( Idle, raw Issues.search )
+        Commands.IssuesSearch args ->
+            ( Idle, raw (Issues.search args) )
 
         Commands.LegacyExceptionsGetModules ->
             ( Idle, raw LegacyExceptions.getModules )
@@ -397,8 +397,8 @@ run stamp config endpoint =
         Commands.RiskHosts ->
             ( Idle, raw Risk.getRiskyHosts )
 
-        Commands.CasesSearch ->
-            ( Idle, raw Cases.search )
+        Commands.CasesSearch args ->
+            ( Idle, raw (Cases.search args) )
 
         Commands.IssuesSchema ->
             ( Idle, raw Issues.schema )
