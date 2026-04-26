@@ -43,12 +43,17 @@ jobs:
             elm-${{ runner.os }}-
 
       - name: Compile CLI
-        run: cd cli && elm make src/Cli/Main.elm --optimize --output=dist/elm.js
+        run: |
+          cd cli
+          elm make src/Cli/Main.elm --optimize --output=dist/elm.js
+          elm make src/Cli/TestMain.elm --optimize --output=dist/elm-test.js
 
       - uses: actions/upload-artifact@v4
         with:
           name: cli-dist
-          path: cli/dist/elm.js
+          path: |
+            cli/dist/elm.js
+            cli/dist/elm-test.js
           retention-days: 1
 
   test:
