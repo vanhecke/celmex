@@ -1,19 +1,50 @@
 module Cortex.Api.Endpoints exposing
-    ( Endpoint, ListResponse
+    ( SearchArgs, defaultSearchArgs
+    , Endpoint, ListResponse
     , list
     )
 
 {-| Cortex endpoint inventory.
 
+@docs SearchArgs, defaultSearchArgs
 @docs Endpoint, ListResponse
 @docs list
 
 -}
 
 import Cortex.Decode exposing (andMap, reply)
+import Cortex.Query as Query exposing (Filter, Range, Sort, Timeframe)
 import Cortex.Request as Request exposing (Request)
+import Cortex.RequestData as RequestData
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
+
+
+{-| Arguments to [`list`](#list). All fields are optional; pass
+[`defaultSearchArgs`](#defaultSearchArgs) for an unfiltered request. `extra`
+is merged last into `request_data` and overrides any SDK-generated key on
+collision.
+-}
+type alias SearchArgs =
+    { filters : List Filter
+    , sort : Maybe Sort
+    , range : Maybe Range
+    , timeframe : Maybe Timeframe
+    , extra : List ( String, Encode.Value )
+    }
+
+
+{-| A [`SearchArgs`](#SearchArgs) with no filters, sort, pagination, or
+timeframe — equivalent to listing every endpoint on the tenant.
+-}
+defaultSearchArgs : SearchArgs
+defaultSearchArgs =
+    { filters = []
+    , sort = Nothing
+    , range = Nothing
+    , timeframe = Nothing
+    , extra = []
+    }
 
 
 {-| Envelope wrapping the endpoint list returned by [`list`](#list).
@@ -40,14 +71,22 @@ type alias Endpoint =
 
 {-| POST /public\_api/v1/endpoints/get\_endpoints
 
-Retrieve a list of all endpoints (agents) on the tenant.
-Response uses the `reply` envelope containing a flat array.
+Retrieve a filtered list of endpoints (agents) on the tenant. Response uses
+the `reply` envelope containing a flat array.
 
 -}
-list : Request ListResponse
-list =
-    Request.postEmpty
+list : SearchArgs -> Request ListResponse
+list args =
+    Request.post
         [ "public_api", "v1", "endpoints", "get_endpoints" ]
+        (RequestData.encode Query.standard
+            { filters = args.filters
+            , sort = args.sort
+            , range = args.range
+            , timeframe = args.timeframe
+            , extra = args.extra
+            }
+        )
         listResponseDecoder
 
 

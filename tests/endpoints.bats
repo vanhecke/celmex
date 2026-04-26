@@ -15,3 +15,19 @@ setup() {
     run "$CORTEX_TEST" endpoints list
     [ "$status" -eq 0 ]
 }
+
+@test "endpoints list --limit 1 succeeds" {
+    run "$CORTEX" endpoints list --limit 1
+    [ "$status" -eq 0 ]
+    echo "$output" | jq . > /dev/null
+}
+
+@test "endpoints list invalid --filter exits non-zero" {
+    run "$CORTEX" endpoints list --filter bad
+    [ "$status" -ne 0 ]
+}
+
+@test "endpoints list invalid --extra JSON exits non-zero" {
+    run "$CORTEX" endpoints list --extra foo=not-json
+    [ "$status" -ne 0 ]
+}

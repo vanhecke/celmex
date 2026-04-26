@@ -13,7 +13,7 @@ module Cortex.Api.AuditLogs exposing
 -}
 
 import Cortex.Decode exposing (reply)
-import Cortex.Query exposing (Filter, Range, Sort, Timeframe)
+import Cortex.Query as Query exposing (Filter, Range, Sort, Timeframe)
 import Cortex.Request as Request exposing (Request)
 import Cortex.RequestData as RequestData
 import Json.Decode as Decode exposing (Decoder)
@@ -80,7 +80,7 @@ search : SearchArgs -> Request SearchResponse
 search args =
     Request.post
         [ "public_api", "v1", "audits", "management_logs" ]
-        (RequestData.encode
+        (RequestData.encode Query.standard
             { filters = args.filters
             , sort = args.sort
             , range = args.range

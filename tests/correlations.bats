@@ -15,3 +15,19 @@ setup() {
     run "$CORTEX_TEST" correlations get
     [ "$status" -eq 0 ]
 }
+
+@test "correlations get --limit 1 succeeds" {
+    run "$CORTEX" correlations get --limit 1
+    [ "$status" -eq 0 ]
+    echo "$output" | jq . > /dev/null
+}
+
+@test "correlations get invalid --filter exits non-zero" {
+    run "$CORTEX" correlations get --filter bad
+    [ "$status" -ne 0 ]
+}
+
+@test "correlations get invalid --extra JSON exits non-zero" {
+    run "$CORTEX" correlations get --extra foo=not-json
+    [ "$status" -ne 0 ]
+}

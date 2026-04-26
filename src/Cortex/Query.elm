@@ -3,6 +3,7 @@ module Cortex.Query exposing
     , Sort, asc, desc
     , Range, range, limit, offset
     , Timeframe, relative, between
+    , Dialect, standard, assetInventory
     , encodeFilter, encodeSort, encodeRange, encodeTimeframe
     )
 
@@ -19,10 +20,18 @@ Values are opaque so the wire format (operator keywords, `keyword: asc|desc`,
 epoch-ms time windows) stays an implementation detail that can shift without
 breaking callers.
 
+A small number of endpoints — most notably the asset-inventory `POST
+/public_api/v1/assets` and the cloud-API list endpoints — use a different
+wire shape (`{SEARCH_FIELD, SEARCH_TYPE, SEARCH_VALUE}` with uppercase
+operators, sort wrapped in an array, etc.). [`Dialect`](#Dialect) selects
+which shape the encoders emit; endpoint modules pick the right value at the
+call site.
+
 @docs Filter, eq, neq, in_, nin, contains, gt, gte, lt, lte, custom
 @docs Sort, asc, desc
 @docs Range, range, limit, offset
 @docs Timeframe, relative, between
+@docs Dialect, standard, assetInventory
 @docs encodeFilter, encodeSort, encodeRange, encodeTimeframe
 
 -}
@@ -113,15 +122,27 @@ custom field operator value =
     Filter { field = field, operator = operator, value = value }
 
 
-{-| Encode a [`Filter`](#Filter) to its wire representation.
+{-| Encode a [`Filter`](#Filter) in the given [`Dialect`](#Dialect)'s wire
+representation. The Standard dialect emits `{field, operator, value}` with
+lowercase operators; the AssetInventory dialect emits `{SEARCH_FIELD,
+SEARCH_TYPE, SEARCH_VALUE}` with uppercase operators.
 -}
-encodeFilter : Filter -> Encode.Value
-encodeFilter (Filter f) =
-    Encode.object
-        [ ( "field", Encode.string f.field )
-        , ( "operator", Encode.string f.operator )
-        , ( "value", f.value )
-        ]
+encodeFilter : Dialect -> Filter -> Encode.Value
+encodeFilter dialect (Filter f) =
+    case dialect of
+        Standard ->
+            Encode.object
+                [ ( "field", Encode.string f.field )
+                , ( "operator", Encode.string f.operator )
+                , ( "value", f.value )
+                ]
+
+        AssetInventory ->
+            Encode.object
+                [ ( "SEARCH_FIELD", Encode.string f.field )
+                , ( "SEARCH_TYPE", Encode.string (String.toUpper f.operator) )
+                , ( "SEARCH_VALUE", f.value )
+                ]
 
 
 
@@ -148,14 +169,25 @@ desc field =
     Sort { field = field, keyword = "desc" }
 
 
-{-| Encode a [`Sort`](#Sort) to its wire representation.
+{-| Encode a [`Sort`](#Sort) in the given [`Dialect`](#Dialect)'s wire
+representation. The Standard dialect emits `{field, keyword: "asc"|"desc"}`;
+the AssetInventory dialect emits `{FIELD, ORDER: "ASC"|"DESC"}` (the
+enclosing array wrapping is applied by [`Cortex.RequestData.encode`](Cortex-RequestData#encode)).
 -}
-encodeSort : Sort -> Encode.Value
-encodeSort (Sort s) =
-    Encode.object
-        [ ( "field", Encode.string s.field )
-        , ( "keyword", Encode.string s.keyword )
-        ]
+encodeSort : Dialect -> Sort -> Encode.Value
+encodeSort dialect (Sort s) =
+    case dialect of
+        Standard ->
+            Encode.object
+                [ ( "field", Encode.string s.field )
+                , ( "keyword", Encode.string s.keyword )
+                ]
+
+        AssetInventory ->
+            Encode.object
+                [ ( "FIELD", Encode.string s.field )
+                , ( "ORDER", Encode.string (String.toUpper s.keyword) )
+                ]
 
 
 
@@ -243,3 +275,35 @@ encodeTimeframe tf =
                 [ ( "from", Encode.int r.from )
                 , ( "to", Encode.int r.to )
                 ]
+
+
+
+-- DIALECT
+
+
+{-| Selects which `request_data` wire shape the encoders emit. Pick one with
+[`standard`](#standard) (the default for almost every Cortex endpoint) or
+[`assetInventory`](#assetInventory) (the `POST /public_api/v1/assets`
+inventory endpoint and the cloud-API list endpoints, which use uppercase
+`SEARCH_FIELD`/`SEARCH_TYPE`/`SEARCH_VALUE` filters and a sort array).
+-}
+type Dialect
+    = Standard
+    | AssetInventory
+
+
+{-| The default dialect used by most Cortex Advanced API list/search
+endpoints — `{field, operator, value}` filters and `{field, keyword}` sort.
+-}
+standard : Dialect
+standard =
+    Standard
+
+
+{-| The asset-inventory dialect — `{SEARCH_FIELD, SEARCH_TYPE, SEARCH_VALUE}`
+filters wrapped in `{AND: [...]}` and sort wrapped in a one-element array.
+Timeframes are not supported by this dialect and are dropped silently.
+-}
+assetInventory : Dialect
+assetInventory =
+    AssetInventory

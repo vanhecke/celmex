@@ -15,3 +15,19 @@ setup() {
     run "$CORTEX_TEST" bioc get
     [ "$status" -eq 0 ]
 }
+
+@test "bioc get --limit 1 succeeds" {
+    run "$CORTEX" bioc get --limit 1
+    [ "$status" -eq 0 ]
+    echo "$output" | jq . > /dev/null
+}
+
+@test "bioc get invalid --filter exits non-zero" {
+    run "$CORTEX" bioc get --filter bad
+    [ "$status" -ne 0 ]
+}
+
+@test "bioc get invalid --extra JSON exits non-zero" {
+    run "$CORTEX" bioc get --extra foo=not-json
+    [ "$status" -ne 0 ]
+}

@@ -7,9 +7,15 @@ module Cli.Commands exposing
     )
 
 import Cli.StandardFlags as StandardFlags
+import Cortex.Api.Assets as Assets
 import Cortex.Api.AuditLogs as AuditLogs
+import Cortex.Api.Biocs as Biocs
 import Cortex.Api.Cases as Cases
+import Cortex.Api.Correlations as Correlations
+import Cortex.Api.Endpoints as Endpoints
+import Cortex.Api.Indicators as Indicators
 import Cortex.Api.Issues as Issues
+import Cortex.Api.ScheduledQueries as ScheduledQueries
 import Cortex.Api.Xql as Xql
 import Cortex.Error exposing (Error(..))
 import Json.Decode as Decode
@@ -20,7 +26,7 @@ type Endpoint
     = Healthcheck
     | TenantInfo
     | CliVersion
-    | EndpointsList
+    | EndpointsList Endpoints.SearchArgs
     | AuditLogsSearch AuditLogs.SearchArgs
     | AuditLogsAgentsReports
     | DistributionsGetVersions
@@ -40,10 +46,10 @@ type Endpoint
     | XqlLookupsAddData Xql.LookupAddArgs
     | XqlLookupsGetData Xql.LookupGetArgs
     | XqlLookupsRemoveData Xql.LookupRemoveArgs
-    | ScheduledQueriesList
-    | IndicatorsGet
-    | BiocsGet
-    | CorrelationsGet
+    | ScheduledQueriesList ScheduledQueries.SearchArgs
+    | IndicatorsGet Indicators.SearchArgs
+    | BiocsGet Biocs.SearchArgs
+    | CorrelationsGet Correlations.SearchArgs
     | IssuesSearch Issues.SearchArgs
     | LegacyExceptionsGetModules
     | LegacyExceptionsFetch
@@ -66,11 +72,11 @@ type Endpoint
     | DisablePreventionFetchInjection
     | AssetsList
     | AssetsSchema
-    | AssetsExternalServices
-    | AssetsInternetExposures
-    | AssetsIpRanges
-    | AssetsVulnerabilityTests
-    | AssetsExternalWebsites
+    | AssetsExternalServices Assets.SearchArgs
+    | AssetsInternetExposures Assets.SearchArgs
+    | AssetsIpRanges Assets.SearchArgs
+    | AssetsVulnerabilityTests Assets.SearchArgs
+    | AssetsExternalWebsites Assets.SearchArgs
     | AssetsWebsitesLastAssessment
     | AssetGroupsList
 
@@ -90,8 +96,9 @@ argvToEndpoint args =
         [ "cli", "version" ] ->
             Ok CliVersion
 
-        [ "endpoints", "list" ] ->
-            Ok EndpointsList
+        "endpoints" :: "list" :: rest ->
+            parseStandardSearch rest
+                |> Result.map (\sa -> EndpointsList (toEndpointsArgs sa))
 
         "audit-logs" :: "search" :: rest ->
             parseStandardSearch rest
@@ -121,17 +128,21 @@ argvToEndpoint args =
         [ "xql-library", "get" ] ->
             Ok XqlLibraryGet
 
-        [ "scheduled-queries", "list" ] ->
-            Ok ScheduledQueriesList
+        "scheduled-queries" :: "list" :: rest ->
+            parseStandardSearch rest
+                |> Result.map (\sa -> ScheduledQueriesList (toScheduledQueriesArgs sa))
 
-        [ "indicators", "get" ] ->
-            Ok IndicatorsGet
+        "indicators" :: "get" :: rest ->
+            parseStandardSearch rest
+                |> Result.map (\sa -> IndicatorsGet (toIndicatorsArgs sa))
 
-        [ "bioc", "get" ] ->
-            Ok BiocsGet
+        "bioc" :: "get" :: rest ->
+            parseStandardSearch rest
+                |> Result.map (\sa -> BiocsGet (toBiocsArgs sa))
 
-        [ "correlations", "get" ] ->
-            Ok CorrelationsGet
+        "correlations" :: "get" :: rest ->
+            parseStandardSearch rest
+                |> Result.map (\sa -> CorrelationsGet (toCorrelationsArgs sa))
 
         "issues" :: "search" :: rest ->
             parseStandardSearch rest
@@ -201,20 +212,25 @@ argvToEndpoint args =
         [ "assets", "schema" ] ->
             Ok AssetsSchema
 
-        [ "assets", "external-services" ] ->
-            Ok AssetsExternalServices
+        "assets" :: "external-services" :: rest ->
+            parseStandardSearch rest
+                |> Result.map (\sa -> AssetsExternalServices (toAssetsArgs sa))
 
-        [ "assets", "internet-exposures" ] ->
-            Ok AssetsInternetExposures
+        "assets" :: "internet-exposures" :: rest ->
+            parseStandardSearch rest
+                |> Result.map (\sa -> AssetsInternetExposures (toAssetsArgs sa))
 
-        [ "assets", "ip-ranges" ] ->
-            Ok AssetsIpRanges
+        "assets" :: "ip-ranges" :: rest ->
+            parseStandardSearch rest
+                |> Result.map (\sa -> AssetsIpRanges (toAssetsArgs sa))
 
-        [ "assets", "vulnerability-tests" ] ->
-            Ok AssetsVulnerabilityTests
+        "assets" :: "vulnerability-tests" :: rest ->
+            parseStandardSearch rest
+                |> Result.map (\sa -> AssetsVulnerabilityTests (toAssetsArgs sa))
 
-        [ "assets", "external-websites" ] ->
-            Ok AssetsExternalWebsites
+        "assets" :: "external-websites" :: rest ->
+            parseStandardSearch rest
+                |> Result.map (\sa -> AssetsExternalWebsites (toAssetsArgs sa))
 
         [ "assets", "websites-last-assessment" ] ->
             Ok AssetsWebsitesLastAssessment
@@ -658,6 +674,66 @@ toAuditLogsArgs sa =
     }
 
 
+toEndpointsArgs : StandardFlags.StandardArgs -> Endpoints.SearchArgs
+toEndpointsArgs sa =
+    { filters = sa.filters
+    , sort = sa.sort
+    , range = sa.range
+    , timeframe = sa.timeframe
+    , extra = sa.extra
+    }
+
+
+toBiocsArgs : StandardFlags.StandardArgs -> Biocs.SearchArgs
+toBiocsArgs sa =
+    { filters = sa.filters
+    , sort = sa.sort
+    , range = sa.range
+    , timeframe = sa.timeframe
+    , extra = sa.extra
+    }
+
+
+toCorrelationsArgs : StandardFlags.StandardArgs -> Correlations.SearchArgs
+toCorrelationsArgs sa =
+    { filters = sa.filters
+    , sort = sa.sort
+    , range = sa.range
+    , timeframe = sa.timeframe
+    , extra = sa.extra
+    }
+
+
+toIndicatorsArgs : StandardFlags.StandardArgs -> Indicators.SearchArgs
+toIndicatorsArgs sa =
+    { filters = sa.filters
+    , sort = sa.sort
+    , range = sa.range
+    , timeframe = sa.timeframe
+    , extra = sa.extra
+    }
+
+
+toScheduledQueriesArgs : StandardFlags.StandardArgs -> ScheduledQueries.SearchArgs
+toScheduledQueriesArgs sa =
+    { filters = sa.filters
+    , sort = sa.sort
+    , range = sa.range
+    , timeframe = sa.timeframe
+    , extra = sa.extra
+    }
+
+
+toAssetsArgs : StandardFlags.StandardArgs -> Assets.SearchArgs
+toAssetsArgs sa =
+    { filters = sa.filters
+    , sort = sa.sort
+    , range = sa.range
+    , timeframe = sa.timeframe
+    , extra = sa.extra
+    }
+
+
 toIssuesArgs : StandardFlags.StandardArgs -> Issues.SearchArgs
 toIssuesArgs sa =
     { filters = sa.filters
@@ -690,7 +766,7 @@ endpointName endpoint =
         CliVersion ->
             "cli version"
 
-        EndpointsList ->
+        EndpointsList _ ->
             "endpoints list"
 
         AuditLogsSearch _ ->
@@ -750,16 +826,16 @@ endpointName endpoint =
         XqlLookupsRemoveData _ ->
             "xql lookups remove-data"
 
-        ScheduledQueriesList ->
+        ScheduledQueriesList _ ->
             "scheduled-queries list"
 
-        IndicatorsGet ->
+        IndicatorsGet _ ->
             "indicators get"
 
-        BiocsGet ->
+        BiocsGet _ ->
             "bioc get"
 
-        CorrelationsGet ->
+        CorrelationsGet _ ->
             "correlations get"
 
         IssuesSearch _ ->
@@ -828,19 +904,19 @@ endpointName endpoint =
         AssetsSchema ->
             "assets schema"
 
-        AssetsExternalServices ->
+        AssetsExternalServices _ ->
             "assets external-services"
 
-        AssetsInternetExposures ->
+        AssetsInternetExposures _ ->
             "assets internet-exposures"
 
-        AssetsIpRanges ->
+        AssetsIpRanges _ ->
             "assets ip-ranges"
 
-        AssetsVulnerabilityTests ->
+        AssetsVulnerabilityTests _ ->
             "assets vulnerability-tests"
 
-        AssetsExternalWebsites ->
+        AssetsExternalWebsites _ ->
             "assets external-websites"
 
         AssetsWebsitesLastAssessment ->

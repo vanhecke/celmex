@@ -40,6 +40,22 @@ setup() {
     [ "$status" -eq 0 ]
 }
 
+@test "assets external-services --limit 1 succeeds" {
+    run "$CORTEX" assets external-services --limit 1
+    [ "$status" -eq 0 ]
+    echo "$output" | jq . > /dev/null
+}
+
+@test "assets external-services invalid --filter exits non-zero" {
+    run "$CORTEX" assets external-services --filter bad
+    [ "$status" -ne 0 ]
+}
+
+@test "assets external-services invalid --extra JSON exits non-zero" {
+    run "$CORTEX" assets external-services --extra foo=not-json
+    [ "$status" -ne 0 ]
+}
+
 @test "assets internet-exposures returns valid JSON" {
     run "$CORTEX" assets internet-exposures
     [ "$status" -eq 0 ]
@@ -50,6 +66,17 @@ setup() {
 @test "assets internet-exposures typed decode succeeds" {
     run "$CORTEX_TEST" assets internet-exposures
     [ "$status" -eq 0 ]
+}
+
+@test "assets internet-exposures --limit 1 succeeds" {
+    run "$CORTEX" assets internet-exposures --limit 1
+    [ "$status" -eq 0 ]
+    echo "$output" | jq . > /dev/null
+}
+
+@test "assets internet-exposures invalid --filter exits non-zero" {
+    run "$CORTEX" assets internet-exposures --filter bad
+    [ "$status" -ne 0 ]
 }
 
 @test "assets ip-ranges returns valid JSON" {
@@ -64,6 +91,17 @@ setup() {
     [ "$status" -eq 0 ]
 }
 
+@test "assets ip-ranges --limit 1 succeeds" {
+    run "$CORTEX" assets ip-ranges --limit 1
+    [ "$status" -eq 0 ]
+    echo "$output" | jq . > /dev/null
+}
+
+@test "assets ip-ranges invalid --filter exits non-zero" {
+    run "$CORTEX" assets ip-ranges --filter bad
+    [ "$status" -ne 0 ]
+}
+
 @test "assets vulnerability-tests returns valid JSON" {
     run "$CORTEX" assets vulnerability-tests
     [ "$status" -eq 0 ]
@@ -76,6 +114,17 @@ setup() {
     [ "$status" -eq 0 ]
 }
 
+@test "assets vulnerability-tests --limit 1 succeeds" {
+    run "$CORTEX" assets vulnerability-tests --limit 1
+    [ "$status" -eq 0 ]
+    echo "$output" | jq . > /dev/null
+}
+
+@test "assets vulnerability-tests invalid --filter exits non-zero" {
+    run "$CORTEX" assets vulnerability-tests --filter bad
+    [ "$status" -ne 0 ]
+}
+
 @test "assets external-websites returns valid JSON" {
     run "$CORTEX" assets external-websites
     [ "$status" -eq 0 ]
@@ -86,6 +135,17 @@ setup() {
 @test "assets external-websites typed decode succeeds" {
     run "$CORTEX_TEST" assets external-websites
     [ "$status" -eq 0 ]
+}
+
+@test "assets external-websites --limit 1 succeeds" {
+    run "$CORTEX" assets external-websites --limit 1
+    [ "$status" -eq 0 ]
+    echo "$output" | jq . > /dev/null
+}
+
+@test "assets external-websites invalid --filter exits non-zero" {
+    run "$CORTEX" assets external-websites --filter bad
+    [ "$status" -ne 0 ]
 }
 
 @test "assets websites-last-assessment returns valid JSON" {

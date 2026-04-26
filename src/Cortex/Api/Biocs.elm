@@ -1,18 +1,49 @@
 module Cortex.Api.Biocs exposing
-    ( BiocsResponse
+    ( SearchArgs, defaultSearchArgs
+    , BiocsResponse
     , get
     )
 
 {-| Cortex behavioral indicators of compromise (BIOCs).
 
+@docs SearchArgs, defaultSearchArgs
 @docs BiocsResponse
 @docs get
 
 -}
 
+import Cortex.Query as Query exposing (Filter, Range, Sort, Timeframe)
 import Cortex.Request as Request exposing (Request)
+import Cortex.RequestData as RequestData
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
+
+
+{-| Arguments to [`get`](#get). All fields are optional; pass
+[`defaultSearchArgs`](#defaultSearchArgs) for an unfiltered request. `extra`
+is merged last into `request_data` and overrides any SDK-generated key on
+collision — e.g. `extended_view` is reachable through it.
+-}
+type alias SearchArgs =
+    { filters : List Filter
+    , sort : Maybe Sort
+    , range : Maybe Range
+    , timeframe : Maybe Timeframe
+    , extra : List ( String, Encode.Value )
+    }
+
+
+{-| A [`SearchArgs`](#SearchArgs) with no filters, sort, pagination, or
+timeframe.
+-}
+defaultSearchArgs : SearchArgs
+defaultSearchArgs =
+    { filters = []
+    , sort = Nothing
+    , range = Nothing
+    , timeframe = Nothing
+    , extra = []
+    }
 
 
 {-| BIOC objects have ~15 variable fields including a nested `indicator` object
@@ -32,11 +63,18 @@ Response is top-level `{objects_count, objects, objects_type}` — NOT wrapped
 in the usual `reply` envelope.
 
 -}
-get : Request BiocsResponse
-get =
+get : SearchArgs -> Request BiocsResponse
+get args =
     Request.post
         [ "public_api", "v1", "bioc", "get" ]
-        (Encode.object [ ( "request_data", Encode.object [] ) ])
+        (RequestData.encode Query.standard
+            { filters = args.filters
+            , sort = args.sort
+            , range = args.range
+            , timeframe = args.timeframe
+            , extra = args.extra
+            }
+        )
         biocsResponseDecoder
 
 

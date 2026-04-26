@@ -1,19 +1,51 @@
 module Cortex.Api.Indicators exposing
-    ( Indicator, IndicatorsResponse
+    ( SearchArgs, defaultSearchArgs
+    , Indicator, IndicatorsResponse
     , get
     )
 
 {-| Cortex threat intelligence indicators (IOCs).
 
+@docs SearchArgs, defaultSearchArgs
 @docs Indicator, IndicatorsResponse
 @docs get
 
 -}
 
 import Cortex.Decode exposing (andMap)
+import Cortex.Query as Query exposing (Filter, Range, Sort, Timeframe)
 import Cortex.Request as Request exposing (Request)
+import Cortex.RequestData as RequestData
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
+
+
+{-| Arguments to [`get`](#get). All fields are optional; pass
+[`defaultSearchArgs`](#defaultSearchArgs) for an unfiltered request. `extra`
+is merged last into `request_data` and overrides any SDK-generated key on
+collision — e.g. the indicator endpoint's `extended_view` flag is reachable
+through it.
+-}
+type alias SearchArgs =
+    { filters : List Filter
+    , sort : Maybe Sort
+    , range : Maybe Range
+    , timeframe : Maybe Timeframe
+    , extra : List ( String, Encode.Value )
+    }
+
+
+{-| A [`SearchArgs`](#SearchArgs) with no filters, sort, pagination, or
+timeframe.
+-}
+defaultSearchArgs : SearchArgs
+defaultSearchArgs =
+    { filters = []
+    , sort = Nothing
+    , range = Nothing
+    , timeframe = Nothing
+    , extra = []
+    }
 
 
 {-| Envelope returned by [`get`](#get). Not wrapped in the standard `reply`.
@@ -48,10 +80,18 @@ Response is top-level `{objects_count, objects, objects_type}` — NOT wrapped
 in the usual `reply` envelope.
 
 -}
-get : Request IndicatorsResponse
-get =
-    Request.postEmpty
+get : SearchArgs -> Request IndicatorsResponse
+get args =
+    Request.post
         [ "public_api", "v1", "indicators", "get" ]
+        (RequestData.encode Query.standard
+            { filters = args.filters
+            , sort = args.sort
+            , range = args.range
+            , timeframe = args.timeframe
+            , extra = args.extra
+            }
+        )
         indicatorsResponseDecoder
 
 

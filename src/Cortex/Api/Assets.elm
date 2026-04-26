@@ -1,11 +1,13 @@
 module Cortex.Api.Assets exposing
-    ( AssetsResponse, CountedResponse, LastAssessment, SchemaEntry, WebsitesLastAssessment
+    ( SearchArgs, defaultSearchArgs
+    , AssetsResponse, CountedResponse, LastAssessment, SchemaEntry, WebsitesLastAssessment
     , list, getSchema
     , getExternalIpRanges, getExternalServices, getExternalWebsites, getInternetExposures, getVulnerabilityTests, getWebsitesLastAssessment
     )
 
 {-| Cortex asset inventory and external attack-surface views.
 
+@docs SearchArgs, defaultSearchArgs
 @docs AssetsResponse, CountedResponse, LastAssessment, SchemaEntry, WebsitesLastAssessment
 @docs list, getSchema
 @docs getExternalIpRanges, getExternalServices, getExternalWebsites, getInternetExposures, getVulnerabilityTests, getWebsitesLastAssessment
@@ -13,9 +15,49 @@ module Cortex.Api.Assets exposing
 -}
 
 import Cortex.Decode exposing (reply)
+import Cortex.Query as Query exposing (Filter, Range, Sort, Timeframe)
 import Cortex.Request as Request exposing (Request)
+import Cortex.RequestData as RequestData
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
+
+
+{-| Arguments to the filtered asset list endpoints
+([`getExternalServices`](#getExternalServices),
+[`getInternetExposures`](#getInternetExposures),
+[`getExternalIpRanges`](#getExternalIpRanges),
+[`getVulnerabilityTests`](#getVulnerabilityTests),
+[`getExternalWebsites`](#getExternalWebsites)). All fields are optional;
+pass [`defaultSearchArgs`](#defaultSearchArgs) for an unfiltered request.
+`extra` is merged last into `request_data` and overrides any SDK-generated
+key on collision.
+
+[`list`](#list) (the asset inventory itself) does not yet take this
+argument because the underlying endpoint uses a different
+`request_data` shape; it remains an unfiltered call until the SDK gains an
+asset-inventory dialect mapping.
+
+-}
+type alias SearchArgs =
+    { filters : List Filter
+    , sort : Maybe Sort
+    , range : Maybe Range
+    , timeframe : Maybe Timeframe
+    , extra : List ( String, Encode.Value )
+    }
+
+
+{-| A [`SearchArgs`](#SearchArgs) with no filters, sort, pagination, or
+timeframe.
+-}
+defaultSearchArgs : SearchArgs
+defaultSearchArgs =
+    { filters = []
+    , sort = Nothing
+    , range = Nothing
+    , timeframe = Nothing
+    , extra = []
+    }
 
 
 {-| Generic paginated response shape shared by several asset endpoints. The
@@ -118,11 +160,12 @@ schemaEntryDecoder =
 
 {-| POST /public\_api/v1/assets/get\_external\_services — externally reachable services.
 -}
-getExternalServices : Request CountedResponse
-getExternalServices =
+getExternalServices : SearchArgs -> Request CountedResponse
+getExternalServices args =
     countedRequest
         [ "public_api", "v1", "assets", "get_external_services" ]
         "external_services"
+        args
 
 
 
@@ -131,11 +174,12 @@ getExternalServices =
 
 {-| POST /public\_api/v1/assets/get\_assets\_internet\_exposure — assets exposed to the public internet.
 -}
-getInternetExposures : Request CountedResponse
-getInternetExposures =
+getInternetExposures : SearchArgs -> Request CountedResponse
+getInternetExposures args =
     countedRequest
         [ "public_api", "v1", "assets", "get_assets_internet_exposure" ]
         "assets_internet_exposure"
+        args
 
 
 
@@ -144,11 +188,12 @@ getInternetExposures =
 
 {-| POST /public\_api/v1/assets/get\_external\_ip\_address\_ranges — discovered external IP ranges.
 -}
-getExternalIpRanges : Request CountedResponse
-getExternalIpRanges =
+getExternalIpRanges : SearchArgs -> Request CountedResponse
+getExternalIpRanges args =
     countedRequest
         [ "public_api", "v1", "assets", "get_external_ip_address_ranges" ]
         "external_ip_address_ranges"
+        args
 
 
 
@@ -157,11 +202,12 @@ getExternalIpRanges =
 
 {-| POST /public\_api/v1/assets/get\_vulnerability\_tests — vulnerability scanner results.
 -}
-getVulnerabilityTests : Request CountedResponse
-getVulnerabilityTests =
+getVulnerabilityTests : SearchArgs -> Request CountedResponse
+getVulnerabilityTests args =
     countedRequest
         [ "public_api", "v1", "assets", "get_vulnerability_tests" ]
         "vulnerability_tests"
+        args
 
 
 
@@ -170,11 +216,12 @@ getVulnerabilityTests =
 
 {-| POST /public\_api/v1/assets/get\_external\_websites — externally reachable websites.
 -}
-getExternalWebsites : Request CountedResponse
-getExternalWebsites =
+getExternalWebsites : SearchArgs -> Request CountedResponse
+getExternalWebsites args =
     countedRequest
         [ "public_api", "v1", "assets", "get_external_websites" ]
         "websites"
+        args
 
 
 
@@ -208,9 +255,17 @@ lastAssessmentDecoder =
 -- ------- shared helpers for the "counted list" response shape -------
 
 
-countedRequest : List String -> String -> Request CountedResponse
-countedRequest path itemKey =
-    Request.postEmpty path
+countedRequest : List String -> String -> SearchArgs -> Request CountedResponse
+countedRequest path itemKey args =
+    Request.post path
+        (RequestData.encode Query.standard
+            { filters = args.filters
+            , sort = args.sort
+            , range = args.range
+            , timeframe = args.timeframe
+            , extra = args.extra
+            }
+        )
         (reply (countedResponseDecoder itemKey))
 
 

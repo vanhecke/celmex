@@ -24,8 +24,13 @@ config =
     }
 
 -- Send a request
-send config GotAuditLogs AuditLogs.search
+send config GotAuditLogs (AuditLogs.search AuditLogs.defaultSearchArgs)
 ```
+
+Every list/search endpoint takes a `SearchArgs` record carrying optional
+filters, sort, pagination, timeframe, and an `extra` escape hatch — see
+`Cortex.Query` for the filter/sort DSL and `Cortex.RequestData` for the
+shared envelope.
 
 ## CLI
 

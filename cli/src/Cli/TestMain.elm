@@ -131,8 +131,8 @@ run stamp config endpoint =
         Commands.CliVersion ->
             typed Cli.getVersion
 
-        Commands.EndpointsList ->
-            typed Endpoints.list
+        Commands.EndpointsList args ->
+            typed (Endpoints.list args)
 
         Commands.AuditLogsSearch args ->
             typed (AuditLogs.search args)
@@ -196,17 +196,17 @@ run stamp config endpoint =
         Commands.XqlLookupsRemoveData _ ->
             skip
 
-        Commands.ScheduledQueriesList ->
-            typed ScheduledQueries.list
+        Commands.ScheduledQueriesList args ->
+            typed (ScheduledQueries.list args)
 
-        Commands.IndicatorsGet ->
-            typed Indicators.get
+        Commands.IndicatorsGet args ->
+            typed (Indicators.get args)
 
-        Commands.BiocsGet ->
-            typed Biocs.get
+        Commands.BiocsGet args ->
+            typed (Biocs.get args)
 
-        Commands.CorrelationsGet ->
-            typed Correlations.get
+        Commands.CorrelationsGet args ->
+            typed (Correlations.get args)
 
         Commands.IssuesSearch args ->
             typed (Issues.search args)
@@ -274,20 +274,20 @@ run stamp config endpoint =
         Commands.AssetsSchema ->
             typed Assets.getSchema
 
-        Commands.AssetsExternalServices ->
-            typed Assets.getExternalServices
+        Commands.AssetsExternalServices args ->
+            typed (Assets.getExternalServices args)
 
-        Commands.AssetsInternetExposures ->
-            typed Assets.getInternetExposures
+        Commands.AssetsInternetExposures args ->
+            typed (Assets.getInternetExposures args)
 
-        Commands.AssetsIpRanges ->
-            typed Assets.getExternalIpRanges
+        Commands.AssetsIpRanges args ->
+            typed (Assets.getExternalIpRanges args)
 
-        Commands.AssetsVulnerabilityTests ->
-            typed Assets.getVulnerabilityTests
+        Commands.AssetsVulnerabilityTests args ->
+            typed (Assets.getVulnerabilityTests args)
 
-        Commands.AssetsExternalWebsites ->
-            typed Assets.getExternalWebsites
+        Commands.AssetsExternalWebsites args ->
+            typed (Assets.getExternalWebsites args)
 
         Commands.AssetsWebsitesLastAssessment ->
             typed Assets.getWebsitesLastAssessment

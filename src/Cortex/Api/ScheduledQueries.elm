@@ -1,19 +1,51 @@
 module Cortex.Api.ScheduledQueries exposing
-    ( ScheduledQueriesResponse
+    ( SearchArgs, defaultSearchArgs
+    , ScheduledQueriesResponse
     , list
     )
 
 {-| Cortex scheduled XQL queries configured on the tenant.
 
+@docs SearchArgs, defaultSearchArgs
 @docs ScheduledQueriesResponse
 @docs list
 
 -}
 
 import Cortex.Decode exposing (reply)
+import Cortex.Query as Query exposing (Filter, Range, Sort, Timeframe)
 import Cortex.Request as Request exposing (Request)
+import Cortex.RequestData as RequestData
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
+
+
+{-| Arguments to [`list`](#list). All fields are optional; pass
+[`defaultSearchArgs`](#defaultSearchArgs) for an unfiltered request. `extra`
+is merged last into `request_data` and overrides any SDK-generated key on
+collision — the endpoint's `extended_view` and `list_ids` fields are
+reachable through it.
+-}
+type alias SearchArgs =
+    { filters : List Filter
+    , sort : Maybe Sort
+    , range : Maybe Range
+    , timeframe : Maybe Timeframe
+    , extra : List ( String, Encode.Value )
+    }
+
+
+{-| A [`SearchArgs`](#SearchArgs) with no filters, sort, pagination, or
+timeframe.
+-}
+defaultSearchArgs : SearchArgs
+defaultSearchArgs =
+    { filters = []
+    , sort = Nothing
+    , range = Nothing
+    , timeframe = Nothing
+    , extra = []
+    }
 
 
 {-| Scheduled-query records contain a large, flexible set of fields (XQL text,
@@ -29,10 +61,18 @@ type alias ScheduledQueriesResponse =
 
 {-| POST /public\_api/v1/scheduled\_queries/list
 -}
-list : Request ScheduledQueriesResponse
-list =
-    Request.postEmpty
+list : SearchArgs -> Request ScheduledQueriesResponse
+list args =
+    Request.post
         [ "public_api", "v1", "scheduled_queries", "list" ]
+        (RequestData.encode Query.standard
+            { filters = args.filters
+            , sort = args.sort
+            , range = args.range
+            , timeframe = args.timeframe
+            , extra = args.extra
+            }
+        )
         (reply responseDecoder)
 
 

@@ -246,8 +246,8 @@ run stamp config endpoint =
         Commands.CliVersion ->
             ( Idle, raw Cli.getVersion )
 
-        Commands.EndpointsList ->
-            ( Idle, raw Endpoints.list )
+        Commands.EndpointsList args ->
+            ( Idle, raw (Endpoints.list args) )
 
         Commands.AuditLogsSearch args ->
             ( Idle, raw (AuditLogs.search args) )
@@ -337,17 +337,17 @@ run stamp config endpoint =
         Commands.XqlLookupsRemoveData args ->
             ( Idle, raw (Xql.lookupsRemoveData args) )
 
-        Commands.ScheduledQueriesList ->
-            ( Idle, raw ScheduledQueries.list )
+        Commands.ScheduledQueriesList args ->
+            ( Idle, raw (ScheduledQueries.list args) )
 
-        Commands.IndicatorsGet ->
-            ( Idle, raw Indicators.get )
+        Commands.IndicatorsGet args ->
+            ( Idle, raw (Indicators.get args) )
 
-        Commands.BiocsGet ->
-            ( Idle, raw Biocs.get )
+        Commands.BiocsGet args ->
+            ( Idle, raw (Biocs.get args) )
 
-        Commands.CorrelationsGet ->
-            ( Idle, raw Correlations.get )
+        Commands.CorrelationsGet args ->
+            ( Idle, raw (Correlations.get args) )
 
         Commands.IssuesSearch args ->
             ( Idle, raw (Issues.search args) )
@@ -415,20 +415,20 @@ run stamp config endpoint =
         Commands.AssetsSchema ->
             ( Idle, raw Assets.getSchema )
 
-        Commands.AssetsExternalServices ->
-            ( Idle, raw Assets.getExternalServices )
+        Commands.AssetsExternalServices args ->
+            ( Idle, raw (Assets.getExternalServices args) )
 
-        Commands.AssetsInternetExposures ->
-            ( Idle, raw Assets.getInternetExposures )
+        Commands.AssetsInternetExposures args ->
+            ( Idle, raw (Assets.getInternetExposures args) )
 
-        Commands.AssetsIpRanges ->
-            ( Idle, raw Assets.getExternalIpRanges )
+        Commands.AssetsIpRanges args ->
+            ( Idle, raw (Assets.getExternalIpRanges args) )
 
-        Commands.AssetsVulnerabilityTests ->
-            ( Idle, raw Assets.getVulnerabilityTests )
+        Commands.AssetsVulnerabilityTests args ->
+            ( Idle, raw (Assets.getVulnerabilityTests args) )
 
-        Commands.AssetsExternalWebsites ->
-            ( Idle, raw Assets.getExternalWebsites )
+        Commands.AssetsExternalWebsites args ->
+            ( Idle, raw (Assets.getExternalWebsites args) )
 
         Commands.AssetsWebsitesLastAssessment ->
             ( Idle, raw Assets.getWebsitesLastAssessment )

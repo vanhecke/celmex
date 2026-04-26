@@ -15,3 +15,19 @@ setup() {
     run "$CORTEX_TEST" indicators get
     [ "$status" -eq 0 ]
 }
+
+@test "indicators get --limit 1 succeeds" {
+    run "$CORTEX" indicators get --limit 1
+    [ "$status" -eq 0 ]
+    echo "$output" | jq . > /dev/null
+}
+
+@test "indicators get invalid --filter exits non-zero" {
+    run "$CORTEX" indicators get --filter bad
+    [ "$status" -ne 0 ]
+}
+
+@test "indicators get invalid --extra JSON exits non-zero" {
+    run "$CORTEX" indicators get --extra foo=not-json
+    [ "$status" -ne 0 ]
+}
