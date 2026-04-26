@@ -41,7 +41,7 @@ setup() {
 }
 
 @test "unknown command exits non-zero" {
-    run bash -c '"$0" nonexistent 2>&1' "$CORTEX"
+    run "$CORTEX" nonexistent
     [ "$status" -eq 1 ]
     [[ "$output" == *"Unknown command"* ]]
 }
