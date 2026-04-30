@@ -1,13 +1,23 @@
 module Cortex.Api.AgentConfig exposing
-    ( AdvancedAnalysis
+    ( ActionCenterExpiration
+    , AdvancedAnalysis
+    , AgentStatus
     , AutoUpgrade
     , ContentManagement
+    , CortexXdrLogCollection
     , CriticalEnvironmentVersions
+    , EndpointAdministrationCleanup
+    , InformativeBtpIssues
     , WildfireAnalysis
+    , getActionCenterExpiration
     , getAdvancedAnalysis
+    , getAgentStatus
     , getAutoUpgrade
     , getContentManagement
+    , getCortexXdrLogCollection
     , getCriticalEnvironmentVersions
+    , getEndpointAdministrationCleanup
+    , getInformativeBtpIssues
     , getWildfireAnalysis
     )
 
@@ -18,6 +28,7 @@ settings object directly (no `reply` envelope). Source of truth:
 -}
 
 import Cortex.Request as Request exposing (Request)
+import Dict exposing (Dict)
 import Json.Decode as Decode exposing (Decoder)
 
 
@@ -125,3 +136,111 @@ advancedAnalysisDecoder =
     Decode.map2 AdvancedAnalysis
         (Decode.maybe (Decode.field "automatically_upload_defined_issue_data_files" Decode.bool))
         (Decode.maybe (Decode.field "automatically_apply_advanced_analysis_exceptions" Decode.bool))
+
+
+type alias AgentStatus =
+    { licenseRevocationAfterLostConnection : Maybe Int
+    , agentDeletionRetention : Maybe Int
+    }
+
+
+{-| GET /public\_api/v1/configurations/agent/agent\_status
+-}
+getAgentStatus : Request AgentStatus
+getAgentStatus =
+    Request.get
+        [ "public_api", "v1", "configurations", "agent", "agent_status" ]
+        agentStatusDecoder
+
+
+agentStatusDecoder : Decoder AgentStatus
+agentStatusDecoder =
+    Decode.map2 AgentStatus
+        (Decode.maybe (Decode.field "license_revocation_after_lost_connection" Decode.int))
+        (Decode.maybe (Decode.field "agent_deletion_retention" Decode.int))
+
+
+type alias InformativeBtpIssues =
+    { displayUniqueAndInformativeBtpRules : Maybe Bool
+    }
+
+
+{-| GET /public\_api/v1/configurations/agent/informative\_btp\_issues
+-}
+getInformativeBtpIssues : Request InformativeBtpIssues
+getInformativeBtpIssues =
+    Request.get
+        [ "public_api", "v1", "configurations", "agent", "informative_btp_issues" ]
+        informativeBtpIssuesDecoder
+
+
+informativeBtpIssuesDecoder : Decoder InformativeBtpIssues
+informativeBtpIssuesDecoder =
+    Decode.map InformativeBtpIssues
+        (Decode.maybe (Decode.field "display_unique_and_informative_btp_rules" Decode.bool))
+
+
+type alias CortexXdrLogCollection =
+    { allowLogsCollection : Maybe Bool
+    }
+
+
+{-| GET /public\_api/v1/configurations/agent/cortex\_xdr\_log\_collection
+-}
+getCortexXdrLogCollection : Request CortexXdrLogCollection
+getCortexXdrLogCollection =
+    Request.get
+        [ "public_api", "v1", "configurations", "agent", "cortex_xdr_log_collection" ]
+        cortexXdrLogCollectionDecoder
+
+
+cortexXdrLogCollectionDecoder : Decoder CortexXdrLogCollection
+cortexXdrLogCollectionDecoder =
+    Decode.map CortexXdrLogCollection
+        (Decode.maybe (Decode.field "allow_logs_collection" Decode.bool))
+
+
+{-| The action-center-expiration response is an open object whose keys are
+action-type names (e.g. `isolate`, `scan`) and whose values are expiration
+durations in hours. The OpenAPI schema declares `additionalProperties: integer`,
+so we surface it as a raw `Dict` rather than a fixed record.
+-}
+type alias ActionCenterExpiration =
+    Dict String Int
+
+
+{-| GET /public\_api/v1/configurations/agent/action\_center\_expiration
+-}
+getActionCenterExpiration : Request ActionCenterExpiration
+getActionCenterExpiration =
+    Request.get
+        [ "public_api", "v1", "configurations", "agent", "action_center_expiration" ]
+        (Decode.dict Decode.int)
+
+
+type alias EndpointAdministrationCleanup =
+    { periodicDuplicateCleanup : Maybe Bool
+    , hostName : Maybe Bool
+    , ip : Maybe Bool
+    , mac : Maybe Bool
+    , timeIntervalHours : Maybe Int
+    }
+
+
+{-| GET /public\_api/v1/configurations/agent/endpoint\_administration\_cleanup
+-}
+getEndpointAdministrationCleanup : Request EndpointAdministrationCleanup
+getEndpointAdministrationCleanup =
+    Request.get
+        [ "public_api", "v1", "configurations", "agent", "endpoint_administration_cleanup" ]
+        endpointAdministrationCleanupDecoder
+
+
+endpointAdministrationCleanupDecoder : Decoder EndpointAdministrationCleanup
+endpointAdministrationCleanupDecoder =
+    Decode.map5 EndpointAdministrationCleanup
+        (Decode.maybe (Decode.field "periodic_duplicate_cleanup" Decode.bool))
+        (Decode.maybe (Decode.field "host_name" (Decode.nullable Decode.bool)) |> Decode.map (Maybe.andThen identity))
+        (Decode.maybe (Decode.field "ip" (Decode.nullable Decode.bool)) |> Decode.map (Maybe.andThen identity))
+        (Decode.maybe (Decode.field "mac" (Decode.nullable Decode.bool)) |> Decode.map (Maybe.andThen identity))
+        (Decode.maybe (Decode.field "time_interval_hours" (Decode.nullable Decode.int)) |> Decode.map (Maybe.andThen identity))

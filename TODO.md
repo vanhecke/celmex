@@ -12,7 +12,7 @@ Complete inventory of all API endpoints from the OpenAPI specs in `docs/cortex-a
 > 9 endpoints appear in multiple specs (CWP / Trusted Images / Registry Connectors) — listed in each relevant section.
 > Raw total across all 22 spec files: 521. After removing the 2 duplicate files: 341 listed below.
 
-**Progress:** 48/341 endpoints implemented | 174 View | 167 Edit
+**Progress:** 53/341 endpoints implemented | 174 View | 167 Edit
 
 
 ## Cortex Platform
@@ -177,23 +177,23 @@ Source: `agent-configurations-papi.yaml`
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | ✓ | GET | `/public_api/v1/configurations/agent/content_management` | Retrieve content management settings | View | `Cortex.Api.AgentConfig` | `agent-config content-management` | `agent_config.bats` |
 |  | POST | `/public_api/v1/configurations/agent/content_management/set` | Update content management settings | Edit |  |  |  |
-|  | GET | `/public_api/v1/configurations/agent/agent_status` | Retrieve agent status timeout settings | View |  |  |  |
+| ✓ | GET | `/public_api/v1/configurations/agent/agent_status` | Retrieve agent status timeout settings | View | `Cortex.Api.AgentConfig` | `agent-config agent-status` | `agent_config.bats` |
 |  | POST | `/public_api/v1/configurations/agent/agent_status/set` | Update agent status timeout settings | View |  |  |  |
 | ✓ | GET | `/public_api/v1/configurations/agent/auto_upgrade` | Retrieve agent auto-upgrade settings | View | `Cortex.Api.AgentConfig` | `agent-config auto-upgrade` | `agent_config.bats` |
 |  | POST | `/public_api/v1/configurations/agent/auto_upgrade/set` | Update agent auto-upgrade settings | Edit |  |  |  |
 | ✓ | GET | `/public_api/v1/configurations/agent/wildfire_analysis` | Retrieve WildFire analysis settings | View | `Cortex.Api.AgentConfig` | `agent-config wildfire-analysis` | `agent_config.bats` |
 |  | POST | `/public_api/v1/configurations/agent/wildfire_analysis/set` | Update WildFire analysis settings | Edit |  |  |  |
-|  | GET | `/public_api/v1/configurations/agent/informative_btp_issues` | Retrieve informative BTP issues settings | View |  |  |  |
+| ✓ | GET | `/public_api/v1/configurations/agent/informative_btp_issues` | Retrieve informative BTP issues settings | View | `Cortex.Api.AgentConfig` | `agent-config informative-btp-issues` | `agent_config.bats` |
 |  | POST | `/public_api/v1/configurations/agent/informative_btp_issues/set` | Update informative BTP issues settings | Edit |  |  |  |
-|  | GET | `/public_api/v1/configurations/agent/cortex_xdr_log_collection` | Retrieve log collection settings | View |  |  |  |
+| ✓ | GET | `/public_api/v1/configurations/agent/cortex_xdr_log_collection` | Retrieve log collection settings | View | `Cortex.Api.AgentConfig` | `agent-config cortex-xdr-log-collection` | `agent_config.bats` |
 |  | POST | `/public_api/v1/configurations/agent/cortex_xdr_log_collection/set` | Update log collection settings | Edit |  |  |  |
-|  | GET | `/public_api/v1/configurations/agent/action_center_expiration` | Retrieve action center expiration settings | View |  |  |  |
+| ✓ | GET | `/public_api/v1/configurations/agent/action_center_expiration` | Retrieve action center expiration settings | View | `Cortex.Api.AgentConfig` | `agent-config action-center-expiration` | `agent_config.bats` |
 |  | POST | `/public_api/v1/configurations/agent/action_center_expiration/set` | Update action center expiration settings | Edit |  |  |  |
 | ✓ | GET | `/public_api/v1/configurations/agent/critical_environment_versions` | Retrieve critical environment versions settings | View | `Cortex.Api.AgentConfig` | `agent-config critical-environment-versions` | `agent_config.bats` |
 |  | POST | `/public_api/v1/configurations/agent/critical_environment_versions/set` | Update critical environment versions settings | View |  |  |  |
 | ✓ | GET | `/public_api/v1/configurations/agent/advanced_analysis` | Retrieve advanced analysis settings | View | `Cortex.Api.AgentConfig` | `agent-config advanced-analysis` | `agent_config.bats` |
 |  | POST | `/public_api/v1/configurations/agent/advanced_analysis/set` | Update advanced analysis settings | Edit |  |  |  |
-|  | GET | `/public_api/v1/configurations/agent/endpoint_administration_cleanup` | Retrieve endpoint administration cleanup settings | View |  |  |  |
+| ✓ | GET | `/public_api/v1/configurations/agent/endpoint_administration_cleanup` | Retrieve endpoint administration cleanup settings | View | `Cortex.Api.AgentConfig` | `agent-config endpoint-administration-cleanup` | `agent_config.bats` |
 |  | POST | `/public_api/v1/configurations/agent/endpoint_administration_cleanup/set` | Update endpoint administration cleanup settings | Edit |  |  |  |
 
 ## Compliance

@@ -60,6 +60,11 @@ type Endpoint
     | AgentConfigWildfireAnalysis
     | AgentConfigCriticalEnvironmentVersions
     | AgentConfigAdvancedAnalysis
+    | AgentConfigAgentStatus
+    | AgentConfigInformativeBtpIssues
+    | AgentConfigCortexXdrLogCollection
+    | AgentConfigActionCenterExpiration
+    | AgentConfigEndpointAdministrationCleanup
     | RbacGetRoles String
     | RbacGetUserGroups String
     | ApiKeysList
@@ -174,6 +179,21 @@ argvToEndpoint args =
 
         [ "agent-config", "advanced-analysis" ] ->
             Ok AgentConfigAdvancedAnalysis
+
+        [ "agent-config", "agent-status" ] ->
+            Ok AgentConfigAgentStatus
+
+        [ "agent-config", "informative-btp-issues" ] ->
+            Ok AgentConfigInformativeBtpIssues
+
+        [ "agent-config", "cortex-xdr-log-collection" ] ->
+            Ok AgentConfigCortexXdrLogCollection
+
+        [ "agent-config", "action-center-expiration" ] ->
+            Ok AgentConfigActionCenterExpiration
+
+        [ "agent-config", "endpoint-administration-cleanup" ] ->
+            Ok AgentConfigEndpointAdministrationCleanup
 
         [ "rbac", "get-roles", roleName ] ->
             Ok (RbacGetRoles roleName)
@@ -868,6 +888,21 @@ endpointName endpoint =
         AgentConfigAdvancedAnalysis ->
             "agent-config advanced-analysis"
 
+        AgentConfigAgentStatus ->
+            "agent-config agent-status"
+
+        AgentConfigInformativeBtpIssues ->
+            "agent-config informative-btp-issues"
+
+        AgentConfigCortexXdrLogCollection ->
+            "agent-config cortex-xdr-log-collection"
+
+        AgentConfigActionCenterExpiration ->
+            "agent-config action-center-expiration"
+
+        AgentConfigEndpointAdministrationCleanup ->
+            "agent-config endpoint-administration-cleanup"
+
         RbacGetRoles _ ->
             "rbac get-roles"
 
@@ -1037,4 +1072,9 @@ usage args =
             , "  cortex agent-config wildfire-analysis               Get WildFire analysis settings"
             , "  cortex agent-config critical-environment-versions   Get critical environment versions settings"
             , "  cortex agent-config advanced-analysis               Get advanced analysis settings"
+            , "  cortex agent-config agent-status                    Get agent status timeout settings"
+            , "  cortex agent-config informative-btp-issues          Get informative BTP issues settings"
+            , "  cortex agent-config cortex-xdr-log-collection       Get log collection settings"
+            , "  cortex agent-config action-center-expiration        Get action center expiration settings"
+            , "  cortex agent-config endpoint-administration-cleanup Get endpoint administration cleanup settings"
             ]

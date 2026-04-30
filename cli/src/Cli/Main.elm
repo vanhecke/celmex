@@ -379,6 +379,21 @@ run stamp config endpoint =
         Commands.AgentConfigAdvancedAnalysis ->
             ( Idle, raw AgentConfig.getAdvancedAnalysis )
 
+        Commands.AgentConfigAgentStatus ->
+            ( Idle, raw AgentConfig.getAgentStatus )
+
+        Commands.AgentConfigInformativeBtpIssues ->
+            ( Idle, raw AgentConfig.getInformativeBtpIssues )
+
+        Commands.AgentConfigCortexXdrLogCollection ->
+            ( Idle, raw AgentConfig.getCortexXdrLogCollection )
+
+        Commands.AgentConfigActionCenterExpiration ->
+            ( Idle, raw AgentConfig.getActionCenterExpiration )
+
+        Commands.AgentConfigEndpointAdministrationCleanup ->
+            ( Idle, raw AgentConfig.getEndpointAdministrationCleanup )
+
         Commands.RbacGetRoles roleName ->
             ( Idle, raw (Rbac.getRoles { roleNames = [ roleName ] }) )
 

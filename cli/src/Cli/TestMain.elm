@@ -238,6 +238,21 @@ run stamp config endpoint =
         Commands.AgentConfigAdvancedAnalysis ->
             typed AgentConfig.getAdvancedAnalysis
 
+        Commands.AgentConfigAgentStatus ->
+            typed AgentConfig.getAgentStatus
+
+        Commands.AgentConfigInformativeBtpIssues ->
+            typed AgentConfig.getInformativeBtpIssues
+
+        Commands.AgentConfigCortexXdrLogCollection ->
+            typed AgentConfig.getCortexXdrLogCollection
+
+        Commands.AgentConfigActionCenterExpiration ->
+            typed AgentConfig.getActionCenterExpiration
+
+        Commands.AgentConfigEndpointAdministrationCleanup ->
+            typed AgentConfig.getEndpointAdministrationCleanup
+
         Commands.RbacGetRoles roleName ->
             typed (Rbac.getRoles { roleNames = [ roleName ] })
 

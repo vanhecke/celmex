@@ -85,3 +85,73 @@ skip_if_unsupported() {
     skip_if_unsupported
     [ "$status" -eq 0 ]
 }
+
+@test "agent-config agent-status returns valid JSON object" {
+    run "$CORTEX" agent-config agent-status
+    skip_if_unsupported
+    [ "$status" -eq 0 ]
+    echo "$output" | jq . > /dev/null
+    echo "$output" | jq -e 'type == "object"' > /dev/null
+}
+
+@test "agent-config agent-status typed decode succeeds" {
+    run "$CORTEX_TEST" agent-config agent-status
+    skip_if_unsupported
+    [ "$status" -eq 0 ]
+}
+
+@test "agent-config informative-btp-issues returns valid JSON object" {
+    run "$CORTEX" agent-config informative-btp-issues
+    skip_if_unsupported
+    [ "$status" -eq 0 ]
+    echo "$output" | jq . > /dev/null
+    echo "$output" | jq -e 'type == "object"' > /dev/null
+}
+
+@test "agent-config informative-btp-issues typed decode succeeds" {
+    run "$CORTEX_TEST" agent-config informative-btp-issues
+    skip_if_unsupported
+    [ "$status" -eq 0 ]
+}
+
+@test "agent-config cortex-xdr-log-collection returns valid JSON object" {
+    run "$CORTEX" agent-config cortex-xdr-log-collection
+    skip_if_unsupported
+    [ "$status" -eq 0 ]
+    echo "$output" | jq . > /dev/null
+    echo "$output" | jq -e 'type == "object"' > /dev/null
+}
+
+@test "agent-config cortex-xdr-log-collection typed decode succeeds" {
+    run "$CORTEX_TEST" agent-config cortex-xdr-log-collection
+    skip_if_unsupported
+    [ "$status" -eq 0 ]
+}
+
+@test "agent-config action-center-expiration returns valid JSON object" {
+    run "$CORTEX" agent-config action-center-expiration
+    skip_if_unsupported
+    [ "$status" -eq 0 ]
+    echo "$output" | jq . > /dev/null
+    echo "$output" | jq -e 'type == "object"' > /dev/null
+}
+
+@test "agent-config action-center-expiration typed decode succeeds" {
+    run "$CORTEX_TEST" agent-config action-center-expiration
+    skip_if_unsupported
+    [ "$status" -eq 0 ]
+}
+
+@test "agent-config endpoint-administration-cleanup returns valid JSON object" {
+    run "$CORTEX" agent-config endpoint-administration-cleanup
+    skip_if_unsupported
+    [ "$status" -eq 0 ]
+    echo "$output" | jq . > /dev/null
+    echo "$output" | jq -e 'type == "object"' > /dev/null
+}
+
+@test "agent-config endpoint-administration-cleanup typed decode succeeds" {
+    run "$CORTEX_TEST" agent-config endpoint-administration-cleanup
+    skip_if_unsupported
+    [ "$status" -eq 0 ]
+}
