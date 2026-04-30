@@ -11,6 +11,18 @@ build: format
 test: build
     bats tests/
 
+# Run a single bats file (or any subset) AND the package-docs check.
+# Useful when iterating on one endpoint — `just test-one tests/quarantine.bats`
+# is much faster than the full suite, and the docs check catches the
+# missing-docstring errors `bats` cannot see. Sufficient for adding or
+# fixing a single endpoint; full `just test` is only needed when shared
+# code (Cortex.Decode, Cortex.Request, CLI parser helpers, StandardFlags)
+# has been touched.
+test-one FILE: build
+    bats {{FILE}}
+    elm make --docs=docs.json
+    rm -f docs.json
+
 cli *ARGS:
     @if [ ! -f cli/dist/elm.js ] || [ -n "$(find src cli/src elm.json cli/elm.json -newer cli/dist/elm.js 2>/dev/null)" ]; then just build; fi
     ./cli/bin/cortex "$@"
