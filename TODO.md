@@ -12,7 +12,7 @@ Complete inventory of all API endpoints from the OpenAPI specs in `docs/cortex-a
 > 9 endpoints appear in multiple specs (CWP / Trusted Images / Registry Connectors) — listed in each relevant section.
 > Raw total across all 22 spec files: 521. After removing the 2 duplicate files: 341 listed below.
 
-**Progress:** 57/341 endpoints implemented | 174 View | 167 Edit
+**Progress:** 58/341 endpoints implemented | 174 View | 167 Edit
 
 
 ## Cortex Platform
@@ -41,7 +41,7 @@ Source: `cortex-platform-papi.json`
 |  | POST | `/public_api/v1/endpoints/restore` | Restore File | Edit |  |  |  |
 |  | POST | `/public_api/v1/actions/file_retrieval_details` | File Retrieval Details | View |  |  |  |
 |  | POST | `/public_api/v1/hash_exceptions/allowlist` | Allow List Files | Edit |  |  |  |
-|  | POST | `/public_api/v1/quarantine/status` | Get Quarantine Status | View |  |  |  |
+| ✓ | POST | `/public_api/v1/quarantine/status` | Get Quarantine Status | View | `Cortex.Api.Quarantine` | `quarantine status` | `quarantine.bats` |
 |  | POST | `/public_api/v1/endpoints/quarantine` | Quarantine Files | Edit |  |  |  |
 |  | POST | `/public_api/v1/hash_exceptions/blocklist` | Block List Files | Edit |  |  |  |
 |  | POST | `/public_api/v1/endpoints/unisolate` | Unisolate Endpoints | Edit |  |  |  |

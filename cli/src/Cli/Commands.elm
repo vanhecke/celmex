@@ -15,6 +15,7 @@ import Cortex.Api.Correlations as Correlations
 import Cortex.Api.Endpoints as Endpoints
 import Cortex.Api.Indicators as Indicators
 import Cortex.Api.Issues as Issues
+import Cortex.Api.Quarantine as Quarantine
 import Cortex.Api.ScheduledQueries as ScheduledQueries
 import Cortex.Api.Xql as Xql
 import Cortex.Error exposing (Error(..))
@@ -88,6 +89,7 @@ type Endpoint
     | AssetsExternalWebsites Assets.SearchArgs
     | AssetsWebsitesLastAssessment
     | AssetGroupsList
+    | QuarantineStatus Quarantine.FileQuery
 
 
 argvToEndpoint : List String -> Result String Endpoint
@@ -273,6 +275,15 @@ argvToEndpoint args =
 
         [ "asset-groups", "list" ] ->
             Ok AssetGroupsList
+
+        [ "quarantine", "status", endpointId, filePath, fileHash ] ->
+            Ok
+                (QuarantineStatus
+                    { endpointId = endpointId
+                    , filePath = filePath
+                    , fileHash = fileHash
+                    }
+                )
 
         _ ->
             Err (usage args)
@@ -988,6 +999,9 @@ endpointName endpoint =
         AssetGroupsList ->
             "asset-groups list"
 
+        QuarantineStatus _ ->
+            "quarantine status"
+
 
 errorToString : Error -> String
 errorToString err =
@@ -1094,6 +1108,9 @@ usage args =
             , "  cortex assets external-websites             List external websites"
             , "  cortex assets websites-last-assessment      Get websites last assessment"
             , "  cortex asset-groups list                    List asset groups"
+            , ""
+            , "  cortex quarantine status <endpoint-id> <file-path> <file-hash>"
+            , "                                              Get quarantine status for a file on an endpoint"
             , ""
             , "  cortex legacy-exceptions get-modules        List legacy exception modules"
             , "  cortex legacy-exceptions fetch              Fetch legacy exception rules"

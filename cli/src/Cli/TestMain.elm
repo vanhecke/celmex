@@ -23,6 +23,7 @@ import Cortex.Api.Indicators as Indicators
 import Cortex.Api.Issues as Issues
 import Cortex.Api.LegacyExceptions as LegacyExceptions
 import Cortex.Api.Profiles as Profiles
+import Cortex.Api.Quarantine as Quarantine
 import Cortex.Api.Rbac as Rbac
 import Cortex.Api.Risk as Risk
 import Cortex.Api.ScheduledQueries as ScheduledQueries
@@ -322,6 +323,9 @@ run stamp config endpoint =
 
         Commands.AssetGroupsList ->
             typed AssetGroups.list
+
+        Commands.QuarantineStatus query ->
+            typed (Quarantine.getStatus [ query ])
 
 
 handleResult : Msg -> Cmd Msg

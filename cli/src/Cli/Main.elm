@@ -23,6 +23,7 @@ import Cortex.Api.Indicators as Indicators
 import Cortex.Api.Issues as Issues
 import Cortex.Api.LegacyExceptions as LegacyExceptions
 import Cortex.Api.Profiles as Profiles
+import Cortex.Api.Quarantine as Quarantine
 import Cortex.Api.Rbac as Rbac
 import Cortex.Api.Risk as Risk
 import Cortex.Api.ScheduledQueries as ScheduledQueries
@@ -463,6 +464,9 @@ run stamp config endpoint =
 
         Commands.AssetGroupsList ->
             ( Idle, raw AssetGroups.list )
+
+        Commands.QuarantineStatus query ->
+            ( Idle, raw (Quarantine.getStatus [ query ]) )
 
 
 {-| Most Cortex responses wrap their body in a top-level `reply` envelope,

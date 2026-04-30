@@ -27,6 +27,7 @@
         "Cortex.Api.Indicators",
         "Cortex.Api.Issues",
         "Cortex.Api.LegacyExceptions",
+        "Cortex.Api.Quarantine",
         "Cortex.Api.Rbac",
         "Cortex.Api.ScheduledQueries",
         "Cortex.Api.TenantInfo",
