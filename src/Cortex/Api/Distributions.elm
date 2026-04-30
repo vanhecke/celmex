@@ -1,12 +1,16 @@
 module Cortex.Api.Distributions exposing
     ( Distribution, DistributionsResponse, Versions
+    , DistributionStatus, DistributionUrl
     , getDistributions, getVersions
+    , getStatus, getDistUrl
     )
 
 {-| Cortex agent installer distributions and available versions.
 
 @docs Distribution, DistributionsResponse, Versions
+@docs DistributionStatus, DistributionUrl
 @docs getDistributions, getVersions
+@docs getStatus, getDistUrl
 
 -}
 
@@ -92,6 +96,71 @@ distributionsResponseDecoder =
         (optionalList "data" distributionDecoder)
         (Decode.maybe (Decode.field "filter_count" Decode.int))
         (Decode.maybe (Decode.field "total_count" Decode.int))
+
+
+{-| Build status of a distribution package, returned by [`getStatus`](#getStatus).
+-}
+type alias DistributionStatus =
+    { status : Maybe String
+    }
+
+
+{-| Signed download URL for a distribution package, returned by [`getDistUrl`](#getDistUrl).
+-}
+type alias DistributionUrl =
+    { distributionUrl : Maybe String
+    }
+
+
+{-| POST /public\_api/v1/distributions/get\_status
+-}
+getStatus : String -> Request DistributionStatus
+getStatus distributionId =
+    Request.post
+        [ "public_api", "v1", "distributions", "get_status" ]
+        (Encode.object
+            [ ( "request_data"
+              , Encode.object [ ( "distribution_id", Encode.string distributionId ) ]
+              )
+            ]
+        )
+        (reply distributionStatusDecoder)
+
+
+{-| POST /public\_api/v1/distributions/get\_dist\_url
+
+`packageType` must match the platform of the distribution. Valid values include
+`pkg` (macOS), `x86`/`x64`/`arm` (Windows), and `sh`/`rpm`/`deb` (Linux). The
+[`Distribution`](#Distribution) record's `supportedPackages` field lists the
+valid choices for a given distribution.
+
+-}
+getDistUrl : { distributionId : String, packageType : String } -> Request DistributionUrl
+getDistUrl args =
+    Request.post
+        [ "public_api", "v1", "distributions", "get_dist_url" ]
+        (Encode.object
+            [ ( "request_data"
+              , Encode.object
+                    [ ( "distribution_id", Encode.string args.distributionId )
+                    , ( "package_type", Encode.string args.packageType )
+                    ]
+              )
+            ]
+        )
+        (reply distributionUrlDecoder)
+
+
+distributionStatusDecoder : Decoder DistributionStatus
+distributionStatusDecoder =
+    Decode.map DistributionStatus
+        (Decode.maybe (Decode.field "status" Decode.string))
+
+
+distributionUrlDecoder : Decoder DistributionUrl
+distributionUrlDecoder =
+    Decode.map DistributionUrl
+        (Decode.maybe (Decode.field "distribution_url" Decode.string))
 
 
 distributionDecoder : Decoder Distribution

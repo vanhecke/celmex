@@ -27,6 +27,7 @@ import Cortex.Api.Rbac as Rbac
 import Cortex.Api.Risk as Risk
 import Cortex.Api.ScheduledQueries as ScheduledQueries
 import Cortex.Api.TenantInfo as TenantInfo
+import Cortex.Api.TriagePresets as TriagePresets
 import Cortex.Api.Xql as Xql
 import Cortex.Auth as Auth
 import Cortex.Client as Client exposing (Config)
@@ -145,6 +146,15 @@ run stamp config endpoint =
 
         Commands.DistributionsList ->
             typed Distributions.getDistributions
+
+        Commands.DistributionsGetStatus id ->
+            typed (Distributions.getStatus id)
+
+        Commands.DistributionsGetDistUrl id packageType ->
+            typed (Distributions.getDistUrl { distributionId = id, packageType = packageType })
+
+        Commands.TriagePresetsList ->
+            typed TriagePresets.list
 
         Commands.RbacGetUsers ->
             typed Rbac.getUsers
@@ -282,6 +292,9 @@ run stamp config endpoint =
 
         Commands.DisablePreventionFetchInjection ->
             typed DisablePrevention.fetchInjectionRules
+
+        Commands.DisablePreventionGetModules platform ->
+            typed (DisablePrevention.getModules platform)
 
         Commands.AssetsList ->
             typed Assets.list

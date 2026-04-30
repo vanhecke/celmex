@@ -12,7 +12,7 @@ Complete inventory of all API endpoints from the OpenAPI specs in `docs/cortex-a
 > 9 endpoints appear in multiple specs (CWP / Trusted Images / Registry Connectors) — listed in each relevant section.
 > Raw total across all 22 spec files: 521. After removing the 2 duplicate files: 341 listed below.
 
-**Progress:** 53/341 endpoints implemented | 174 View | 167 Edit
+**Progress:** 57/341 endpoints implemented | 174 View | 167 Edit
 
 
 ## Cortex Platform
@@ -33,8 +33,8 @@ Source: `cortex-platform-papi.json`
 |  | POST | `/public_api/v1/distributions/create` | Create distributions | Edit |  |  |  |
 | ✓ | POST | `/public_api/v1/distributions/get_distributions` | Get Distributions | View | `Cortex.Api.Distributions` | `distributions list` | `distributions.bats` |
 | ✓ | POST | `/public_api/v1/device_control/get_violations` | Get Violations | View | `Cortex.Api.DeviceControl` | `device-control get-violations` | `device_control.bats` |
-|  | POST | `/public_api/v1/distributions/get_status` | Get Distribution status | View |  |  |  |
-|  | POST | `/public_api/v1/distributions/get_dist_url` | Get Distribution URL | View |  |  |  |
+| ✓ | POST | `/public_api/v1/distributions/get_status` | Get Distribution status | View | `Cortex.Api.Distributions` | `distributions get-status` | `distributions.bats` |
+| ✓ | POST | `/public_api/v1/distributions/get_dist_url` | Get Distribution URL | View | `Cortex.Api.Distributions` | `distributions get-dist-url` | `distributions.bats` |
 |  | POST | `/public_api/v1/endpoints/update_agent_name` | Set an Endpoint Alias | Edit |  |  |  |
 |  | POST | `/public_api/v1/tags/agents/assign` | Assign Tags | Edit |  |  |  |
 |  | POST | `/public_api/v1/tags/agents/remove` | Remove Tags | Edit |  |  |  |
@@ -90,7 +90,7 @@ Source: `cortex-platform-papi.json`
 |  | POST | `/public_api/v1/xql/lookups/add_data` | Add or update data in a lookup dataset | Edit |  |  |  |
 |  | POST | `/public_api/v1/xql/lookups/remove_data` | Remove data from a lookup dataset | Edit |  |  |  |
 |  | POST | `/public_api/v1/xql/lookups/get_data` | Get data from a lookup dataset | View |  |  |  |
-|  | POST | `/public_api/v1/get_triage_presets` | Get triage presets | View |  |  |  |
+| ✓ | POST | `/public_api/v1/get_triage_presets` | Get triage presets | View | `Cortex.Api.TriagePresets` | `triage-presets list` | `triage_presets.bats` |
 |  | POST | `/public_api/v1/authentication-settings/create` | Create authentication settings for IdP SSO or metadata URL | Edit |  |  |  |
 |  | POST | `/public_api/v1/authentication-settings/update` | Update authentication settings | Edit |  |  |  |
 |  | POST | `/public_api/v1/authentication-settings/delete` | Delete authentication settings by domain | Edit |  |  |  |
@@ -424,7 +424,7 @@ Source: `disable-prevention-rule-papi.json`
 | ✓ | Method | Path | Description | Type | Elm | CLI | Test |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | ✓ | POST | `/public_api/v1/disable_prevention/fetch` | Get Disable Prevention Rules | View | `Cortex.Api.DisablePrevention` | `disable-prevention fetch` | `disable_prevention.bats` |
-|  | POST | `/public_api/v1/disable_prevention/get_modules` | Get Disable Prevention Modules | View |  |  |  |
+| ✓ | POST | `/public_api/v1/disable_prevention/get_modules` | Get Disable Prevention Modules | View | `Cortex.Api.DisablePrevention` | `disable-prevention get-modules` | `disable_prevention.bats` |
 |  | POST | `/public_api/v1/disable_prevention/add` | Add Disable Prevention Rule | Edit |  |  |  |
 |  | POST | `/public_api/v1/disable_prevention/edit` | Edit Disable Prevention Rule | Edit |  |  |  |
 |  | POST | `/public_api/v1/disable_prevention/delete` | Delete Disable Prevention Rules | Edit |  |  |  |

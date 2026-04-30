@@ -31,6 +31,9 @@ type Endpoint
     | AuditLogsAgentsReports
     | DistributionsGetVersions
     | DistributionsList
+    | DistributionsGetStatus String
+    | DistributionsGetDistUrl String String
+    | TriagePresetsList
     | RbacGetUsers
     | AuthSettingsGet
     | DeviceControlGetViolations
@@ -75,6 +78,7 @@ type Endpoint
     | IssuesSchema
     | DisablePreventionFetch
     | DisablePreventionFetchInjection
+    | DisablePreventionGetModules String
     | AssetsList
     | AssetsSchema
     | AssetsExternalServices Assets.SearchArgs
@@ -117,6 +121,15 @@ argvToEndpoint args =
 
         [ "distributions", "list" ] ->
             Ok DistributionsList
+
+        [ "distributions", "get-status", id ] ->
+            Ok (DistributionsGetStatus id)
+
+        [ "distributions", "get-dist-url", id, packageType ] ->
+            Ok (DistributionsGetDistUrl id packageType)
+
+        [ "triage-presets", "list" ] ->
+            Ok TriagePresetsList
 
         [ "rbac", "get-users" ] ->
             Ok RbacGetUsers
@@ -225,6 +238,9 @@ argvToEndpoint args =
 
         [ "disable-prevention", "fetch-injection" ] ->
             Ok DisablePreventionFetchInjection
+
+        [ "disable-prevention", "get-modules", platform ] ->
+            Ok (DisablePreventionGetModules platform)
 
         [ "assets", "list" ] ->
             Ok AssetsList
@@ -801,6 +817,15 @@ endpointName endpoint =
         DistributionsList ->
             "distributions list"
 
+        DistributionsGetStatus _ ->
+            "distributions get-status"
+
+        DistributionsGetDistUrl _ _ ->
+            "distributions get-dist-url"
+
+        TriagePresetsList ->
+            "triage-presets list"
+
         RbacGetUsers ->
             "rbac get-users"
 
@@ -933,6 +958,9 @@ endpointName endpoint =
         DisablePreventionFetchInjection ->
             "disable-prevention fetch-injection"
 
+        DisablePreventionGetModules _ ->
+            "disable-prevention get-modules"
+
         AssetsList ->
             "assets list"
 
@@ -1001,6 +1029,10 @@ usage args =
             , "  cortex endpoints list                       List all endpoints"
             , "  cortex distributions get-versions           List all agent versions"
             , "  cortex distributions list                   List agent distributions"
+            , "  cortex distributions get-status <id>        Get build status of a distribution"
+            , "  cortex distributions get-dist-url <id> <pkg-type>"
+            , "                                              Get signed download URL for a distribution package"
+            , "  cortex triage-presets list                  List forensics triage presets"
             , ""
             , "  cortex rbac get-users                       List users"
             , "  cortex rbac get-roles <name>                Get details for a role by name"
@@ -1050,6 +1082,8 @@ usage args =
             , ""
             , "  cortex disable-prevention fetch             List disable-prevention rules"
             , "  cortex disable-prevention fetch-injection   List disable-injection-prevention rules"
+            , "  cortex disable-prevention get-modules <platform>"
+            , "                                              List prevention modules for a platform (windows|linux|macos)"
             , ""
             , "  cortex assets list                          List assets"
             , "  cortex assets schema                        Get asset inventory schema"

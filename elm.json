@@ -30,6 +30,7 @@
         "Cortex.Api.Rbac",
         "Cortex.Api.ScheduledQueries",
         "Cortex.Api.TenantInfo",
+        "Cortex.Api.TriagePresets",
         "Cortex.Api.Xql"
     ],
     "elm-version": "0.19.0 <= v < 0.20.0",

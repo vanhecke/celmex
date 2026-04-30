@@ -27,3 +27,26 @@ setup() {
     run "$CORTEX_TEST" disable-prevention fetch-injection
     [ "$status" -eq 0 ]
 }
+
+@test "disable-prevention get-modules windows returns valid JSON array" {
+    run "$CORTEX" disable-prevention get-modules windows
+    [ "$status" -eq 0 ]
+    echo "$output" | jq . > /dev/null
+    echo "$output" | jq -e 'type == "array"' > /dev/null
+    echo "$output" | jq -e '.[0].module_id | type == "number"' > /dev/null
+}
+
+@test "disable-prevention get-modules windows typed decode succeeds" {
+    run "$CORTEX_TEST" disable-prevention get-modules windows
+    [ "$status" -eq 0 ]
+}
+
+@test "disable-prevention get-modules linux typed decode succeeds" {
+    run "$CORTEX_TEST" disable-prevention get-modules linux
+    [ "$status" -eq 0 ]
+}
+
+@test "disable-prevention get-modules macos typed decode succeeds" {
+    run "$CORTEX_TEST" disable-prevention get-modules macos
+    [ "$status" -eq 0 ]
+}
