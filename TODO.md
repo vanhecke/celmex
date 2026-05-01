@@ -153,7 +153,7 @@ Source: `cortex-platform-papi.json`
 |  | GET | `/public_api/v1/assets/{id}/raw_fields` | Get raw fields of asset by ID | View |  |  |  |  |
 | ✓ | GET | `/public_api/v1/assets/schema` | Get schema of asset inventory | View | `Cortex.Api.Assets` | `assets schema` | `assets.bats` | ✗ |
 |  | GET | `/public_api/v1/assets/enum/{field_name}` | Get enum values of specified field | View |  |  |  |  |
-| ✓ | POST | `/public_api/v1/asset-groups` | Get all or filtered asset groups | View | `Cortex.Api.AssetGroups` | `asset-groups list` | `asset_groups.bats` | ✗ |
+| ✓ | POST | `/public_api/v1/asset-groups` | Get all or filtered asset groups | View | `Cortex.Api.AssetGroups` | `asset-groups list` | `asset_groups.bats` | ✓ |
 |  | POST | `/public_api/v1/asset-groups/create` | Create an Asset Group | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/asset-groups/update/{group_id}` | Update an Asset Group | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/asset-groups/delete/{group_id}` | Delete an Asset Group | Edit |  |  |  |  |

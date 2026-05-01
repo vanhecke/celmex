@@ -936,7 +936,20 @@ run stamp config endpoint =
             typed Assets.getWebsitesLastAssessment
 
         Commands.AssetGroupsList ->
-            typed AssetGroups.list
+            typedAssert AssetGroups.list
+                (\r ->
+                    nonEmpty "data" r.data
+                        :: sampleFirst "data"
+                            r.data
+                            (\g ->
+                                [ positive "id" g.id
+                                , nonBlank "name" g.name
+                                , nonBlank "type" g.type_
+                                , present "creationTime" g.creationTime
+                                , nonBlank "createdBy" g.createdBy
+                                ]
+                            )
+                )
 
         Commands.QuarantineStatus query ->
             typedAssert (Quarantine.getStatus [ query ])
