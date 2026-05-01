@@ -7,8 +7,9 @@ setup() {
 @test "xql get-quota returns valid JSON object" {
     run "$CORTEX" xql get-quota
     [ "$status" -eq 0 ]
-    echo "$output" | jq . > /dev/null
     echo "$output" | jq -e 'type == "object"' > /dev/null
+    echo "$output" | jq -e '.license_quota | type == "number"' > /dev/null
+    echo "$output" | jq -e '.used_quota | type == "number"' > /dev/null
 }
 
 @test "xql get-quota typed decode succeeds" {
@@ -19,8 +20,9 @@ setup() {
 @test "xql get-datasets returns valid JSON array" {
     run "$CORTEX" xql get-datasets
     [ "$status" -eq 0 ]
-    echo "$output" | jq . > /dev/null
-    echo "$output" | jq -e 'type == "array"' > /dev/null
+    echo "$output" | jq -e 'type == "array" and length > 0' > /dev/null
+    echo "$output" | jq -e '.[0]."Dataset Name" | type == "string" and length > 0' > /dev/null
+    echo "$output" | jq -e '.[0]."Type" | type == "string" and length > 0' > /dev/null
 }
 
 @test "xql get-datasets typed decode succeeds" {
@@ -31,8 +33,10 @@ setup() {
 @test "xql-library get returns valid JSON with xql_queries array" {
     run "$CORTEX" xql-library get
     [ "$status" -eq 0 ]
-    echo "$output" | jq . > /dev/null
-    echo "$output" | jq -e '.xql_queries | type == "array"' > /dev/null
+    echo "$output" | jq -e '.xql_queries | type == "array" and length > 0' > /dev/null
+    echo "$output" | jq -e '.queries_count | type == "number" and . > 0' > /dev/null
+    echo "$output" | jq -e '.xql_queries[0].xql_query_name | type == "string" and length > 0' > /dev/null
+    echo "$output" | jq -e '.xql_queries[0].xql_query | type == "string" and length > 0' > /dev/null
 }
 
 @test "xql-library get typed decode succeeds" {

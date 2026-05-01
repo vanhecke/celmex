@@ -49,13 +49,22 @@ type alias Quota =
     , evalQuota : Maybe Float
     , totalDailyRunningQueries : Maybe Int
     , totalDailyConcurrentRejectedQueries : Maybe Int
+
+    {- currentConcurrentActiveQueries is a runtime list of in-flight
+       query descriptors (query_id + start time + caller). Shape varies
+       per query type; preserved verbatim because the runtime payload
+       is operational metadata rather than user-consumable data.
+    -}
     , currentConcurrentActiveQueries : Encode.Value
     , currentConcurrentActiveQueriesCount : Maybe Int
     , maxDailyConcurrentActiveQueryCount : Maybe Int
     }
 
 
-{-| A dataset available to XQL queries, with its retention ranges and size stats.
+{-| A dataset available to XQL queries, with its retention ranges and size
+stats. The wire format uses Title Case Spaced keys ("Dataset Name", "Last
+Updated", "Total Events", etc.) — not snake\_case. `defaultQueryTarget` is
+emitted as a string ("TRUE" / "FALSE"), not a boolean.
 -}
 type alias Dataset =
     { datasetName : Maybe String
@@ -70,7 +79,7 @@ type alias Dataset =
     , totalEvents : Maybe Int
     , averageEventSize : Maybe Int
     , ttl : Maybe Int
-    , defaultQueryTarget : Maybe Bool
+    , defaultQueryTarget : Maybe String
     }
 
 
@@ -90,7 +99,10 @@ type alias Library =
     }
 
 
-{-| A single saved XQL query inside the [`Library`](#Library).
+{-| A single saved XQL query inside the [`Library`](#Library). The live wire
+format uses `xql_query_name`, `xql_query`, and `xql_query_tags` for the
+query name, body, and tags; OpenAPI-schema field names like `name`,
+`query_text`, and `labels` are accepted as fallbacks.
 -}
 type alias LibraryQuery =
     { id : Maybe Int
@@ -103,7 +115,12 @@ type alias LibraryQuery =
     , modifiedAt : Maybe Int
     , modifiedBy : Maybe String
     , modifiedByPretty : Maybe String
-    , queryMetadata : Encode.Value
+
+    {- queryMetadata is a per-query opaque metadata blob (UI render
+       hints, owner attribution, etc.). Shape varies by query source;
+       preserved verbatim.
+    -}
+    , queryMetadata : Maybe Encode.Value
     , isPrivate : Maybe Bool
     , labels : List String
     }
@@ -164,9 +181,20 @@ fields.
 type alias QueryResults =
     { status : QueryStatus
     , numberOfResults : Maybe Int
-    , queryCostCharged : Encode.Value
+
+    {- queryCostCharged is a per-tenant cost map keyed by region or
+       compute class (e.g. `{"us-east-1": 0.42}`). Keys vary per tenant
+       deployment; preserved verbatim.
+    -}
+    , queryCostCharged : Maybe Encode.Value
     , remainingQuota : Maybe Float
     , remainingYearlyQuota : Maybe Float
+
+    {- data is the user's XQL query result rows. The schema is determined
+       by the user's `dataset = X | fields ...` clauses, so the row
+       shape is genuinely polymorphic across queries. This is the
+       canonical "preserve as Encode.Value" case.
+    -}
     , data : List Encode.Value
     , streamId : Maybe String
     }
@@ -187,6 +215,10 @@ should be an object mapping field names to string values (the lookup dataset
 schema enforces per-field types server-side). With `keyFields = []` the
 server inserts only; with non-empty `keyFields` the server upserts using
 those fields as the identity.
+
+`data` is `Encode.Value` because the lookup-dataset schema is user-defined
+per dataset; the SDK cannot constrain the shape ahead of time.
+
 -}
 type alias LookupAddArgs =
     { datasetName : String
@@ -215,11 +247,13 @@ type alias LookupGetArgs =
     }
 
 
-{-| Payload returned by [`lookupsGetData`](#lookupsGetData). `data` shape
-varies by the lookup dataset schema so it's passed through as raw JSON.
+{-| Payload returned by [`lookupsGetData`](#lookupsGetData).
 -}
 type alias LookupGetResult =
-    { data : Encode.Value
+    { {- data shape varies by the lookup dataset's user-defined schema
+         (each dataset has its own field set). Preserved verbatim.
+      -}
+      data : Maybe Encode.Value
     , filterCount : Maybe Int
     , totalCount : Maybe Int
     }
@@ -478,22 +512,56 @@ quotaDecoder =
         |> andMap (Decode.maybe (Decode.field "max_daily_concurrent_active_query_count" Decode.int))
 
 
+
+{- Quota.currentConcurrentActiveQueries stays as bare Encode.Value rather
+   than Maybe Encode.Value so the existing canonical typedAssert example
+   in TestMain (XqlGetQuota) keeps its straightforward record-field shape.
+-}
+
+
 datasetDecoder : Decoder Dataset
 datasetDecoder =
-    Decode.map8 Dataset
-        (Decode.maybe (Decode.field "dataset_name" Decode.string))
-        (Decode.maybe (Decode.field "type" Decode.string))
-        (Decode.maybe (Decode.field "log_update_type" Decode.string))
-        (Decode.maybe (Decode.field "last_updated" Decode.int))
-        (Decode.maybe (Decode.field "total_days_stored" Decode.int))
-        (Decode.maybe (Decode.field "hot_range" rangeDecoder))
-        (Decode.maybe (Decode.field "cold_range" rangeDecoder))
-        (Decode.maybe (Decode.field "total_size_stored" Decode.int))
-        |> andMap (Decode.maybe (Decode.field "average_daily_size" Decode.int))
-        |> andMap (Decode.maybe (Decode.field "total_events" Decode.int))
-        |> andMap (Decode.maybe (Decode.field "average_event_size" Decode.int))
-        |> andMap (Decode.maybe (Decode.field "ttl" Decode.int))
-        |> andMap (Decode.maybe (Decode.field "default_query_target" Decode.bool))
+    Decode.succeed Dataset
+        |> andMap (eitherStringField "Dataset Name" "dataset_name")
+        |> andMap (eitherStringField "Type" "type")
+        |> andMap (eitherStringField "Log Update Type" "log_update_type")
+        |> andMap (eitherIntField "Last Updated" "last_updated")
+        |> andMap (eitherIntField "Total Days Stored" "total_days_stored")
+        |> andMap (eitherRangeField "Hot Range" "hot_range")
+        |> andMap (eitherRangeField "Cold Range" "cold_range")
+        |> andMap (eitherIntField "Total Size Stored" "total_size_stored")
+        |> andMap (eitherIntField "Average Daily Size" "average_daily_size")
+        |> andMap (eitherIntField "Total Events" "total_events")
+        |> andMap (eitherIntField "Average Event Size" "average_event_size")
+        |> andMap (eitherIntField "TTL" "ttl")
+        |> andMap (eitherStringField "Default Query Target" "default_query_target")
+
+
+eitherStringField : String -> String -> Decoder (Maybe String)
+eitherStringField primary fallback =
+    Decode.oneOf
+        [ Decode.field primary Decode.string |> Decode.map Just
+        , Decode.field fallback Decode.string |> Decode.map Just
+        , Decode.succeed Nothing
+        ]
+
+
+eitherIntField : String -> String -> Decoder (Maybe Int)
+eitherIntField primary fallback =
+    Decode.oneOf
+        [ Decode.field primary Decode.int |> Decode.map Just
+        , Decode.field fallback Decode.int |> Decode.map Just
+        , Decode.succeed Nothing
+        ]
+
+
+eitherRangeField : String -> String -> Decoder (Maybe DatasetRange)
+eitherRangeField primary fallback =
+    Decode.oneOf
+        [ Decode.field primary rangeDecoder |> Decode.map Just
+        , Decode.field fallback rangeDecoder |> Decode.map Just
+        , Decode.succeed Nothing
+        ]
 
 
 rangeDecoder : Decoder DatasetRange
@@ -501,6 +569,15 @@ rangeDecoder =
     Decode.map2 DatasetRange
         (Decode.maybe (Decode.field "from" Decode.int))
         (Decode.maybe (Decode.field "to" Decode.int))
+
+
+eitherListField : String -> String -> Decoder a -> Decoder (List a)
+eitherListField primary fallback itemDecoder =
+    Decode.oneOf
+        [ Decode.field primary (Decode.list itemDecoder)
+        , Decode.field fallback (Decode.list itemDecoder)
+        , Decode.succeed []
+        ]
 
 
 libraryDecoder : Decoder Library
@@ -512,25 +589,20 @@ libraryDecoder =
 
 libraryQueryDecoder : Decoder LibraryQuery
 libraryQueryDecoder =
-    Decode.map8 LibraryQuery
-        (Decode.maybe (Decode.field "id" Decode.int))
-        (Decode.maybe (Decode.field "name" Decode.string))
-        (Decode.maybe (Decode.field "description" Decode.string))
-        (Decode.maybe (Decode.field "query_text" Decode.string))
-        (Decode.maybe (Decode.field "created_at" Decode.int))
-        (Decode.maybe (Decode.field "created_by" Decode.string))
-        (Decode.maybe (Decode.field "created_by_pretty" Decode.string))
-        (Decode.maybe (Decode.field "modified_at" Decode.int))
+    Decode.succeed LibraryQuery
+        |> andMap (Decode.maybe (Decode.field "id" Decode.int))
+        |> andMap (eitherStringField "xql_query_name" "name")
+        |> andMap (Decode.maybe (Decode.field "description" Decode.string))
+        |> andMap (eitherStringField "xql_query" "query_text")
+        |> andMap (Decode.maybe (Decode.field "created_at" Decode.int))
+        |> andMap (Decode.maybe (Decode.field "created_by" Decode.string))
+        |> andMap (Decode.maybe (Decode.field "created_by_pretty" Decode.string))
+        |> andMap (Decode.maybe (Decode.field "modified_at" Decode.int))
         |> andMap (Decode.maybe (Decode.field "modified_by" Decode.string))
         |> andMap (Decode.maybe (Decode.field "modified_by_pretty" Decode.string))
-        |> andMap
-            (Decode.oneOf
-                [ Decode.field "query_metadata" Decode.value
-                , Decode.succeed Encode.null
-                ]
-            )
+        |> andMap (Decode.maybe (Decode.field "query_metadata" Decode.value))
         |> andMap (Decode.maybe (Decode.field "is_private" Decode.bool))
-        |> andMap (optionalList "labels" Decode.string)
+        |> andMap (eitherListField "xql_query_tags" "labels" Decode.string)
 
 
 statusDecoder : Decoder QueryStatus
@@ -558,11 +630,12 @@ queryResultsDecoder =
     Decode.map7 QueryResults
         (Decode.field "status" statusDecoder)
         (Decode.maybe (Decode.field "number_of_results" Decode.int))
-        (Decode.oneOf
-            [ Decode.field "query_cost_charged" Decode.value
-            , Decode.field "query_cost" Decode.value
-            , Decode.succeed Encode.null
-            ]
+        (Decode.maybe
+            (Decode.oneOf
+                [ Decode.field "query_cost_charged" Decode.value
+                , Decode.field "query_cost" Decode.value
+                ]
+            )
         )
         (Decode.maybe (Decode.field "remaining_quota" Decode.float))
         (Decode.maybe (Decode.field "remaining_yearly_quota" Decode.float))
@@ -594,11 +667,7 @@ lookupAddResultDecoder =
 lookupGetResultDecoder : Decoder LookupGetResult
 lookupGetResultDecoder =
     Decode.map3 LookupGetResult
-        (Decode.oneOf
-            [ Decode.field "data" Decode.value
-            , Decode.succeed Encode.null
-            ]
-        )
+        (Decode.maybe (Decode.field "data" Decode.value))
         (Decode.maybe (Decode.field "filter_count" Decode.int))
         (Decode.maybe (Decode.field "total_count" Decode.int))
 

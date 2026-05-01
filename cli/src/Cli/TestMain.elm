@@ -464,24 +464,52 @@ run stamp config endpoint =
                 )
 
         Commands.XqlGetDatasets ->
-            typed Xql.getDatasets
+            typedAssert Xql.getDatasets
+                (\datasets ->
+                    nonEmpty "datasets" datasets
+                        :: sampleFirst "datasets"
+                            datasets
+                            (\d ->
+                                [ nonBlank "datasetName" d.datasetName
+                                , nonBlank "type" d.type_
+                                , nonBlank "logUpdateType" d.logUpdateType
+                                , nonBlank "defaultQueryTarget" d.defaultQueryTarget
+                                ]
+                            )
+                )
 
         Commands.XqlLibraryGet ->
-            typed Xql.getLibrary
+            typedAssert Xql.getLibrary
+                (\lib ->
+                    [ positive "queriesCount" lib.queriesCount
+                    , nonEmpty "xqlQueries" lib.xqlQueries
+                    ]
+                        ++ sampleFirst "xqlQueries"
+                            lib.xqlQueries
+                            (\q ->
+                                [ nonBlank "name" q.name
+                                , nonBlank "queryText" q.queryText
+                                ]
+                            )
+                )
 
         Commands.XqlStartQuery args ->
-            typed (Xql.startQuery args)
+            typedAssert (Xql.startQuery args)
+                (\queryId -> [ satisfies "queryId" (not (String.isEmpty queryId)) "blank queryId" ])
 
         Commands.XqlQueryPoll args _ ->
             -- Only validate the initial startQuery typed decode; the polling
             -- loop is a CLI-runtime concern, not a decoder concern.
-            typed (Xql.startQuery args)
+            typedAssert (Xql.startQuery args)
+                (\queryId -> [ satisfies "queryId" (not (String.isEmpty queryId)) "blank queryId" ])
 
         Commands.XqlGetResults args ->
-            typed (Xql.getQueryResults args)
+            typedAssert (Xql.getQueryResults args)
+                (\r -> [ present "remainingQuota" r.remainingQuota ])
 
         Commands.XqlGetResultsPoll args _ ->
-            typed (Xql.getQueryResults args)
+            typedAssert (Xql.getQueryResults args)
+                (\r -> [ present "remainingQuota" r.remainingQuota ])
 
         Commands.XqlGetResultsStream _ ->
             -- Response is raw Encode.Value; nothing to typed-decode.
@@ -493,7 +521,8 @@ run stamp config endpoint =
             skip
 
         Commands.XqlLookupsGetData args ->
-            typed (Xql.lookupsGetData args)
+            typedAssert (Xql.lookupsGetData args)
+                (\r -> [ present "totalCount" r.totalCount ])
 
         Commands.XqlLookupsRemoveData _ ->
             skip

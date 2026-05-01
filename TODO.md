@@ -90,7 +90,7 @@ Source: `cortex-platform-papi.json`
 |  | POST | `/public_api/v1/dataset/delete_dataset` | Delete an XQL user dataset | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/xql/add_dataset` | Add Dataset | Edit |  |  |  |  |
 |  | POST | `/public_api/v2/xql/delete_dataset` | Delete a dataset | Edit |  |  |  |  |
-| ✓ | POST | `/public_api/v1/xql/get_datasets` | Get all datasets | View | `Cortex.Api.Xql` | `xql get-datasets` | `xql.bats` | ✗ |
+| ✓ | POST | `/public_api/v1/xql/get_datasets` | Get all datasets | View | `Cortex.Api.Xql` | `xql get-datasets` | `xql.bats` | ✓ |
 |  | POST | `/public_api/v1/xql/lookups/add_data` | Add or update data in a lookup dataset | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/xql/lookups/remove_data` | Remove data from a lookup dataset | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/xql/lookups/get_data` | Get data from a lookup dataset | View |  |  |  |  |
@@ -115,7 +115,7 @@ Source: `cortex-platform-papi.json`
 | ✓ | POST | `/public_api/v1/scheduled_queries/list` | Get scheduled queries | View | `Cortex.Api.ScheduledQueries` | `scheduled-queries list` | `scheduled_queries.bats` | ✓ |
 |  | POST | `/public_api/v1/scheduled_queries/insert` | Insert or update scheduled queries | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/scheduled_queries/delete` | Delete a scheduled query | Edit |  |  |  |  |
-| ✓ | POST | `/public_api/xql_library/get` | Get XQL Queries | View | `Cortex.Api.Xql` | `xql-library get` | `xql.bats` | ✗ |
+| ✓ | POST | `/public_api/xql_library/get` | Get XQL Queries | View | `Cortex.Api.Xql` | `xql-library get` | `xql.bats` | ✓ |
 |  | POST | `/public_api/xql_library/insert` | Insert or update XQL queries | Edit |  |  |  |  |
 |  | POST | `/public_api/xql_library/delete` | Delete XQL Queries | Edit |  |  |  |  |
 | ✓ | POST | `/public_api/v1/indicators/get` | Get Indicators (IOCs) | View | `Cortex.Api.Indicators` | `indicators get` | `indicators.bats` | ✓ |
