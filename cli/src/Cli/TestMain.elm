@@ -359,7 +359,21 @@ run stamp config endpoint =
                 (\r -> [ nonBlank "distributionUrl" r.distributionUrl ])
 
         Commands.TriagePresetsList ->
-            typed TriagePresets.list
+            typedAssert TriagePresets.list
+                (\r ->
+                    if List.isEmpty r.triagePresets then
+                        []
+
+                    else
+                        sampleFirst "triagePresets"
+                            r.triagePresets
+                            (\p ->
+                                [ nonBlank "uuid" p.uuid
+                                , nonBlank "name" p.name
+                                , nonBlank "os" p.os
+                                ]
+                            )
+                )
 
         Commands.RbacGetUsers ->
             typedAssert Rbac.getUsers

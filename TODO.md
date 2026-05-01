@@ -94,7 +94,7 @@ Source: `cortex-platform-papi.json`
 |  | POST | `/public_api/v1/xql/lookups/add_data` | Add or update data in a lookup dataset | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/xql/lookups/remove_data` | Remove data from a lookup dataset | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/xql/lookups/get_data` | Get data from a lookup dataset | View |  |  |  |  |
-| ✓ | POST | `/public_api/v1/get_triage_presets` | Get triage presets | View | `Cortex.Api.TriagePresets` | `triage-presets list` | `triage_presets.bats` | ✗ |
+| ✓ | POST | `/public_api/v1/get_triage_presets` | Get triage presets (tenant-unsupported, requires Forensics add-on) | View | `Cortex.Api.TriagePresets` | `triage-presets list` | `triage_presets.bats` | ✓ |
 |  | POST | `/public_api/v1/authentication-settings/create` | Create authentication settings for IdP SSO or metadata URL | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/authentication-settings/update` | Update authentication settings | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/authentication-settings/delete` | Delete authentication settings by domain | Edit |  |  |  |  |
