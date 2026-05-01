@@ -7,8 +7,10 @@ setup() {
 @test "assets list returns valid JSON with data array" {
     run "$CORTEX" assets list
     [ "$status" -eq 0 ]
-    echo "$output" | jq . > /dev/null
-    echo "$output" | jq -e '.data | type == "array"' > /dev/null
+    echo "$output" | jq -e '.data | type == "array" and length > 0' > /dev/null
+    echo "$output" | jq -e '.data[0]."xdm.asset.id" | type == "string" and length > 0' > /dev/null
+    echo "$output" | jq -e '.data[0]."xdm.asset.type.id" | type == "string" and length > 0' > /dev/null
+    echo "$output" | jq -e '.data[0]."xdm.asset.provider" | type == "string" and length > 0' > /dev/null
 }
 
 @test "assets list typed decode succeeds" {

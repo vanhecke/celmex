@@ -1,20 +1,36 @@
 module Cortex.Api.Assets exposing
     ( SearchArgs, defaultSearchArgs
-    , AssetsResponse, CountedResponse, LastAssessment, SchemaEntry, WebsitesLastAssessment
+    , AssetsResponse, Asset, AssetCounts
+    , SchemaEntry
+    , ExternalService, ExternalServicesResponse
+    , InternetExposure, InternetExposuresResponse
+    , ExternalIpRange, ExternalIpRangesResponse
+    , VulnerabilityTest, AffectedSoftware, VulnerabilityTestsResponse
+    , ExternalWebsite, ExternalWebsitesResponse
+    , LastAssessment, WebsitesLastAssessment
     , list, getSchema
-    , getExternalIpRanges, getExternalServices, getExternalWebsites, getInternetExposures, getVulnerabilityTests, getWebsitesLastAssessment
+    , getExternalServices, getInternetExposures, getExternalIpRanges
+    , getVulnerabilityTests, getExternalWebsites, getWebsitesLastAssessment
     )
 
 {-| Cortex asset inventory and external attack-surface views.
 
 @docs SearchArgs, defaultSearchArgs
-@docs AssetsResponse, CountedResponse, LastAssessment, SchemaEntry, WebsitesLastAssessment
+@docs AssetsResponse, Asset, AssetCounts
+@docs SchemaEntry
+@docs ExternalService, ExternalServicesResponse
+@docs InternetExposure, InternetExposuresResponse
+@docs ExternalIpRange, ExternalIpRangesResponse
+@docs VulnerabilityTest, AffectedSoftware, VulnerabilityTestsResponse
+@docs ExternalWebsite, ExternalWebsitesResponse
+@docs LastAssessment, WebsitesLastAssessment
 @docs list, getSchema
-@docs getExternalIpRanges, getExternalServices, getExternalWebsites, getInternetExposures, getVulnerabilityTests, getWebsitesLastAssessment
+@docs getExternalServices, getInternetExposures, getExternalIpRanges
+@docs getVulnerabilityTests, getExternalWebsites, getWebsitesLastAssessment
 
 -}
 
-import Cortex.Decode exposing (reply)
+import Cortex.Decode exposing (andMap, optionalList, reply)
 import Cortex.Query as Query exposing (Filter, Range, Sort, Timeframe)
 import Cortex.Request as Request exposing (Request)
 import Cortex.RequestData as RequestData
@@ -22,21 +38,10 @@ import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
 
 
-{-| Arguments to the filtered asset list endpoints
-([`getExternalServices`](#getExternalServices),
-[`getInternetExposures`](#getInternetExposures),
-[`getExternalIpRanges`](#getExternalIpRanges),
-[`getVulnerabilityTests`](#getVulnerabilityTests),
-[`getExternalWebsites`](#getExternalWebsites)). All fields are optional;
-pass [`defaultSearchArgs`](#defaultSearchArgs) for an unfiltered request.
-`extra` is merged last into `request_data` and overrides any SDK-generated
-key on collision.
-
-[`list`](#list) (the asset inventory itself) does not yet take this
-argument because the underlying endpoint uses a different
-`request_data` shape; it remains an unfiltered call until the SDK gains an
-asset-inventory dialect mapping.
-
+{-| Arguments to the filtered asset list endpoints. All fields are
+optional; pass [`defaultSearchArgs`](#defaultSearchArgs) for an unfiltered
+request. `extra` is merged last into `request_data` and overrides any
+SDK-generated key on collision.
 -}
 type alias SearchArgs =
     { filters : List Filter
@@ -60,27 +65,57 @@ defaultSearchArgs =
     }
 
 
-{-| Generic paginated response shape shared by several asset endpoints. The
-inner items vary so widely (external services, internet exposures, IP ranges,
-vulnerability tests, websites) that each item is decoded as raw JSON to
-preserve every field.
--}
-type alias CountedResponse =
-    { totalCount : Maybe Int
-    , resultCount : Maybe Int
-    , items : List Encode.Value
-    }
+
+-- ASSETS LIST
 
 
-{-| Response shape for POST /public\_api/v1/assets — the asset inventory list.
-The top-level envelope contains metadata; each asset's xdm.asset.\* fields are
-preserved as raw JSON.
+{-| Top-level envelope for the asset inventory list.
 -}
 type alias AssetsResponse =
-    { data : List Encode.Value
+    { data : List Asset
     , filterCount : Maybe Int
     , totalCount : Maybe Int
     }
+
+
+{-| A single asset from the inventory. Field names mirror the wire
+format's `xdm.asset.*` dotted-lowercase shape.
+-}
+type alias Asset =
+    { id : Maybe String
+    , strongId : Maybe String
+    , name : Maybe String
+    , externalProviderId : Maybe String
+    , provider : Maybe String
+    , realm : Maybe String
+    , typeId : Maybe String
+    , typeName : Maybe String
+    , typeCategory : Maybe String
+    , typeClass : Maybe String
+    , cloudRegion : Maybe String
+    , firstObserved : Maybe Int
+    , lastObserved : Maybe Int
+    , groupIds : List Int
+    , hostIpv4Addresses : List String
+    , relatedIssuesCritical : Maybe Int
+    , relatedIssuesBreakdown : Maybe AssetCounts
+    , relatedCasesCritical : Maybe Int
+    , relatedCasesBreakdown : Maybe AssetCounts
+    }
+
+
+{-| Severity breakdown for an asset's related issues or cases.
+-}
+type alias AssetCounts =
+    { critical : Maybe Int
+    , high : Maybe Int
+    , medium : Maybe Int
+    , low : Maybe Int
+    }
+
+
+
+-- ASSETS SCHEMA
 
 
 {-| One row of the asset inventory schema returned by [`getSchema`](#getSchema).
@@ -92,8 +127,207 @@ type alias SchemaEntry =
     }
 
 
-{-| Wrapper for [`getWebsitesLastAssessment`](#getWebsitesLastAssessment)'s
-single `last_external_assessment` field.
+
+-- EXTERNAL SERVICES
+
+
+{-| Paginated envelope returned by [`getExternalServices`](#getExternalServices).
+-}
+type alias ExternalServicesResponse =
+    { totalCount : Maybe Int
+    , resultCount : Maybe Int
+    , externalServices : List ExternalService
+    }
+
+
+{-| A single externally-reachable service (open port + protocol on a
+discovered IP). Tenant returned no services on this fixture; full field
+list is the spec's `external_services` item shape (~20 fields, mostly
+optional). Sub-objects like `details` and `service_classifications` are
+preserved as Encode.Value with inline justification.
+-}
+type alias ExternalService =
+    { serviceId : Maybe String
+    , serviceName : Maybe String
+    , serviceType : Maybe String
+    , ipAddress : List String
+    , externallyDetectedProviders : List String
+    , externallyInferredCves : List String
+    , isActive : Maybe String
+    , firstObserved : Maybe Int
+    , lastObserved : Maybe Int
+    , protocol : Maybe String
+    , port_ : Maybe Int
+    , domain : List String
+    , activeClassifications : List String
+    , inactiveClassifications : List String
+    , discoveryType : Maybe String
+    , businessUnits : List String
+    , tags : List String
+
+    {- details is a service-type-specific blob (TLS handshake info, HTTP
+       headers, banner bytes, etc.). Genuinely free-form per service
+       type; preserved verbatim.
+    -}
+    , details : Maybe Encode.Value
+    }
+
+
+
+-- INTERNET EXPOSURES
+
+
+{-| Paginated envelope returned by [`getInternetExposures`](#getInternetExposures).
+-}
+type alias InternetExposuresResponse =
+    { totalCount : Maybe Int
+    , resultCount : Maybe Int
+    , assetsInternetExposure : List InternetExposure
+    }
+
+
+{-| One internet-exposure record (an asset reachable from the public
+internet).
+-}
+type alias InternetExposure =
+    { assetId : Maybe String
+    , name : Maybe String
+    , type_ : Maybe String
+    , ipAddress : Maybe String
+    , ipv6Address : Maybe String
+    , domain : Maybe String
+    , externallyDetectedProviders : List String
+    , externallyInferredCves : List String
+    , externallyInferredVulnerabilityScore : Maybe Float
+    , businessUnits : List String
+    , firstObserved : Maybe Int
+    , lastObserved : Maybe Int
+    , activeServices : Maybe Int
+    , activeExternalServices : List String
+    , tags : List String
+    }
+
+
+
+-- EXTERNAL IP RANGES
+
+
+{-| Paginated envelope returned by [`getExternalIpRanges`](#getExternalIpRanges).
+-}
+type alias ExternalIpRangesResponse =
+    { totalCount : Maybe Int
+    , resultCount : Maybe Int
+    , externalIpAddressRanges : List ExternalIpRange
+    }
+
+
+{-| One external IP-address range registered to or attributed to the
+organization.
+-}
+type alias ExternalIpRange =
+    { rangeId : Maybe String
+    , firstIp : Maybe String
+    , lastIp : Maybe String
+    , ipsCount : Maybe Int
+    , activeResponsiveIpsCount : Maybe Int
+    , dateAdded : Maybe Int
+    , annotations : List String
+    , organizationHandles : List String
+    , businessUnits : List String
+    , tags : List String
+    }
+
+
+
+-- VULNERABILITY TESTS
+
+
+{-| Paginated envelope returned by [`getVulnerabilityTests`](#getVulnerabilityTests).
+-}
+type alias VulnerabilityTestsResponse =
+    { totalCount : Maybe Int
+    , resultCount : Maybe Int
+    , vulnerabilityTests : List VulnerabilityTest
+    }
+
+
+{-| One vulnerability-test definition (a CVE / scanner check the ASM
+engine runs against discovered services).
+-}
+type alias VulnerabilityTest =
+    { id : Maybe String
+    , name : Maybe String
+    , description : Maybe String
+    , status : Maybe String
+    , severityScore : Maybe Float
+    , epssScore : Maybe Float
+    , intrusiveLevel : Maybe String
+    , countVulnerableServices : Maybe Int
+    , vulnerabilityIds : List String
+    , vendorNames : List String
+    , cweIds : List String
+    , references : List String
+    , remediationGuidance : Maybe String
+    , firstPublished : Maybe Int
+    , created : Maybe Int
+    , affectedSoftware : List AffectedSoftware
+    }
+
+
+{-| One affected-software entry under a [`VulnerabilityTest`](#VulnerabilityTest)
+— a CPE plus version range describing which package versions the test
+applies to.
+-}
+type alias AffectedSoftware =
+    { name : Maybe String
+    , vendor : Maybe String
+    , product : Maybe String
+    , version : Maybe String
+    , versionStartIncluding : Maybe String
+    , versionStartExcluding : Maybe String
+    , versionEndIncluding : Maybe String
+    , versionEndExcluding : Maybe String
+    }
+
+
+
+-- EXTERNAL WEBSITES
+
+
+{-| Paginated envelope returned by [`getExternalWebsites`](#getExternalWebsites).
+-}
+type alias ExternalWebsitesResponse =
+    { totalCount : Maybe Int
+    , resultCount : Maybe Int
+    , websites : List ExternalWebsite
+    }
+
+
+{-| One externally-reachable website (a URL the ASM engine has
+discovered).
+-}
+type alias ExternalWebsite =
+    { id : Maybe String
+    , url : Maybe String
+    , statusCode : Maybe Int
+    , title : Maybe String
+    , favicon : Maybe String
+    , firstObserved : Maybe Int
+    , lastObserved : Maybe Int
+    , externallyDetectedProviders : List String
+    , externallyInferredCves : List String
+    , technologyMatches : List String
+    , businessUnits : List String
+    , tags : List String
+    }
+
+
+
+-- WEBSITES LAST ASSESSMENT
+
+
+{-| Wrapper for the single `last_external_assessment` field returned by
+[`getWebsitesLastAssessment`](#getWebsitesLastAssessment).
 -}
 type alias WebsitesLastAssessment =
     { lastExternalAssessment : LastAssessment
@@ -109,7 +343,7 @@ type alias LastAssessment =
 
 
 
--- ------- POST /public_api/v1/assets -------
+-- ENDPOINTS
 
 
 {-| POST /public\_api/v1/assets — the asset inventory list.
@@ -121,22 +355,6 @@ list =
         (reply assetsResponseDecoder)
 
 
-assetsResponseDecoder : Decoder AssetsResponse
-assetsResponseDecoder =
-    Decode.map3 AssetsResponse
-        (Decode.oneOf
-            [ Decode.field "data" (Decode.list Decode.value)
-            , Decode.succeed []
-            ]
-        )
-        (Decode.maybe (Decode.at [ "metadata", "filter_count" ] Decode.int))
-        (Decode.maybe (Decode.at [ "metadata", "total_count" ] Decode.int))
-
-
-
--- ------- GET /public_api/v1/assets/schema -------
-
-
 {-| GET /public\_api/v1/assets/schema — list the tenant's asset schema.
 -}
 getSchema : Request (List SchemaEntry)
@@ -146,86 +364,89 @@ getSchema =
         (Decode.at [ "reply", "data" ] (Decode.list schemaEntryDecoder))
 
 
-schemaEntryDecoder : Decoder SchemaEntry
-schemaEntryDecoder =
-    Decode.map3 SchemaEntry
-        (Decode.maybe (Decode.field "field_name" Decode.string))
-        (Decode.maybe (Decode.field "field_pretty_name" Decode.string))
-        (Decode.maybe (Decode.field "data_type" Decode.string))
-
-
-
--- ------- POST /public_api/v1/assets/get_external_services -------
-
-
 {-| POST /public\_api/v1/assets/get\_external\_services — externally reachable services.
 -}
-getExternalServices : SearchArgs -> Request CountedResponse
+getExternalServices : SearchArgs -> Request ExternalServicesResponse
 getExternalServices args =
-    countedRequest
+    Request.post
         [ "public_api", "v1", "assets", "get_external_services" ]
-        "external_services"
-        args
-
-
-
--- ------- POST /public_api/v1/assets/get_assets_internet_exposure -------
+        (RequestData.encode Query.standard
+            { filters = args.filters
+            , sort = args.sort
+            , range = args.range
+            , timeframe = args.timeframe
+            , extra = args.extra
+            }
+        )
+        (reply (countedDecoder "external_services" externalServiceDecoder ExternalServicesResponse))
 
 
 {-| POST /public\_api/v1/assets/get\_assets\_internet\_exposure — assets exposed to the public internet.
 -}
-getInternetExposures : SearchArgs -> Request CountedResponse
+getInternetExposures : SearchArgs -> Request InternetExposuresResponse
 getInternetExposures args =
-    countedRequest
+    Request.post
         [ "public_api", "v1", "assets", "get_assets_internet_exposure" ]
-        "assets_internet_exposure"
-        args
-
-
-
--- ------- POST /public_api/v1/assets/get_external_ip_address_ranges -------
+        (RequestData.encode Query.standard
+            { filters = args.filters
+            , sort = args.sort
+            , range = args.range
+            , timeframe = args.timeframe
+            , extra = args.extra
+            }
+        )
+        (reply (countedDecoder "assets_internet_exposure" internetExposureDecoder InternetExposuresResponse))
 
 
 {-| POST /public\_api/v1/assets/get\_external\_ip\_address\_ranges — discovered external IP ranges.
 -}
-getExternalIpRanges : SearchArgs -> Request CountedResponse
+getExternalIpRanges : SearchArgs -> Request ExternalIpRangesResponse
 getExternalIpRanges args =
-    countedRequest
+    Request.post
         [ "public_api", "v1", "assets", "get_external_ip_address_ranges" ]
-        "external_ip_address_ranges"
-        args
-
-
-
--- ------- POST /public_api/v1/assets/get_vulnerability_tests -------
+        (RequestData.encode Query.standard
+            { filters = args.filters
+            , sort = args.sort
+            , range = args.range
+            , timeframe = args.timeframe
+            , extra = args.extra
+            }
+        )
+        (reply (countedDecoder "external_ip_address_ranges" externalIpRangeDecoder ExternalIpRangesResponse))
 
 
 {-| POST /public\_api/v1/assets/get\_vulnerability\_tests — vulnerability scanner results.
 -}
-getVulnerabilityTests : SearchArgs -> Request CountedResponse
+getVulnerabilityTests : SearchArgs -> Request VulnerabilityTestsResponse
 getVulnerabilityTests args =
-    countedRequest
+    Request.post
         [ "public_api", "v1", "assets", "get_vulnerability_tests" ]
-        "vulnerability_tests"
-        args
-
-
-
--- ------- POST /public_api/v1/assets/get_external_websites -------
+        (RequestData.encode Query.standard
+            { filters = args.filters
+            , sort = args.sort
+            , range = args.range
+            , timeframe = args.timeframe
+            , extra = args.extra
+            }
+        )
+        (reply (countedDecoder "vulnerability_tests" vulnerabilityTestDecoder VulnerabilityTestsResponse))
 
 
 {-| POST /public\_api/v1/assets/get\_external\_websites — externally reachable websites.
 -}
-getExternalWebsites : SearchArgs -> Request CountedResponse
+getExternalWebsites : SearchArgs -> Request ExternalWebsitesResponse
 getExternalWebsites args =
-    countedRequest
+    Request.post
         [ "public_api", "v1", "assets", "get_external_websites" ]
-        "websites"
-        args
-
-
-
--- ------- POST /public_api/v1/assets/get_external_websites/last_external_assessment -------
+        (RequestData.encode Query.standard
+            { filters = args.filters
+            , sort = args.sort
+            , range = args.range
+            , timeframe = args.timeframe
+            , extra = args.extra
+            }
+        )
+        (reply (countedDecoder "websites" externalWebsiteDecoder ExternalWebsitesResponse))
 
 
 {-| POST /public\_api/v1/assets/get\_external\_websites/last\_external\_assessment —
@@ -236,6 +457,185 @@ getWebsitesLastAssessment =
     Request.postEmpty
         [ "public_api", "v1", "assets", "get_external_websites", "last_external_assessment" ]
         websitesLastAssessmentDecoder
+
+
+
+-- DECODERS
+
+
+countedDecoder : String -> Decoder item -> (Maybe Int -> Maybe Int -> List item -> resp) -> Decoder resp
+countedDecoder itemKey itemDecoder ctor =
+    Decode.map3 ctor
+        (Decode.maybe (Decode.field "total_count" Decode.int))
+        (Decode.maybe (Decode.field "result_count" Decode.int))
+        (Decode.oneOf
+            [ Decode.field itemKey (Decode.list itemDecoder)
+            , Decode.succeed []
+            ]
+        )
+
+
+assetsResponseDecoder : Decoder AssetsResponse
+assetsResponseDecoder =
+    Decode.map3 AssetsResponse
+        (Decode.oneOf
+            [ Decode.field "data" (Decode.list assetDecoder)
+            , Decode.succeed []
+            ]
+        )
+        (Decode.maybe (Decode.at [ "metadata", "filter_count" ] Decode.int))
+        (Decode.maybe (Decode.at [ "metadata", "total_count" ] Decode.int))
+
+
+assetDecoder : Decoder Asset
+assetDecoder =
+    Decode.succeed Asset
+        |> andMap (optionalField "xdm.asset.id" Decode.string)
+        |> andMap (optionalField "xdm.asset.strong_id" Decode.string)
+        |> andMap (optionalField "xdm.asset.name" Decode.string)
+        |> andMap (optionalField "xdm.asset.external_provider_id" Decode.string)
+        |> andMap (optionalField "xdm.asset.provider" Decode.string)
+        |> andMap (optionalField "xdm.asset.realm" Decode.string)
+        |> andMap (optionalField "xdm.asset.type.id" Decode.string)
+        |> andMap (optionalField "xdm.asset.type.name" Decode.string)
+        |> andMap (optionalField "xdm.asset.type.category" Decode.string)
+        |> andMap (optionalField "xdm.asset.type.class" Decode.string)
+        |> andMap (optionalField "xdm.asset.cloud.region" Decode.string)
+        |> andMap (optionalField "xdm.asset.first_observed" Decode.int)
+        |> andMap (optionalField "xdm.asset.last_observed" Decode.int)
+        |> andMap (optionalList "xdm.asset.group_ids" Decode.int)
+        |> andMap (optionalList "xdm.host.ipv4_addresses" Decode.string)
+        |> andMap (optionalField "xdm.asset.related_issues.critical_issues" Decode.int)
+        |> andMap (optionalField "xdm.asset.related_issues.issues_breakdown" assetCountsDecoder)
+        |> andMap (optionalField "xdm.asset.related_cases.critical_cases" Decode.int)
+        |> andMap (optionalField "xdm.asset.related_cases.cases_breakdown" assetCountsDecoder)
+
+
+assetCountsDecoder : Decoder AssetCounts
+assetCountsDecoder =
+    Decode.map4 AssetCounts
+        (optionalField "critical" Decode.int)
+        (optionalField "high" Decode.int)
+        (optionalField "medium" Decode.int)
+        (optionalField "low" Decode.int)
+
+
+schemaEntryDecoder : Decoder SchemaEntry
+schemaEntryDecoder =
+    Decode.map3 SchemaEntry
+        (optionalField "field_name" Decode.string)
+        (optionalField "field_pretty_name" Decode.string)
+        (optionalField "data_type" Decode.string)
+
+
+externalServiceDecoder : Decoder ExternalService
+externalServiceDecoder =
+    Decode.succeed ExternalService
+        |> andMap (optionalField "service_id" Decode.string)
+        |> andMap (optionalField "service_name" Decode.string)
+        |> andMap (optionalField "service_type" Decode.string)
+        |> andMap (optionalList "ip_address" Decode.string)
+        |> andMap (optionalList "externally_detected_providers" Decode.string)
+        |> andMap (optionalList "externally_inferred_cves" Decode.string)
+        |> andMap (optionalField "is_active" Decode.string)
+        |> andMap (optionalField "first_observed" Decode.int)
+        |> andMap (optionalField "last_observed" Decode.int)
+        |> andMap (optionalField "protocol" Decode.string)
+        |> andMap (optionalField "port" Decode.int)
+        -- ^ wire field is "port"; Elm record field is `port_` because port is reserved
+        |> andMap (optionalList "domain" Decode.string)
+        |> andMap (optionalList "active_classifications" Decode.string)
+        |> andMap (optionalList "inactive_classifications" Decode.string)
+        |> andMap (optionalField "discovery_type" Decode.string)
+        |> andMap (optionalList "business_units_list" Decode.string)
+        |> andMap (optionalList "tags" Decode.string)
+        |> andMap (optionalField "details" Decode.value)
+
+
+internetExposureDecoder : Decoder InternetExposure
+internetExposureDecoder =
+    Decode.succeed InternetExposure
+        |> andMap (optionalField "asset_id" Decode.string)
+        |> andMap (optionalField "name" Decode.string)
+        |> andMap (optionalField "type" Decode.string)
+        |> andMap (optionalField "ip_address" Decode.string)
+        |> andMap (optionalField "ipv6_address" Decode.string)
+        |> andMap (optionalField "domain" Decode.string)
+        |> andMap (optionalList "externally_detected_providers" Decode.string)
+        |> andMap (optionalList "externally_inferred_cves" Decode.string)
+        |> andMap (optionalField "externally_inferred_vulnerability_score" Decode.float)
+        |> andMap (optionalList "business_units_list" Decode.string)
+        |> andMap (optionalField "first_observed" Decode.int)
+        |> andMap (optionalField "last_observed" Decode.int)
+        |> andMap (optionalField "active_services" Decode.int)
+        |> andMap (optionalList "active_external_services" Decode.string)
+        |> andMap (optionalList "tags" Decode.string)
+
+
+externalIpRangeDecoder : Decoder ExternalIpRange
+externalIpRangeDecoder =
+    Decode.succeed ExternalIpRange
+        |> andMap (optionalField "range_id" Decode.string)
+        |> andMap (optionalField "first_ip" Decode.string)
+        |> andMap (optionalField "last_ip" Decode.string)
+        |> andMap (optionalField "ips_count" Decode.int)
+        |> andMap (optionalField "active_responsive_ips_count" Decode.int)
+        |> andMap (optionalField "date_added" Decode.int)
+        |> andMap (optionalList "annotations" Decode.string)
+        |> andMap (optionalList "organization_handles" Decode.string)
+        |> andMap (optionalList "business_units_list" Decode.string)
+        |> andMap (optionalList "tags" Decode.string)
+
+
+vulnerabilityTestDecoder : Decoder VulnerabilityTest
+vulnerabilityTestDecoder =
+    Decode.succeed VulnerabilityTest
+        |> andMap (optionalField "id" Decode.string)
+        |> andMap (optionalField "name" Decode.string)
+        |> andMap (optionalField "description" Decode.string)
+        |> andMap (optionalField "status" Decode.string)
+        |> andMap (optionalField "severity_score" Decode.float)
+        |> andMap (optionalField "epss_score" Decode.float)
+        |> andMap (optionalField "intrusive_level" Decode.string)
+        |> andMap (optionalField "count_vulnerable_services" Decode.int)
+        |> andMap (optionalList "vulnerability_ids" Decode.string)
+        |> andMap (optionalList "vendor_names" Decode.string)
+        |> andMap (optionalList "cwe_ids" Decode.string)
+        |> andMap (optionalList "references" Decode.string)
+        |> andMap (optionalField "remediation_guidance" Decode.string)
+        |> andMap (optionalField "first_published" Decode.int)
+        |> andMap (optionalField "created" Decode.int)
+        |> andMap (optionalList "affected_software" affectedSoftwareDecoder)
+
+
+affectedSoftwareDecoder : Decoder AffectedSoftware
+affectedSoftwareDecoder =
+    Decode.map8 AffectedSoftware
+        (optionalField "NAME" Decode.string)
+        (optionalField "VENDOR" Decode.string)
+        (optionalField "PRODUCT" Decode.string)
+        (optionalField "VERSION" Decode.string)
+        (optionalField "VERSION_START_INCLUDING" Decode.string)
+        (optionalField "VERSION_START_EXCLUDING" Decode.string)
+        (optionalField "VERSION_END_INCLUDING" Decode.string)
+        (optionalField "VERSION_END_EXCLUDING" Decode.string)
+
+
+externalWebsiteDecoder : Decoder ExternalWebsite
+externalWebsiteDecoder =
+    Decode.succeed ExternalWebsite
+        |> andMap (optionalField "id" Decode.string)
+        |> andMap (optionalField "url" Decode.string)
+        |> andMap (optionalField "status_code" Decode.int)
+        |> andMap (optionalField "title" Decode.string)
+        |> andMap (optionalField "favicon" Decode.string)
+        |> andMap (optionalField "first_observed" Decode.int)
+        |> andMap (optionalField "last_observed" Decode.int)
+        |> andMap (optionalList "externally_detected_providers" Decode.string)
+        |> andMap (optionalList "externally_inferred_cves" Decode.string)
+        |> andMap (optionalList "technology_matches" Decode.string)
+        |> andMap (optionalList "business_units_list" Decode.string)
+        |> andMap (optionalList "tags" Decode.string)
 
 
 websitesLastAssessmentDecoder : Decoder WebsitesLastAssessment
@@ -251,31 +651,6 @@ lastAssessmentDecoder =
         (Decode.maybe (Decode.field "time" Decode.int))
 
 
-
--- ------- shared helpers for the "counted list" response shape -------
-
-
-countedRequest : List String -> String -> SearchArgs -> Request CountedResponse
-countedRequest path itemKey args =
-    Request.post path
-        (RequestData.encode Query.standard
-            { filters = args.filters
-            , sort = args.sort
-            , range = args.range
-            , timeframe = args.timeframe
-            , extra = args.extra
-            }
-        )
-        (reply (countedResponseDecoder itemKey))
-
-
-countedResponseDecoder : String -> Decoder CountedResponse
-countedResponseDecoder itemKey =
-    Decode.map3 CountedResponse
-        (Decode.maybe (Decode.field "total_count" Decode.int))
-        (Decode.maybe (Decode.field "result_count" Decode.int))
-        (Decode.oneOf
-            [ Decode.field itemKey (Decode.list Decode.value)
-            , Decode.succeed []
-            ]
-        )
+optionalField : String -> Decoder a -> Decoder (Maybe a)
+optionalField name d =
+    Decode.maybe (Decode.field name d)

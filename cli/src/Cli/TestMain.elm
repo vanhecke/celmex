@@ -912,28 +912,135 @@ run stamp config endpoint =
                 )
 
         Commands.AssetsList ->
-            typed Assets.list
+            typedAssert Assets.list
+                (\r ->
+                    nonEmpty "data" r.data
+                        :: sampleFirst "data"
+                            r.data
+                            (\a ->
+                                [ nonBlank "id" a.id
+                                , nonBlank "typeId" a.typeId
+                                , nonBlank "typeName" a.typeName
+                                , nonBlank "provider" a.provider
+                                , present "firstObserved" a.firstObserved
+                                ]
+                            )
+                )
 
         Commands.AssetsSchema ->
-            typed Assets.getSchema
+            typedAssert Assets.getSchema
+                (\fields ->
+                    nonEmpty "schema" fields
+                        :: sampleFirst "schema"
+                            fields
+                            (\f ->
+                                [ nonBlank "fieldName" f.fieldName
+                                , nonBlank "dataType" f.dataType
+                                ]
+                            )
+                )
 
         Commands.AssetsExternalServices args ->
-            typed (Assets.getExternalServices args)
+            typedAssert (Assets.getExternalServices args)
+                (\r ->
+                    [ nonNegative "totalCount" r.totalCount
+                    , nonNegative "resultCount" r.resultCount
+                    ]
+                        ++ (if List.isEmpty r.externalServices then
+                                []
+
+                            else
+                                sampleFirst "externalServices"
+                                    r.externalServices
+                                    (\s ->
+                                        [ nonBlank "serviceName" s.serviceName
+                                        , nonBlank "protocol" s.protocol
+                                        ]
+                                    )
+                           )
+                )
 
         Commands.AssetsInternetExposures args ->
-            typed (Assets.getInternetExposures args)
+            typedAssert (Assets.getInternetExposures args)
+                (\r ->
+                    [ nonNegative "totalCount" r.totalCount
+                    , nonNegative "resultCount" r.resultCount
+                    ]
+                        ++ (if List.isEmpty r.assetsInternetExposure then
+                                []
+
+                            else
+                                sampleFirst "assetsInternetExposure"
+                                    r.assetsInternetExposure
+                                    (\e ->
+                                        [ nonBlank "assetId" e.assetId
+                                        , nonBlank "name" e.name
+                                        ]
+                                    )
+                           )
+                )
 
         Commands.AssetsIpRanges args ->
-            typed (Assets.getExternalIpRanges args)
+            typedAssert (Assets.getExternalIpRanges args)
+                (\r ->
+                    [ nonNegative "totalCount" r.totalCount
+                    , nonNegative "resultCount" r.resultCount
+                    ]
+                        ++ (if List.isEmpty r.externalIpAddressRanges then
+                                []
+
+                            else
+                                sampleFirst "externalIpAddressRanges"
+                                    r.externalIpAddressRanges
+                                    (\ipr ->
+                                        [ nonBlank "firstIp" ipr.firstIp
+                                        , nonBlank "lastIp" ipr.lastIp
+                                        ]
+                                    )
+                           )
+                )
 
         Commands.AssetsVulnerabilityTests args ->
-            typed (Assets.getVulnerabilityTests args)
+            typedAssert (Assets.getVulnerabilityTests args)
+                (\r ->
+                    [ nonNegative "totalCount" r.totalCount
+                    , nonNegative "resultCount" r.resultCount
+                    ]
+                        ++ (if List.isEmpty r.vulnerabilityTests then
+                                []
+
+                            else
+                                sampleFirst "vulnerabilityTests"
+                                    r.vulnerabilityTests
+                                    (\v ->
+                                        [ nonBlank "id" v.id
+                                        , nonBlank "name" v.name
+                                        , nonBlank "status" v.status
+                                        , nonEmpty "vulnerabilityIds" v.vulnerabilityIds
+                                        ]
+                                    )
+                           )
+                )
 
         Commands.AssetsExternalWebsites args ->
-            typed (Assets.getExternalWebsites args)
+            typedAssert (Assets.getExternalWebsites args)
+                (\r ->
+                    [ nonNegative "totalCount" r.totalCount
+                    , nonNegative "resultCount" r.resultCount
+                    ]
+                        ++ (if List.isEmpty r.websites then
+                                []
+
+                            else
+                                sampleFirst "websites"
+                                    r.websites
+                                    (\w -> [ nonBlank "url" w.url ])
+                           )
+                )
 
         Commands.AssetsWebsitesLastAssessment ->
-            typed Assets.getWebsitesLastAssessment
+            typedAssert Assets.getWebsitesLastAssessment
+                (\r -> [ present "status" r.lastExternalAssessment.status ])
 
         Commands.AssetGroupsList ->
             typedAssert AssetGroups.list

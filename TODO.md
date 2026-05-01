@@ -77,13 +77,13 @@ Source: `cortex-platform-papi.json`
 |  | POST | `/public_api/v1/endpoints/isolate` | Isolate Endpoints | Edit |  |  |  |  |
 | ✓ | POST | `/public_api/v1/audits/agents_reports` | Get Audit Agent Report | View | `Cortex.Api.AuditLogs` | `audit-logs agents-reports` | `audit_logs_agents_reports.bats` | ✓ |
 |  | POST | `/public_api/v1/assets/get_external_service` | Get External Service | View |  |  |  |  |
-| ✓ | POST | `/public_api/v1/assets/get_external_services` | Get All Services | View | `Cortex.Api.Assets` | `assets external-services` | `assets.bats` | ✗ |
-| ✓ | POST | `/public_api/v1/assets/get_assets_internet_exposure` | Get all Internet Exposures | View | `Cortex.Api.Assets` | `assets internet-exposures` | `assets.bats` | ✗ |
+| ✓ | POST | `/public_api/v1/assets/get_external_services` | Get All Services | View | `Cortex.Api.Assets` | `assets external-services` | `assets.bats` | ✓ |
+| ✓ | POST | `/public_api/v1/assets/get_assets_internet_exposure` | Get all Internet Exposures | View | `Cortex.Api.Assets` | `assets internet-exposures` | `assets.bats` | ✓ |
 |  | POST | `/public_api/v1/assets/get_asset_internet_exposure` | Get Internet Exposure | View |  |  |  |  |
-| ✓ | POST | `/public_api/v1/assets/get_external_ip_address_ranges` | Get all External IP Address Ranges | View | `Cortex.Api.Assets` | `assets ip-ranges` | `assets.bats` | ✗ |
+| ✓ | POST | `/public_api/v1/assets/get_external_ip_address_ranges` | Get all External IP Address Ranges | View | `Cortex.Api.Assets` | `assets ip-ranges` | `assets.bats` | ✓ |
 |  | POST | `/public_api/v1/assets/get_external_ip_address_range` | Get External IP Address Range | View |  |  |  |  |
 |  | POST | `/public_api/v1/triage_endpoint` | Initiate Forensics Triage | Edit |  |  |  |  |
-| ✓ | POST | `/public_api/v1/assets/get_vulnerability_tests` | Get vulnerability tests | View | `Cortex.Api.Assets` | `assets vulnerability-tests` | `assets.bats` | ✗ |
+| ✓ | POST | `/public_api/v1/assets/get_vulnerability_tests` | Get vulnerability tests | View | `Cortex.Api.Assets` | `assets vulnerability-tests` | `assets.bats` | ✓ |
 |  | POST | `/public_api/v1/assets/bulk_update_vulnerability_tests` | Bulk Update Vulnerability Tests | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/dataset/define_dataset` | Define an XQL user dataset | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/dataset/get_created_datasets` | Get created XQL user datasets | View |  |  |  |  |
@@ -102,8 +102,8 @@ Source: `cortex-platform-papi.json`
 |  | POST | `/public_api/v1/authentication-settings/get/metadata` | Get IdP metadata | View |  |  |  |  |
 |  | POST | `/public_api/v1/asm_management/upload_asm_data` | Upload assets to the inventory | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/assets/get_external_website` | Get Website Details | View |  |  |  |  |
-| ✓ | POST | `/public_api/v1/assets/get_external_websites` | Get all Websites | View | `Cortex.Api.Assets` | `assets external-websites` | `assets.bats` | ✗ |
-| ✓ | POST | `/public_api/v1/assets/get_external_websites/last_external_assessment` | Get Websites Last Assessment | View | `Cortex.Api.Assets` | `assets websites-last-assessment` | `assets.bats` | ✗ |
+| ✓ | POST | `/public_api/v1/assets/get_external_websites` | Get all Websites | View | `Cortex.Api.Assets` | `assets external-websites` | `assets.bats` | ✓ |
+| ✓ | POST | `/public_api/v1/assets/get_external_websites/last_external_assessment` | Get Websites Last Assessment | View | `Cortex.Api.Assets` | `assets websites-last-assessment` | `assets.bats` | ✓ |
 |  | POST | `/public_api/v1/integrations/syslog/create` | Create a syslog integration | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/integrations/syslog/get` | Get all or filtered syslog servers | View |  |  |  |  |
 |  | POST | `/public_api/v1/integrations/syslog/update` | Update a syslog integration | Edit |  |  |  |  |
@@ -148,10 +148,10 @@ Source: `cortex-platform-papi.json`
 |  | GET | `/public_api/v1/case/artifacts/{case-id}` | Retrieve Case Artifacts by Case ID | View |  |  |  |  |
 |  | POST | `/public_api/v1/entries/get` | Get War Room entries | View |  |  |  |  |
 |  | POST | `/public_api/v1/entries/insert` | Add War Room entries | Edit |  |  |  |  |
-| ✓ | POST | `/public_api/v1/assets` | Get all or filtered assets | View | `Cortex.Api.Assets` | `assets list` | `assets.bats` | ✗ |
+| ✓ | POST | `/public_api/v1/assets` | Get all or filtered assets | View | `Cortex.Api.Assets` | `assets list` | `assets.bats` | ✓ |
 |  | GET | `/public_api/v1/assets/{id}` | Get asset by ID | View |  |  |  |  |
 |  | GET | `/public_api/v1/assets/{id}/raw_fields` | Get raw fields of asset by ID | View |  |  |  |  |
-| ✓ | GET | `/public_api/v1/assets/schema` | Get schema of asset inventory | View | `Cortex.Api.Assets` | `assets schema` | `assets.bats` | ✗ |
+| ✓ | GET | `/public_api/v1/assets/schema` | Get schema of asset inventory | View | `Cortex.Api.Assets` | `assets schema` | `assets.bats` | ✓ |
 |  | GET | `/public_api/v1/assets/enum/{field_name}` | Get enum values of specified field | View |  |  |  |  |
 | ✓ | POST | `/public_api/v1/asset-groups` | Get all or filtered asset groups | View | `Cortex.Api.AssetGroups` | `asset-groups list` | `asset_groups.bats` | ✓ |
 |  | POST | `/public_api/v1/asset-groups/create` | Create an Asset Group | Edit |  |  |  |  |
