@@ -320,16 +320,43 @@ run stamp config endpoint =
                 )
 
         Commands.DistributionsGetVersions ->
-            typed Distributions.getVersions
+            typedAssert Distributions.getVersions
+                (\v ->
+                    [ nonEmpty "windows" v.windows
+                    , nonEmpty "linux" v.linux
+                    , nonEmpty "macos" v.macos
+                    ]
+                )
 
         Commands.DistributionsList ->
-            typed Distributions.getDistributions
+            typedAssert Distributions.getDistributions
+                (\r ->
+                    [ nonNegative "totalCount" r.totalCount
+                    , nonNegative "filterCount" r.filterCount
+                    ]
+                        ++ (if List.isEmpty r.data then
+                                []
+
+                            else
+                                sampleFirst "data"
+                                    r.data
+                                    (\d ->
+                                        [ nonBlank "distributionId" d.distributionId
+                                        , nonBlank "name" d.name
+                                        , nonBlank "platform" d.platform
+                                        , nonBlank "agentVersion" d.agentVersion
+                                        ]
+                                    )
+                           )
+                )
 
         Commands.DistributionsGetStatus id ->
-            typed (Distributions.getStatus id)
+            typedAssert (Distributions.getStatus id)
+                (\r -> [ nonBlank "status" r.status ])
 
         Commands.DistributionsGetDistUrl id packageType ->
-            typed (Distributions.getDistUrl { distributionId = id, packageType = packageType })
+            typedAssert (Distributions.getDistUrl { distributionId = id, packageType = packageType })
+                (\r -> [ nonBlank "distributionUrl" r.distributionUrl ])
 
         Commands.TriagePresetsList ->
             typed TriagePresets.list

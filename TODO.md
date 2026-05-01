@@ -30,15 +30,15 @@ Source: `cortex-platform-papi.json`
 |  | POST | `/public_api/v1/xql/get_query_results` | Get XQL query results | View |  |  |  |  |
 | ✓ | POST | `/public_api/v1/xql/get_quota` | Get XQL query Quota | View | `Cortex.Api.Xql` | `xql get-quota` | `xql.bats` | ✓ |
 |  | POST | `/public_api/v1/xql/get_query_results_stream` | Get XQL query results Stream | View |  |  |  |  |
-| ✓ | POST | `/public_api/v1/distributions/get_versions` | Get Distribution version | View | `Cortex.Api.Distributions` | `distributions get-versions` | `distributions.bats` | ✗ |
+| ✓ | POST | `/public_api/v1/distributions/get_versions` | Get Distribution version | View | `Cortex.Api.Distributions` | `distributions get-versions` | `distributions.bats` | ✓ |
 | ✓ | POST | `/public_api/v1/endpoints/get_endpoints` | Get all Endpoints | View | `Cortex.Api.Endpoints` | `endpoints list` | `endpoints.bats` | ✓ |
 | ✓ | POST | `/public_api/v1/endpoints/get_policy` | Get Policy | View | `Cortex.Api.Profiles` | `profiles get-policy` | `profiles.bats` | ✗ |
 |  | POST | `/public_api/v1/endpoints/delete` | Delete Endpoints | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/distributions/create` | Create distributions | Edit |  |  |  |  |
-| ✓ | POST | `/public_api/v1/distributions/get_distributions` | Get Distributions | View | `Cortex.Api.Distributions` | `distributions list` | `distributions.bats` | ✗ |
+| ✓ | POST | `/public_api/v1/distributions/get_distributions` | Get Distributions | View | `Cortex.Api.Distributions` | `distributions list` | `distributions.bats` | ✓ |
 | ✓ | POST | `/public_api/v1/device_control/get_violations` | Get Violations | View | `Cortex.Api.DeviceControl` | `device-control get-violations` | `device_control.bats` | ✓ |
-| ✓ | POST | `/public_api/v1/distributions/get_status` | Get Distribution status | View | `Cortex.Api.Distributions` | `distributions get-status` | `distributions.bats` | ✗ |
-| ✓ | POST | `/public_api/v1/distributions/get_dist_url` | Get Distribution URL | View | `Cortex.Api.Distributions` | `distributions get-dist-url` | `distributions.bats` | ✗ |
+| ✓ | POST | `/public_api/v1/distributions/get_status` | Get Distribution status | View | `Cortex.Api.Distributions` | `distributions get-status` | `distributions.bats` | ✓ |
+| ✓ | POST | `/public_api/v1/distributions/get_dist_url` | Get Distribution URL | View | `Cortex.Api.Distributions` | `distributions get-dist-url` | `distributions.bats` | ✓ |
 |  | POST | `/public_api/v1/endpoints/update_agent_name` | Set an Endpoint Alias | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/tags/agents/assign` | Assign Tags | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/tags/agents/remove` | Remove Tags | Edit |  |  |  |  |
