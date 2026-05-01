@@ -303,7 +303,26 @@ run stamp config endpoint =
                 )
 
         Commands.DeviceControlGetViolations ->
-            typed DeviceControl.getViolations
+            typedAssert DeviceControl.getViolations
+                (\r ->
+                    [ nonNegative "totalCount" r.totalCount
+                    , nonNegative "resultCount" r.resultCount
+                    ]
+                        ++ (if List.isEmpty r.violations then
+                                -- legitimately empty on tenants with no peripheral activity
+                                []
+
+                            else
+                                sampleFirst "violations"
+                                    r.violations
+                                    (\v ->
+                                        [ positive "violationId" v.violationId
+                                        , present "timestamp" v.timestamp
+                                        , nonBlank "endpointId" v.endpointId
+                                        ]
+                                    )
+                           )
+                )
 
         Commands.AttackSurfaceGetRules ->
             typed AttackSurface.getRules

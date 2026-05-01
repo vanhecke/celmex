@@ -7,8 +7,9 @@ setup() {
 @test "device-control get-violations returns valid JSON with violations array" {
     run "$CORTEX" device-control get-violations
     [ "$status" -eq 0 ]
-    echo "$output" | jq . > /dev/null
     echo "$output" | jq -e '.violations | type == "array"' > /dev/null
+    echo "$output" | jq -e '.total_count | type == "number"' > /dev/null
+    echo "$output" | jq -e '.result_count | type == "number"' > /dev/null
 }
 
 @test "device-control get-violations typed decode succeeds" {
