@@ -514,13 +514,58 @@ run stamp config endpoint =
                 )
 
         Commands.DisablePreventionFetch ->
-            typed DisablePrevention.fetchRules
+            typedAssert DisablePrevention.fetchRules
+                (\r ->
+                    [ nonNegative "totalCount" r.totalCount
+                    , nonNegative "filterCount" r.filterCount
+                    ]
+                        ++ (if List.isEmpty r.data then
+                                []
+
+                            else
+                                sampleFirst "data"
+                                    r.data
+                                    (\rule ->
+                                        [ nonBlank "ruleId" rule.ruleId
+                                        , nonBlank "ruleName" rule.ruleName
+                                        , nonBlank "status" rule.status
+                                        ]
+                                    )
+                           )
+                )
 
         Commands.DisablePreventionFetchInjection ->
-            typed DisablePrevention.fetchInjectionRules
+            typedAssert DisablePrevention.fetchInjectionRules
+                (\r ->
+                    [ nonNegative "totalCount" r.totalCount
+                    , nonNegative "filterCount" r.filterCount
+                    ]
+                        ++ (if List.isEmpty r.data then
+                                []
+
+                            else
+                                sampleFirst "data"
+                                    r.data
+                                    (\rule ->
+                                        [ nonBlank "ruleId" rule.ruleId
+                                        , nonBlank "ruleName" rule.ruleName
+                                        ]
+                                    )
+                           )
+                )
 
         Commands.DisablePreventionGetModules platform ->
-            typed (DisablePrevention.getModules platform)
+            typedAssert (DisablePrevention.getModules platform)
+                (\modules ->
+                    nonEmpty "modules" modules
+                        :: sampleFirst "modules"
+                            modules
+                            (\m ->
+                                [ positive "moduleId" m.moduleId
+                                , nonBlank "name" m.name
+                                ]
+                            )
+                )
 
         Commands.AssetsList ->
             typed Assets.list

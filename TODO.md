@@ -427,8 +427,8 @@ Source: `disable-prevention-rule-papi.json`
 
 | ✓ | Method | Path | Description | Type | Elm | CLI | Test | Asserts |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ✓ | POST | `/public_api/v1/disable_prevention/fetch` | Get Disable Prevention Rules | View | `Cortex.Api.DisablePrevention` | `disable-prevention fetch` | `disable_prevention.bats` | ✗ |
-| ✓ | POST | `/public_api/v1/disable_prevention/get_modules` | Get Disable Prevention Modules | View | `Cortex.Api.DisablePrevention` | `disable-prevention get-modules` | `disable_prevention.bats` | ✗ |
+| ✓ | POST | `/public_api/v1/disable_prevention/fetch` | Get Disable Prevention Rules | View | `Cortex.Api.DisablePrevention` | `disable-prevention fetch` | `disable_prevention.bats` | ✓ |
+| ✓ | POST | `/public_api/v1/disable_prevention/get_modules` | Get Disable Prevention Modules | View | `Cortex.Api.DisablePrevention` | `disable-prevention get-modules` | `disable_prevention.bats` | ✓ |
 |  | POST | `/public_api/v1/disable_prevention/add` | Add Disable Prevention Rule | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/disable_prevention/edit` | Edit Disable Prevention Rule | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/disable_prevention/delete` | Delete Disable Prevention Rules | Edit |  |  |  |  |
@@ -439,7 +439,7 @@ Source: `disable-injection-prevention-rule-papi.json`
 
 | ✓ | Method | Path | Description | Type | Elm | CLI | Test | Asserts |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ✓ | POST | `/public_api/v1/disable_injection_prevention_rules/fetch` | Get Disable Injection and Prevention rules | View | `Cortex.Api.DisablePrevention` | `disable-prevention fetch-injection` | `disable_prevention.bats` | ✗ |
+| ✓ | POST | `/public_api/v1/disable_injection_prevention_rules/fetch` | Get Disable Injection and Prevention rules | View | `Cortex.Api.DisablePrevention` | `disable-prevention fetch-injection` | `disable_prevention.bats` | ✓ |
 |  | POST | `/public_api/v1/disable_injection_prevention_rules/add` | Add Disable Injection and Prevention rule | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/disable_injection_prevention_rules/disable` | Disable Disable Injection and Prevention Rules | Edit |  |  |  |  |
 
