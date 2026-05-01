@@ -157,7 +157,7 @@ Source: `cortex-platform-papi.json`
 |  | POST | `/public_api/v1/asset-groups/create` | Create an Asset Group | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/asset-groups/update/{group_id}` | Update an Asset Group | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/asset-groups/delete/{group_id}` | Delete an Asset Group | Edit |  |  |  |  |
-| ✓ | POST | `/public_api/v1/api_keys/get_api_keys` | Get existing API keys | View | `Cortex.Api.ApiKeys` | `api-keys list` | `api_keys.bats` | ✗ |
+| ✓ | POST | `/public_api/v1/api_keys/get_api_keys` | Get existing API keys | View | `Cortex.Api.ApiKeys` | `api-keys list` | `api_keys.bats` | ✓ |
 |  | POST | `/public_api/v1/api_keys/generate` | Generate an API key | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/api_keys/delete` | Delete API keys | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/tags/agents/delete_permanently` | Delete Tags Permanently | Edit |  |  |  |  |

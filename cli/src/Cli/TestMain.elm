@@ -739,7 +739,24 @@ run stamp config endpoint =
                 )
 
         Commands.ApiKeysList ->
-            typed ApiKeys.getApiKeys
+            typedAssert ApiKeys.getApiKeys
+                (\r ->
+                    [ positive "totalCount" r.totalCount
+                    , positive "filterCount" r.filterCount
+                    , nonEmpty "data" r.data
+                    ]
+                        ++ sampleFirst "data"
+                            r.data
+                            (\k ->
+                                [ satisfies "id" (k.id > 0) "expected > 0"
+                                , present "creationTime" k.creationTime
+                                , nonBlank "createdBy" k.createdBy
+                                , nonBlank "userName" k.userName
+                                , nonEmpty "roles" k.roles
+                                , nonBlank "securityLevel" k.securityLevel
+                                ]
+                            )
+                )
 
         Commands.RiskScore id ->
             typed (Risk.getRiskScore { id = id })

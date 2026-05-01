@@ -15,8 +15,11 @@ skip_if_unsupported() {
     run "$CORTEX" api-keys list
     skip_if_unsupported
     [ "$status" -eq 0 ]
-    echo "$output" | jq . > /dev/null
-    echo "$output" | jq -e '.DATA | type == "array"' > /dev/null
+    echo "$output" | jq -e '.DATA | type == "array" and length > 0' > /dev/null
+    echo "$output" | jq -e '.TOTAL_COUNT | type == "number" and . > 0' > /dev/null
+    echo "$output" | jq -e '.FILTER_COUNT | type == "number" and . > 0' > /dev/null
+    echo "$output" | jq -e '.DATA[0].id | type == "number"' > /dev/null
+    echo "$output" | jq -e '.DATA[0].roles | type == "array" and length > 0' > /dev/null
 }
 
 @test "api-keys list typed decode succeeds" {
