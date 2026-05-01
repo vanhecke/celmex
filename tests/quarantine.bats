@@ -47,16 +47,16 @@ FAKE_FILE_HASH="0000000000000000000000000000000000000000000000000000000000000000
 # --- CLI argument handling ---
 
 @test "quarantine status with missing args reports usage" {
-    run "$CORTEX" quarantine status "$FAKE_ENDPOINT_ID"
+    run --separate-stderr "$CORTEX" quarantine status "$FAKE_ENDPOINT_ID"
     [ "$status" -ne 0 ]
-    [[ "$output" == *"Unknown command"* ]] || [[ "$output" == *"Usage"* ]]
+    [[ "$stderr" == *"Unknown command"* ]] || [[ "$stderr" == *"Usage"* ]]
 }
 
 @test "quarantine status with too many args reports usage" {
-    run "$CORTEX" quarantine status \
+    run --separate-stderr "$CORTEX" quarantine status \
         "$FAKE_ENDPOINT_ID" "$FAKE_FILE_PATH" "$FAKE_FILE_HASH" extra
     [ "$status" -ne 0 ]
-    [[ "$output" == *"Unknown command"* ]] || [[ "$output" == *"Usage"* ]]
+    [[ "$stderr" == *"Unknown command"* ]] || [[ "$stderr" == *"Usage"* ]]
 }
 
 # --- Per-parameter test using a real endpoint id from the tenant ---
