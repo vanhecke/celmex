@@ -136,7 +136,58 @@ Assert **type and shape of actual fields** from the sample response. "Output is 
 }
 ```
 
-This proves the Elm decoder accepts the real response without dropping fields.
+This proves the Elm decoder accepts the real response without dropping fields. Exit code 0 means **both** structural decode AND any wired typed assertions (next sub-section) passed.
+
+**2a. Typed presence/value assertions in `cli/src/Cli/TestMain.elm`**
+
+Bare `typed` only catches the case where the decoder structurally fails (renamed/removed fields). It does **not** catch the case where a documented `Maybe` field decodes to `Nothing` because the API silently stopped returning it, or where a counter returns `0` for a field that should always be positive.
+
+If the SDK record has documented `Maybe` fields the API is contractually expected to return, wire them through `typedAssert` instead of `typed`:
+
+```elm
+Commands.FooBar ->
+    typedAssert Foo.bar
+        (\r ->
+            [ positive "totalCount" r.totalCount
+            , nonNegative "skippedCount" r.skippedCount
+            , nonBlank "tenantId" r.tenantId
+            , nonEmpty "items" r.items
+            ]
+                ++ sampleFirst "items"
+                    r.items
+                    (\item ->
+                        [ nonBlank "id" item.id
+                        , present "createdAt" item.createdAt
+                        ]
+                    )
+        )
+```
+
+The `XqlGetQuota` case in `cli/src/Cli/TestMain.elm` is the canonical worked example.
+
+**Helper vocabulary** (all defined in `TestMain.elm`):
+
+| Helper | Use for |
+|---|---|
+| `present "name" m` | `Maybe a` — only existence matters; value can be anything |
+| `positive "name" m` | `Maybe number` — must be present AND `> 0` |
+| `nonNegative "name" m` | `Maybe number` — must be present AND `>= 0` |
+| `nonBlank "name" m` | `Maybe String` — must be present AND not `""` |
+| `nonEmpty "name" xs` | `List a` — must have at least one element |
+| `satisfies "name" pred "msg"` | escape hatch for one-off predicates (cross-field, ranges, enums) |
+| `sampleFirst "name" xs (\x -> [...])` | sample head of a list and run typed checks on its fields |
+
+The `Maybe`-aware helpers (`positive`, `nonNegative`, `nonBlank`) imply existence — no need to chain `present` first.
+
+**Output on failure** is collapsed to one line per endpoint, naming each failed assertion and its reason:
+
+```
+fail: xql get-quota: licenseQuota: expected > 0; usedQuota: missing
+```
+
+**Do not** add assertions for fields the OpenAPI spec marks optional/nullable, for `Encode.Value` pass-through fields, for mutating endpoints (those use `skip` in TestMain), or for fields whose values legitimately vary across tenants in ways the test can't predict.
+
+If no `Maybe` fields are worth asserting on (e.g. `Healthcheck`'s `Bool` response), keep the bare `typed` and mark `—` in the `Asserts` column of TODO.md.
 
 **3. Per-parameter test cases** (only for endpoints that accept CLI parameters):
 
@@ -191,6 +242,11 @@ Open `TODO.md`. Find the section for the OpenAPI spec your endpoint belongs to.
 - Fill the `Elm` column with the module name (e.g., `Cortex.Api.Distributions`).
 - Fill the `CLI` column with the subcommand path (e.g., `distributions get-versions`).
 - Fill the `Test` column with the test file (e.g., `distributions.bats`).
+- Fill the `Asserts` column:
+  - `✓` if you wired typed assertions in `TestMain.elm` (Phase 6, sub-section 2a).
+  - `—` if the response has no `Maybe` fields worth asserting on.
+  - `skip` if the endpoint is a mutating endpoint or raw `Encode.Value` pass-through (matches `skip` in TestMain).
+  - `✗` only if you knowingly deferred the assertions — this is backlog, not a finished state.
 - If tenant-unsupported, annotate the Description column.
 - Update the progress tracker line near the top (e.g., `57/341 endpoints implemented`).
 
@@ -241,7 +297,7 @@ Apply the same checklist to an already-shipped endpoint:
 - **Phase 1**: re-read the OpenAPI spec for the endpoint. Diff the response schema against the current decoder — any fields silently dropped?
 - **Phase 2**: probe with `just curl`. Compare keys in the live response to the decoder fields. If the spec and live disagree, prefer the live response and update both decoder and any spec-driven assumptions.
 - **Phase 3**: check the SDK module — is the module-level docstring complete? `@docs` line for every exposed symbol? Per-symbol docs present? Decoder using `mapN`/`andMap` cleanly?
-- **Phase 6**: do the tests assert content (specific field types/shapes), or just exit code 0? Per-parameter coverage for CLI args? Dynamic fixture pattern where applicable?
+- **Phase 6**: do the tests assert content (specific field types/shapes), or just exit code 0? Per-parameter coverage for CLI args? Dynamic fixture pattern where applicable? Are documented `Maybe` fields wired as typed assertions in `cli/src/Cli/TestMain.elm`, using the strongest helper that fits (`positive` / `nonNegative` / `nonBlank` over a bare `present` where applicable)? Are list responses sampled with `sampleFirst`? If the `Asserts` column in `TODO.md` shows `✗`, this is the time to flip it to `✓`.
 - **Phase 7/8**: if endpoint is tenant-unsupported, is `skip_if_unsupported` used AND the `TODO.md` row annotated?
 
 Report findings first (concise list of gaps + severity), then fix in place. Same Phase 9 hand-off applies.
