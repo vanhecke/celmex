@@ -40,14 +40,112 @@ import Platform
 
 {-| Integration test runner for the typed SDK decoders. Same argv surface as
 `cortex`, but instead of emitting the response body it runs each endpoint
-through its typed decoder and reports `ok` / `fail` to stdout / stderr.
+through its typed decoder, evaluates a list of typed presence/value
+assertions against the decoded record, and reports `ok` / `fail` to
+stdout / stderr.
 
-A `fail` means the tenant returned JSON that the library's typed decoder
-could not parse — i.e., the library and the API have drifted.
+A `fail` means either:
+
+  - the tenant returned JSON that the library's typed decoder could not parse
+    (library/API have drifted at the structural level), or
+  - the decoder accepted the JSON but a documented field decoded to `Nothing`,
+    `0`, `""`, etc. (library/API have drifted at the value level — fields
+    silently disappeared or returned degenerate values).
+
+Endpoints that haven't opted in to value-level assertions still pass through
+`typed` and only catch the first failure mode.
 
 -}
+type alias Assertion =
+    { name : String
+    , reason : Maybe String
+    }
+
+
+present : String -> Maybe a -> Assertion
+present name m =
+    case m of
+        Just _ ->
+            { name = name, reason = Nothing }
+
+        Nothing ->
+            { name = name, reason = Just "missing" }
+
+
+nonEmpty : String -> List a -> Assertion
+nonEmpty name xs =
+    if List.isEmpty xs then
+        { name = name, reason = Just "empty list" }
+
+    else
+        { name = name, reason = Nothing }
+
+
+positive : String -> Maybe number -> Assertion
+positive name m =
+    case m of
+        Just v ->
+            if v > 0 then
+                { name = name, reason = Nothing }
+
+            else
+                { name = name, reason = Just "expected > 0" }
+
+        Nothing ->
+            { name = name, reason = Just "missing" }
+
+
+nonNegative : String -> Maybe number -> Assertion
+nonNegative name m =
+    case m of
+        Just v ->
+            if v >= 0 then
+                { name = name, reason = Nothing }
+
+            else
+                { name = name, reason = Just "expected >= 0" }
+
+        Nothing ->
+            { name = name, reason = Just "missing" }
+
+
+nonBlank : String -> Maybe String -> Assertion
+nonBlank name m =
+    case m of
+        Just s ->
+            if String.isEmpty s then
+                { name = name, reason = Just "expected non-empty string" }
+
+            else
+                { name = name, reason = Nothing }
+
+        Nothing ->
+            { name = name, reason = Just "missing" }
+
+
+satisfies : String -> Bool -> String -> Assertion
+satisfies name passed reason =
+    if passed then
+        { name = name, reason = Nothing }
+
+    else
+        { name = name, reason = Just reason }
+
+
+sampleFirst : String -> List a -> (a -> List Assertion) -> List Assertion
+sampleFirst listName xs check =
+    case List.head xs of
+        Just x ->
+            List.map
+                (\a -> { a | name = listName ++ "[0]." ++ a.name })
+                (check x)
+
+        Nothing ->
+            [ { name = listName, reason = Just "empty — cannot sample element fields" } ]
+
+
 type Msg
-    = Decoded String (Result Error ())
+    = Decoded String (Result Error (List Assertion))
 
 
 main : Program Decode.Value () Msg
@@ -114,7 +212,11 @@ run stamp config endpoint =
 
         typed : Request a -> Cmd Msg
         typed req =
-            Client.sendWith stamp config (Decoded name) (Request.map (\_ -> ()) req)
+            Client.sendWith stamp config (Decoded name) (Request.map (\_ -> []) req)
+
+        typedAssert : Request a -> (a -> List Assertion) -> Cmd Msg
+        typedAssert req checks =
+            Client.sendWith stamp config (Decoded name) (Request.map checks req)
 
         skip : Cmd Msg
         skip =
@@ -170,7 +272,19 @@ run stamp config endpoint =
             typed AttackSurface.getRules
 
         Commands.XqlGetQuota ->
-            typed Xql.getQuota
+            typedAssert Xql.getQuota
+                (\q ->
+                    [ positive "licenseQuota" q.licenseQuota
+                    , nonNegative "additionalPurchasedQuota" q.additionalPurchasedQuota
+                    , nonNegative "usedQuota" q.usedQuota
+                    , nonNegative "dailyUsedQuota" q.dailyUsedQuota
+                    , nonNegative "evalQuota" q.evalQuota
+                    , nonNegative "totalDailyRunningQueries" q.totalDailyRunningQueries
+                    , nonNegative "totalDailyConcurrentRejectedQueries" q.totalDailyConcurrentRejectedQueries
+                    , nonNegative "currentConcurrentActiveQueriesCount" q.currentConcurrentActiveQueriesCount
+                    , nonNegative "maxDailyConcurrentActiveQueryCount" q.maxDailyConcurrentActiveQueryCount
+                    ]
+                )
 
         Commands.XqlGetDatasets ->
             typed Xql.getDatasets
@@ -331,11 +445,24 @@ run stamp config endpoint =
 handleResult : Msg -> Cmd Msg
 handleResult (Decoded name result) =
     case result of
-        Ok () ->
-            Cmd.batch
-                [ Ports.stdout ("ok: " ++ name ++ "\n")
-                , Ports.exit 0
-                ]
+        Ok assertions ->
+            let
+                failures =
+                    List.filterMap
+                        (\a -> Maybe.map (\r -> a.name ++ ": " ++ r) a.reason)
+                        assertions
+            in
+            if List.isEmpty failures then
+                Cmd.batch
+                    [ Ports.stdout ("ok: " ++ name ++ "\n")
+                    , Ports.exit 0
+                    ]
+
+            else
+                Cmd.batch
+                    [ Ports.stderr ("fail: " ++ name ++ ": " ++ String.join "; " failures ++ "\n")
+                    , Ports.exit 1
+                    ]
 
         Err err ->
             Cmd.batch
