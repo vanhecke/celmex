@@ -120,4 +120,4 @@ jobs:
           path: cli/dist
 
       - name: Run BATS tests
-        run: bats tests/
+        run: bats --jobs 4 tests/
