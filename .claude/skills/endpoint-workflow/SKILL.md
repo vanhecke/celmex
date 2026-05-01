@@ -10,7 +10,7 @@ Repeatable methodology for adding or reviewing a Cortex API endpoint in this rep
 - **Add mode**: implement a new endpoint end-to-end (SDK + CLI + tests + TODO.md).
 - **Review mode**: audit an already-shipped endpoint against the same checklist and fix gaps in place.
 
-The workflow stops **before commit** — final step is `just test` + a summary. The user reviews the diff and commits.
+The workflow ends with a commit. Phases 1–9 implement and verify; Phase 10 stages the touched files and writes the commit using the project's message style. Pushing stays a separate, explicit user step.
 
 ## Inputs to confirm before starting
 
@@ -250,7 +250,7 @@ Open `TODO.md`. Find the section for the OpenAPI spec your endpoint belongs to.
 - If tenant-unsupported, annotate the Description column.
 - Update the progress tracker line near the top (e.g., `57/341 endpoints implemented`).
 
-## Phase 9 — Verify (then HAND OFF)
+## Phase 9 — Verify
 
 For a **single endpoint** (one or a few endpoints in one module):
 
@@ -277,16 +277,48 @@ just test
 
 `just test` includes `just build` and the docs check is implicit via `just test-one`'s separate flow — but for shared-code changes also run `elm make --docs=docs.json` once.
 
-**STOP. Do not commit.** Summarize for the user:
+Once tests are green, gather the inputs Phase 10 needs:
 - Files added/modified.
 - Test results (counts, any skips with reasons).
 - Updated coverage (`<old> → <new>/341`).
-- Suggested commit message in the project's style:
-  - Batch: `Add <N> <type> endpoints across <areas> (<old> → <new>/341 coverage)`
-  - Singleton: `Add <verb> <name> endpoint`
-- Bundle related endpoints from the same OpenAPI section into one commit when natural.
 
-The user reviews the diff and commits.
+Bundle related endpoints from the same OpenAPI section into one commit when natural — that decision drives whether Phase 10 uses the singleton or batch message template.
+
+## Phase 10 — Commit
+
+Tests are green; land the work as one commit. The user already authorized this by invoking the skill — do **not** ask for confirmation here.
+
+**Stage explicitly.** Never `git add -A` or `git add .` — those would sweep in `.envrc`, `docs.json`, or unrelated WIP. Add only the files this workflow touched, e.g.:
+
+```
+git add src/Cortex/Api/<Name>.elm src/elm.json \
+        cli/src/Cli/Commands.elm cli/src/Cli/Main.elm cli/src/Cli/TestMain.elm \
+        tests/<api>.bats TODO.md
+```
+
+Drop any path you didn't actually modify.
+
+**Write the commit** using the templates from Phase 9 inputs, via HEREDOC so the trailer formats cleanly:
+
+```
+git commit -m "$(cat <<'EOF'
+Add <verb> <name> endpoint
+
+Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>
+EOF
+)"
+```
+
+Subject-line templates:
+- Singleton (Add mode): `Add <verb> <name> endpoint`
+- Batch (Add mode): `Add <N> <type> endpoints across <areas> (<old> → <new>/341 coverage)`
+- Review mode: shift the verb — e.g. `Tighten <name> endpoint decoder`, `Add typed assertions for <name> endpoint`, `Audit <name> endpoint against OpenAPI spec`.
+
+**Hard rules:**
+- Never `--no-verify` and never `--no-gpg-sign`. If a pre-commit hook fails, the commit did not happen — fix the underlying issue, re-stage, and create a **new** commit. Do not `--amend`.
+- Do not push. The user runs `git push` themselves once they've reviewed the landed commit.
+
+After the commit succeeds, run `git status` to confirm a clean tree, then summarize for the user: new commit SHA, the message subject, files committed, test counts, and updated coverage (`<old> → <new>/341`).
 
 ---
 
@@ -300,7 +332,7 @@ Apply the same checklist to an already-shipped endpoint:
 - **Phase 6**: do the tests assert content (specific field types/shapes), or just exit code 0? Per-parameter coverage for CLI args? Dynamic fixture pattern where applicable? Are documented `Maybe` fields wired as typed assertions in `cli/src/Cli/TestMain.elm`, using the strongest helper that fits (`positive` / `nonNegative` / `nonBlank` over a bare `present` where applicable)? Are list responses sampled with `sampleFirst`? If the `Asserts` column in `TODO.md` shows `✗`, this is the time to flip it to `✓`.
 - **Phase 7/8**: if endpoint is tenant-unsupported, is `skip_if_unsupported` used AND the `TODO.md` row annotated?
 
-Report findings first (concise list of gaps + severity), then fix in place. Same Phase 9 hand-off applies.
+Report findings first (concise list of gaps + severity), then fix in place. Same Phase 9 + 10 flow applies — review-mode commits use a verb like `Tighten`, `Audit`, or `Add typed assertions for` instead of `Add`.
 
 ---
 
