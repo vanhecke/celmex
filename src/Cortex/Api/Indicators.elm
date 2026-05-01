@@ -58,8 +58,6 @@ type alias IndicatorsResponse =
 
 
 {-| A single threat-intelligence indicator (hash, domain, URL, IP, etc.).
-The `reputation` and `reliability` fields carry per-source sub-objects whose
-shape varies, so they are kept as raw JSON.
 -}
 type alias Indicator =
     { ruleId : Maybe Int
@@ -69,7 +67,17 @@ type alias Indicator =
     , expirationDate : Maybe Int
     , defaultExpirationEnabled : Maybe Bool
     , comment : Maybe String
+
+    {- reputation carries a per-source reputation map whose keys are
+       arbitrary feed names (VirusTotal, Cortex Threat Intel, custom
+       sources, etc.) and values are source-specific score objects.
+       Genuinely free-form per tenant configuration; preserved verbatim.
+    -}
     , reputation : Encode.Value
+
+    {- reliability is a per-source reliability rating object with the
+       same per-source-arbitrary-key shape as reputation. Same rationale.
+    -}
     , reliability : Encode.Value
     }
 

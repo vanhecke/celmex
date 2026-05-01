@@ -398,7 +398,26 @@ run stamp config endpoint =
             typed (ScheduledQueries.list args)
 
         Commands.IndicatorsGet args ->
-            typed (Indicators.get args)
+            typedAssert (Indicators.get args)
+                (\r ->
+                    [ nonNegative "objectsCount" r.objectsCount
+                    , nonBlank "objectsType" r.objectsType
+                    ]
+                        ++ (if List.isEmpty r.objects then
+                                []
+
+                            else
+                                sampleFirst "objects"
+                                    r.objects
+                                    (\ind ->
+                                        [ positive "ruleId" ind.ruleId
+                                        , nonBlank "indicator" ind.indicator
+                                        , nonBlank "type" ind.type_
+                                        , nonBlank "severity" ind.severity
+                                        ]
+                                    )
+                           )
+                )
 
         Commands.BiocsGet args ->
             typed (Biocs.get args)

@@ -118,7 +118,7 @@ Source: `cortex-platform-papi.json`
 | ✓ | POST | `/public_api/xql_library/get` | Get XQL Queries | View | `Cortex.Api.Xql` | `xql-library get` | `xql.bats` | ✗ |
 |  | POST | `/public_api/xql_library/insert` | Insert or update XQL queries | Edit |  |  |  |  |
 |  | POST | `/public_api/xql_library/delete` | Delete XQL Queries | Edit |  |  |  |  |
-| ✓ | POST | `/public_api/v1/indicators/get` | Get Indicators (IOCs) | View | `Cortex.Api.Indicators` | `indicators get` | `indicators.bats` | ✗ |
+| ✓ | POST | `/public_api/v1/indicators/get` | Get Indicators (IOCs) | View | `Cortex.Api.Indicators` | `indicators get` | `indicators.bats` | ✓ |
 |  | POST | `/public_api/v1/indicators/insert` | Insert or update IOCs | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/indicators/delete` | Delete Indicators (IOCs) | Edit |  |  |  |  |
 | ✓ | POST | `/public_api/v1/bioc/get` | Get BIOCs | View | `Cortex.Api.Biocs` | `bioc get` | `biocs.bats` | ✗ |
