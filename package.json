@@ -42,5 +42,8 @@
     },
     "engines": {
         "node": ">=18"
+    },
+    "devDependencies": {
+        "elm-review": "^2.13.5"
     }
 }

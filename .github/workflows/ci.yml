@@ -21,9 +21,44 @@ jobs:
       - name: Check formatting
         run: elm-format src/ cli/src/ --validate
 
+  review:
+    name: elm-review
+    needs: format
+    runs-on: ubuntu-latest
+    # TODO: remove continue-on-error once the initial elm-review backlog
+    # is cleaned up (see QUALITY_TOOLING_PLAN.md Tier 1).
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: jorelali/setup-elm@v6
+        with:
+          elm-version: 0.19.1
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.elm
+            review/elm-stuff
+            cli/review/elm-stuff
+          key: elm-review-${{ runner.os }}-${{ hashFiles('review/elm.json', 'cli/review/elm.json') }}
+          restore-keys: |
+            elm-review-${{ runner.os }}-
+
+      - name: Review SDK
+        run: npx --yes elm-review
+
+      - name: Review CLI
+        working-directory: cli
+        run: npx --yes elm-review
+
   compile:
     name: Compile
-    needs: format
+    needs: [format, review]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
