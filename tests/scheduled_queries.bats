@@ -7,8 +7,9 @@ setup() {
 @test "scheduled-queries list returns valid JSON with DATA array" {
     run "$CORTEX" scheduled-queries list
     [ "$status" -eq 0 ]
-    echo "$output" | jq . > /dev/null
     echo "$output" | jq -e '.DATA | type == "array"' > /dev/null
+    echo "$output" | jq -e '.TOTAL_COUNT | type == "number"' > /dev/null
+    echo "$output" | jq -e '.FILTER_COUNT | type == "number"' > /dev/null
 }
 
 @test "scheduled-queries list typed decode succeeds" {

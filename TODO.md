@@ -112,7 +112,7 @@ Source: `cortex-platform-papi.json`
 |  | POST | `/public_api/v1/distributions/delete` | Delete agent installation packages | Edit |  |  |  |  |
 | ✓ | POST | `/public_api/v1/get_attack_surface_rules` | Get all Attack Surface Rules | View | `Cortex.Api.AttackSurface` | `attack-surface get-rules` | `attack_surface.bats` | ✓ |
 |  | POST | `/public_api/v1/asm_management/remove_asm_data` | Remove Assets | Edit |  |  |  |  |
-| ✓ | POST | `/public_api/v1/scheduled_queries/list` | Get scheduled queries | View | `Cortex.Api.ScheduledQueries` | `scheduled-queries list` | `scheduled_queries.bats` | ✗ |
+| ✓ | POST | `/public_api/v1/scheduled_queries/list` | Get scheduled queries | View | `Cortex.Api.ScheduledQueries` | `scheduled-queries list` | `scheduled_queries.bats` | ✓ |
 |  | POST | `/public_api/v1/scheduled_queries/insert` | Insert or update scheduled queries | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/scheduled_queries/delete` | Delete a scheduled query | Edit |  |  |  |  |
 | ✓ | POST | `/public_api/xql_library/get` | Get XQL Queries | View | `Cortex.Api.Xql` | `xql-library get` | `xql.bats` | ✗ |

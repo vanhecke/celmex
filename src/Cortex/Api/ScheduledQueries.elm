@@ -1,18 +1,18 @@
 module Cortex.Api.ScheduledQueries exposing
     ( SearchArgs, defaultSearchArgs
-    , ScheduledQueriesResponse
+    , ScheduledQuery, Schedule, ScheduledQueriesResponse
     , list
     )
 
 {-| Cortex scheduled XQL queries configured on the tenant.
 
 @docs SearchArgs, defaultSearchArgs
-@docs ScheduledQueriesResponse
+@docs ScheduledQuery, Schedule, ScheduledQueriesResponse
 @docs list
 
 -}
 
-import Cortex.Decode exposing (reply)
+import Cortex.Decode exposing (andMap, reply)
 import Cortex.Query as Query exposing (Filter, Range, Sort, Timeframe)
 import Cortex.Request as Request exposing (Request)
 import Cortex.RequestData as RequestData
@@ -48,18 +48,66 @@ defaultSearchArgs =
     }
 
 
-{-| Scheduled-query records contain a large, flexible set of fields (XQL text,
-timeframe, tenants, trigger config, etc.) that vary by query type. We preserve
-each record as raw JSON and only type the top-level envelope counters.
+{-| Paginated envelope returned by [`list`](#list).
 -}
 type alias ScheduledQueriesResponse =
-    { data : List Encode.Value
+    { data : List ScheduledQuery
     , filterCount : Maybe Int
     , totalCount : Maybe Int
     }
 
 
+{-| One scheduled XQL query configured on the tenant.
+-}
+type alias ScheduledQuery =
+    { queryDefId : Maybe String
+    , queryDefinitionName : Maybe String
+    , xql : Maybe String
+    , enable : Maybe Bool
+    , schedule : Maybe Schedule
+
+    {- timeframe is documented as `{ relativeTime: ? }` but the
+       relativeTime value is polymorphic (string label like "asdasdasd"
+       in one example, int milliseconds 86400000 in another), and the
+       object is sometimes empty. Preserved verbatim until the wire
+       format stabilises.
+    -}
+    , timeframe : Maybe Encode.Value
+
+    {- tenants is `nullable object` per spec — populated only for MSSP
+       (managed-security) configurations with a tenant-specific shape
+       that varies per integration. Preserved verbatim.
+    -}
+    , tenants : Maybe Encode.Value
+    }
+
+
+{-| Trigger schedule for a [`ScheduledQuery`](#ScheduledQuery). All
+fields optional — only the subset relevant to the trigger type is
+populated. `triggerType = "date"` populates `runDate`; `"cron"` populates
+`startDate` / `endDate` / `hour` / `minute` / `second` / `dayOfWeek` /
+`week` / `month`.
+-}
+type alias Schedule =
+    { triggerType : Maybe String
+    , runDate : Maybe Int
+    , startDate : Maybe Int
+    , endDate : Maybe Int
+    , hour : Maybe String
+    , minute : Maybe String
+    , second : Maybe String
+    , dayOfWeek : Maybe String
+    , week : Maybe String
+    , month : Maybe String
+    }
+
+
 {-| POST /public\_api/v1/scheduled\_queries/list
+
+Retrieve scheduled XQL queries currently configured on the tenant, with
+optional filters and pagination. Requires Instance Administrator
+permissions.
+
 -}
 list : SearchArgs -> Request ScheduledQueriesResponse
 list args =
@@ -76,12 +124,16 @@ list args =
         (reply responseDecoder)
 
 
+
+-- DECODERS
+
+
 responseDecoder : Decoder ScheduledQueriesResponse
 responseDecoder =
     Decode.map3 ScheduledQueriesResponse
         (Decode.oneOf
-            [ Decode.field "DATA" (Decode.list Decode.value)
-            , Decode.field "data" (Decode.list Decode.value)
+            [ Decode.field "DATA" (Decode.list scheduledQueryDecoder)
+            , Decode.field "data" (Decode.list scheduledQueryDecoder)
             , Decode.succeed []
             ]
         )
@@ -99,3 +151,35 @@ responseDecoder =
                 ]
             )
         )
+
+
+scheduledQueryDecoder : Decoder ScheduledQuery
+scheduledQueryDecoder =
+    Decode.succeed ScheduledQuery
+        |> andMap (optionalField "query_def_id" Decode.string)
+        |> andMap (optionalField "query_definition_name" Decode.string)
+        |> andMap (optionalField "xql" Decode.string)
+        |> andMap (optionalField "enable" Decode.bool)
+        |> andMap (optionalField "schedule" scheduleDecoder)
+        |> andMap (optionalField "timeframe" Decode.value)
+        |> andMap (optionalField "tenants" Decode.value)
+
+
+scheduleDecoder : Decoder Schedule
+scheduleDecoder =
+    Decode.succeed Schedule
+        |> andMap (optionalField "trigger_type" Decode.string)
+        |> andMap (optionalField "run_date" Decode.int)
+        |> andMap (optionalField "start_date" Decode.int)
+        |> andMap (optionalField "end_date" Decode.int)
+        |> andMap (optionalField "hour" Decode.string)
+        |> andMap (optionalField "minute" Decode.string)
+        |> andMap (optionalField "second" Decode.string)
+        |> andMap (optionalField "day_of_week" Decode.string)
+        |> andMap (optionalField "week" Decode.string)
+        |> andMap (optionalField "month" Decode.string)
+
+
+optionalField : String -> Decoder a -> Decoder (Maybe a)
+optionalField name d =
+    Decode.maybe (Decode.field name d)

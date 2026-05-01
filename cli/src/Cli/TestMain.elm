@@ -395,7 +395,25 @@ run stamp config endpoint =
             skip
 
         Commands.ScheduledQueriesList args ->
-            typed (ScheduledQueries.list args)
+            typedAssert (ScheduledQueries.list args)
+                (\r ->
+                    [ nonNegative "totalCount" r.totalCount
+                    , nonNegative "filterCount" r.filterCount
+                    ]
+                        ++ (if List.isEmpty r.data then
+                                []
+
+                            else
+                                sampleFirst "data"
+                                    r.data
+                                    (\sq ->
+                                        [ nonBlank "queryDefId" sq.queryDefId
+                                        , nonBlank "queryDefinitionName" sq.queryDefinitionName
+                                        , present "enable" sq.enable
+                                        ]
+                                    )
+                           )
+                )
 
         Commands.IndicatorsGet args ->
             typedAssert (Indicators.get args)
