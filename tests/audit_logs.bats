@@ -1,5 +1,7 @@
 #!/usr/bin/env bats
 
+bats_require_minimum_version 1.5.0
+
 setup() {
     load test_helper/common
 }
@@ -41,7 +43,7 @@ setup() {
 }
 
 @test "unknown command exits non-zero" {
-    run "$CORTEX" nonexistent
+    run --separate-stderr "$CORTEX" nonexistent
     [ "$status" -eq 1 ]
-    [[ "$output" == *"Unknown command"* ]]
+    [[ "$stderr" == *"Unknown command"* ]]
 }
