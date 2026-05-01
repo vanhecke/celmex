@@ -70,9 +70,9 @@ Source: `cortex-platform-papi.json`
 | ✓ | POST | `/public_api/v1/rbac/get_user_group` | Get User Groups | View | `Cortex.Api.Rbac` | `rbac get-user-groups` | `rbac.bats` | ✓ |
 |  | POST | `/public_api/v1/rbac/set_user_role` | Set a User Role | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/endpoints/get_endpoint` | Get Endpoint | View |  |  |  |  |
-| ✓ | POST | `/public_api/v1/get_risk_score` | Get Risk Score | View | `Cortex.Api.Risk` | `risk score` | `risk.bats` | ✗ |
-| ✓ | POST | `/public_api/v1/get_risky_users` | Get Risky Users | View | `Cortex.Api.Risk` | `risk users` | `risk.bats` | ✗ |
-| ✓ | POST | `/public_api/v1/get_risky_hosts` | Get Risky Hosts | View | `Cortex.Api.Risk` | `risk hosts` | `risk.bats` | ✗ |
+| ✓ | POST | `/public_api/v1/get_risk_score` | Get Risk Score (tenant-unsupported) | View | `Cortex.Api.Risk` | `risk score` | `risk.bats` | ✓ |
+| ✓ | POST | `/public_api/v1/get_risky_users` | Get Risky Users (tenant-unsupported) | View | `Cortex.Api.Risk` | `risk users` | `risk.bats` | ✓ |
+| ✓ | POST | `/public_api/v1/get_risky_hosts` | Get Risky Hosts (tenant-unsupported) | View | `Cortex.Api.Risk` | `risk hosts` | `risk.bats` | ✓ |
 |  | POST | `/public_api/v1/endpoints/file_retrieval` | Retrieve File | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/endpoints/isolate` | Isolate Endpoints | Edit |  |  |  |  |
 | ✓ | POST | `/public_api/v1/audits/agents_reports` | Get Audit Agent Report | View | `Cortex.Api.AuditLogs` | `audit-logs agents-reports` | `audit_logs_agents_reports.bats` | ✓ |

@@ -777,13 +777,49 @@ run stamp config endpoint =
                 )
 
         Commands.RiskScore id ->
-            typed (Risk.getRiskScore { id = id })
+            typedAssert (Risk.getRiskScore { id = id })
+                (\r ->
+                    [ nonBlank "type" r.type_
+                    , nonBlank "id" r.id
+                    , present "score" r.score
+                    , present "normRiskScore" r.normRiskScore
+                    , nonBlank "riskLevel" r.riskLevel
+                    ]
+                )
 
         Commands.RiskUsers ->
-            typed Risk.getRiskyUsers
+            typedAssert Risk.getRiskyUsers
+                (\users ->
+                    if List.isEmpty users then
+                        []
+
+                    else
+                        sampleFirst "users"
+                            users
+                            (\u ->
+                                [ nonBlank "id" u.id
+                                , present "score" u.score
+                                , nonBlank "riskLevel" u.riskLevel
+                                ]
+                            )
+                )
 
         Commands.RiskHosts ->
-            typed Risk.getRiskyHosts
+            typedAssert Risk.getRiskyHosts
+                (\hosts ->
+                    if List.isEmpty hosts then
+                        []
+
+                    else
+                        sampleFirst "hosts"
+                            hosts
+                            (\h ->
+                                [ nonBlank "id" h.id
+                                , present "score" h.score
+                                , nonBlank "riskLevel" h.riskLevel
+                                ]
+                            )
+                )
 
         Commands.CasesSearch args ->
             typed (Cases.search args)
