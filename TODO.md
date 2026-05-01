@@ -45,7 +45,7 @@ Source: `cortex-platform-papi.json`
 |  | POST | `/public_api/v1/endpoints/restore` | Restore File | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/actions/file_retrieval_details` | File Retrieval Details | View |  |  |  |  |
 |  | POST | `/public_api/v1/hash_exceptions/allowlist` | Allow List Files | Edit |  |  |  |  |
-| ✓ | POST | `/public_api/v1/quarantine/status` | Get Quarantine Status | View | `Cortex.Api.Quarantine` | `quarantine status` | `quarantine.bats` | ✗ |
+| ✓ | POST | `/public_api/v1/quarantine/status` | Get Quarantine Status | View | `Cortex.Api.Quarantine` | `quarantine status` | `quarantine.bats` | ✓ |
 |  | POST | `/public_api/v1/endpoints/quarantine` | Quarantine Files | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/hash_exceptions/blocklist` | Block List Files | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/endpoints/unisolate` | Unisolate Endpoints | Edit |  |  |  |  |

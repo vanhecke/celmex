@@ -834,7 +834,19 @@ run stamp config endpoint =
             typed AssetGroups.list
 
         Commands.QuarantineStatus query ->
-            typed (Quarantine.getStatus [ query ])
+            typedAssert (Quarantine.getStatus [ query ])
+                (\statuses ->
+                    nonEmpty "files" statuses
+                        :: sampleFirst "files"
+                            statuses
+                            (\f ->
+                                [ nonBlank "endpointId" f.endpointId
+                                , nonBlank "filePath" f.filePath
+                                , nonBlank "fileHash" f.fileHash
+                                , present "status" f.status
+                                ]
+                            )
+                )
 
 
 handleResult : Msg -> Cmd Msg
