@@ -8,8 +8,12 @@ build: format
     cd cli && elm make src/Cli/Main.elm --optimize --output=dist/elm.js
     cd cli && elm make src/Cli/TestMain.elm --optimize --output=dist/elm-test.js
 
-test: build
-    bats tests/
+# Run the full bats suite. JOBS sets bats's --jobs parallelism (default 1 =
+# serial). For Claude/agentic coding sessions, prefer `just test 4` so the
+# 180+ integration tests don't serialise the tenant round-trips. Tests are
+# read-only against the tenant and safe to parallelise.
+test JOBS='1': build
+    bats --jobs {{JOBS}} tests/
 
 # Run a single bats file (or any subset) AND the package-docs check.
 # Useful when iterating on one endpoint — `just test-one tests/quarantine.bats`
@@ -17,9 +21,9 @@ test: build
 # missing-docstring errors `bats` cannot see. Sufficient for adding or
 # fixing a single endpoint; full `just test` is only needed when shared
 # code (Cortex.Decode, Cortex.Request, CLI parser helpers, StandardFlags)
-# has been touched.
-test-one FILE: build
-    bats {{FILE}}
+# has been touched. JOBS works the same as in `test`.
+test-one FILE JOBS='1': build
+    bats --jobs {{JOBS}} {{FILE}}
     elm make --docs=docs.json
     rm -f docs.json
 

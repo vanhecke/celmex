@@ -21,12 +21,17 @@
 ```
 just format         # elm-format all source files
 just build          # format + compile cli/dist/elm.js
-just test           # build + run BATS tests
+just test [JOBS]    # build + run BATS tests (JOBS = bats --jobs parallelism, default 1)
 just curl           # raw authenticated API call: just curl GET /public_api/v1/healthcheck | jq .
 just clean          # remove elm-stuff and build artifacts
 elm make --docs=docs.json   # verify docs for the Elm package (required before `just publish`)
 just publish VERSION        # bump manifests in lockstep, tag, push, publish to npm + elm
 ```
+
+**Agentic testing:** Always run `just test 4` (not bare `just test`) during
+coding sessions. The 180+ integration tests each round-trip the live tenant;
+serial execution is the dominant time sink. `--jobs 4` is safe — every test
+is read-only against the tenant, no shared mutable fixtures.
 
 ## Key conventions
 
