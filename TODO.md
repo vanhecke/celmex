@@ -16,20 +16,23 @@ Complete inventory of all API endpoints from the OpenAPI specs in `docs/cortex-a
 > 9 endpoints appear in multiple specs (CWP / Trusted Images / Registry Connectors) — listed in each relevant section.
 > Raw total across all 22 spec files: 521. After removing the 2 duplicate files: 341 listed below.
 
-**Progress:** 58/341 endpoints implemented | 174 View | 167 Edit
+<!-- BEGIN AUTO: progress -->
+**Progress:** 64/341 endpoints implemented | 170 View | 171 Edit
+<!-- END AUTO -->
 
 
 ## Cortex Platform
 
 Source: `cortex-platform-papi.json`
 
+<!-- BEGIN AUTO: cortex-platform-papi.json -->
 | ✓ | Method | Path | Description | Type | Elm | CLI | Test | Asserts |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | ✓ | GET | `/public_api/v1/cli/releases/version` | Get the latest version of the Cortex CLI | View | `Cortex.Api.Cli` | `cli version` | `cli_version.bats` | ✓ |
-|  | POST | `/public_api/v1/xql/start_xql_query` | Start an XQL query | Edit |  |  |  |  |
-|  | POST | `/public_api/v1/xql/get_query_results` | Get XQL query results | View |  |  |  |  |
+| ✓ | POST | `/public_api/v1/xql/start_xql_query` | Start an XQL query | Edit | `Cortex.Api.Xql` |  |  |  |
+| ✓ | POST | `/public_api/v1/xql/get_query_results` | Get XQL query results | View | `Cortex.Api.Xql` |  |  |  |
 | ✓ | POST | `/public_api/v1/xql/get_quota` | Get XQL query Quota | View | `Cortex.Api.Xql` | `xql get-quota` | `xql.bats` | ✓ |
-|  | POST | `/public_api/v1/xql/get_query_results_stream` | Get XQL query results Stream | View |  |  |  |  |
+| ✓ | POST | `/public_api/v1/xql/get_query_results_stream` | Get XQL query results Stream | View | `Cortex.Api.Xql` |  |  |  |
 | ✓ | POST | `/public_api/v1/distributions/get_versions` | Get Distribution version | View | `Cortex.Api.Distributions` | `distributions get-versions` | `distributions.bats` | ✓ |
 | ✓ | POST | `/public_api/v1/endpoints/get_endpoints` | Get all Endpoints | View | `Cortex.Api.Endpoints` | `endpoints list` | `endpoints.bats` | ✓ |
 | ✓ | POST | `/public_api/v1/endpoints/get_policy` | Get Policy | View | `Cortex.Api.Profiles` | `profiles get-policy` | `profiles.bats` | ✓ |
@@ -43,7 +46,7 @@ Source: `cortex-platform-papi.json`
 |  | POST | `/public_api/v1/tags/agents/assign` | Assign Tags | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/tags/agents/remove` | Remove Tags | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/endpoints/restore` | Restore File | Edit |  |  |  |  |
-|  | POST | `/public_api/v1/actions/file_retrieval_details` | File Retrieval Details | View |  |  |  |  |
+|  | POST | `/public_api/v1/actions/file_retrieval_details` | File Retrieval Details | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/hash_exceptions/allowlist` | Allow List Files | Edit |  |  |  |  |
 | ✓ | POST | `/public_api/v1/quarantine/status` | Get Quarantine Status | View | `Cortex.Api.Quarantine` | `quarantine status` | `quarantine.bats` | ✓ |
 |  | POST | `/public_api/v1/endpoints/quarantine` | Quarantine Files | Edit |  |  |  |  |
@@ -73,7 +76,7 @@ Source: `cortex-platform-papi.json`
 | ✓ | POST | `/public_api/v1/get_risk_score` | Get Risk Score (tenant-unsupported) | View | `Cortex.Api.Risk` | `risk score` | `risk.bats` | ✓ |
 | ✓ | POST | `/public_api/v1/get_risky_users` | Get Risky Users (tenant-unsupported) | View | `Cortex.Api.Risk` | `risk users` | `risk.bats` | ✓ |
 | ✓ | POST | `/public_api/v1/get_risky_hosts` | Get Risky Hosts (tenant-unsupported) | View | `Cortex.Api.Risk` | `risk hosts` | `risk.bats` | ✓ |
-|  | POST | `/public_api/v1/endpoints/file_retrieval` | Retrieve File | Edit |  |  |  |  |
+|  | POST | `/public_api/v1/endpoints/file_retrieval` | Retrieve File | View |  |  |  |  |
 |  | POST | `/public_api/v1/endpoints/isolate` | Isolate Endpoints | Edit |  |  |  |  |
 | ✓ | POST | `/public_api/v1/audits/agents_reports` | Get Audit Agent Report | View | `Cortex.Api.AuditLogs` | `audit-logs agents-reports` | `audit_logs_agents_reports.bats` | ✓ |
 |  | POST | `/public_api/v1/assets/get_external_service` | Get External Service | View |  |  |  |  |
@@ -91,9 +94,9 @@ Source: `cortex-platform-papi.json`
 |  | POST | `/public_api/v1/xql/add_dataset` | Add Dataset | Edit |  |  |  |  |
 |  | POST | `/public_api/v2/xql/delete_dataset` | Delete a dataset | Edit |  |  |  |  |
 | ✓ | POST | `/public_api/v1/xql/get_datasets` | Get all datasets | View | `Cortex.Api.Xql` | `xql get-datasets` | `xql.bats` | ✓ |
-|  | POST | `/public_api/v1/xql/lookups/add_data` | Add or update data in a lookup dataset | Edit |  |  |  |  |
-|  | POST | `/public_api/v1/xql/lookups/remove_data` | Remove data from a lookup dataset | Edit |  |  |  |  |
-|  | POST | `/public_api/v1/xql/lookups/get_data` | Get data from a lookup dataset | View |  |  |  |  |
+| ✓ | POST | `/public_api/v1/xql/lookups/add_data` | Add or update data in a lookup dataset | Edit | `Cortex.Api.Xql` |  |  |  |
+| ✓ | POST | `/public_api/v1/xql/lookups/remove_data` | Remove data from a lookup dataset | Edit | `Cortex.Api.Xql` |  |  |  |
+| ✓ | POST | `/public_api/v1/xql/lookups/get_data` | Get data from a lookup dataset | View | `Cortex.Api.Xql` |  |  |  |
 | ✓ | POST | `/public_api/v1/get_triage_presets` | Get triage presets (tenant-unsupported, requires Forensics add-on) | View | `Cortex.Api.TriagePresets` | `triage-presets list` | `triage_presets.bats` | ✓ |
 |  | POST | `/public_api/v1/authentication-settings/create` | Create authentication settings for IdP SSO or metadata URL | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/authentication-settings/update` | Update authentication settings | Edit |  |  |  |  |
@@ -172,17 +175,19 @@ Source: `cortex-platform-papi.json`
 |  | POST | `/public_api/v1/profiles/add_signer_cn_to_allowlist` | Add Signer CN to Allowlist | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/profiles/prevention/edit` | Edit Prevention Profile | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/profiles/prevention/get_modules` | Get Prevention Profile Modules | View |  |  |  |  |
+<!-- END AUTO -->
 
 ## Agent Configuration
 
 Source: `agent-configurations-papi.yaml`
 
+<!-- BEGIN AUTO: agent-configurations-papi.yaml -->
 | ✓ | Method | Path | Description | Type | Elm | CLI | Test | Asserts |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | ✓ | GET | `/public_api/v1/configurations/agent/content_management` | Retrieve content management settings (tenant-unsupported) | View | `Cortex.Api.AgentConfig` | `agent-config content-management` | `agent_config.bats` | ✓ |
 |  | POST | `/public_api/v1/configurations/agent/content_management/set` | Update content management settings | Edit |  |  |  |  |
 | ✓ | GET | `/public_api/v1/configurations/agent/agent_status` | Retrieve agent status timeout settings (tenant-unsupported) | View | `Cortex.Api.AgentConfig` | `agent-config agent-status` | `agent_config.bats` | ✓ |
-|  | POST | `/public_api/v1/configurations/agent/agent_status/set` | Update agent status timeout settings | View |  |  |  |  |
+|  | POST | `/public_api/v1/configurations/agent/agent_status/set` | Update agent status timeout settings | Edit |  |  |  |  |
 | ✓ | GET | `/public_api/v1/configurations/agent/auto_upgrade` | Retrieve agent auto-upgrade settings (tenant-unsupported) | View | `Cortex.Api.AgentConfig` | `agent-config auto-upgrade` | `agent_config.bats` | ✓ |
 |  | POST | `/public_api/v1/configurations/agent/auto_upgrade/set` | Update agent auto-upgrade settings | Edit |  |  |  |  |
 | ✓ | GET | `/public_api/v1/configurations/agent/wildfire_analysis` | Retrieve WildFire analysis settings (tenant-unsupported) | View | `Cortex.Api.AgentConfig` | `agent-config wildfire-analysis` | `agent_config.bats` | ✓ |
@@ -194,16 +199,18 @@ Source: `agent-configurations-papi.yaml`
 | ✓ | GET | `/public_api/v1/configurations/agent/action_center_expiration` | Retrieve action center expiration settings (tenant-unsupported) | View | `Cortex.Api.AgentConfig` | `agent-config action-center-expiration` | `agent_config.bats` | ✓ |
 |  | POST | `/public_api/v1/configurations/agent/action_center_expiration/set` | Update action center expiration settings | Edit |  |  |  |  |
 | ✓ | GET | `/public_api/v1/configurations/agent/critical_environment_versions` | Retrieve critical environment versions settings (tenant-unsupported) | View | `Cortex.Api.AgentConfig` | `agent-config critical-environment-versions` | `agent_config.bats` | ✓ |
-|  | POST | `/public_api/v1/configurations/agent/critical_environment_versions/set` | Update critical environment versions settings | View |  |  |  |  |
+|  | POST | `/public_api/v1/configurations/agent/critical_environment_versions/set` | Update critical environment versions settings | Edit |  |  |  |  |
 | ✓ | GET | `/public_api/v1/configurations/agent/advanced_analysis` | Retrieve advanced analysis settings (tenant-unsupported) | View | `Cortex.Api.AgentConfig` | `agent-config advanced-analysis` | `agent_config.bats` | ✓ |
 |  | POST | `/public_api/v1/configurations/agent/advanced_analysis/set` | Update advanced analysis settings | Edit |  |  |  |  |
 | ✓ | GET | `/public_api/v1/configurations/agent/endpoint_administration_cleanup` | Retrieve endpoint administration cleanup settings (tenant-unsupported) | View | `Cortex.Api.AgentConfig` | `agent-config endpoint-administration-cleanup` | `agent_config.bats` | ✓ |
 |  | POST | `/public_api/v1/configurations/agent/endpoint_administration_cleanup/set` | Update endpoint administration cleanup settings | Edit |  |  |  |  |
+<!-- END AUTO -->
 
 ## Compliance
 
 Source: `compliance-papi.json`
 
+<!-- BEGIN AUTO: compliance-papi.json -->
 | ✓ | Method | Path | Description | Type | Elm | CLI | Test | Asserts |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 |  | POST | `/public_api/v1/compliance/get_assessment_profiles` | Get assessment profiles | View |  |  |  |  |
@@ -230,23 +237,27 @@ Source: `compliance-papi.json`
 |  | POST | `/public_api/v1/compliance/edit_standard` | Edit existing standard | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/compliance/delete_standard` | Delete standard | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/compliance/get_assets` | Get compliance assets | View |  |  |  |  |
+<!-- END AUTO -->
 
 ## CSPM Policies
 
 Source: `cspm-policies-papi.json`
 
+<!-- BEGIN AUTO: cspm-policies-papi.json -->
 | ✓ | Method | Path | Description | Type | Elm | CLI | Test | Asserts |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 |  | POST | `/public_api/v1/policy` | Create Public Policy | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/policy/search` | List Public Policies | View |  |  |  |  |
-|  | DELETE | `/public_api/v1/policy/{policy_id}` | Delete Public Policy | Edit |  |  |  |  |
 |  | GET | `/public_api/v1/policy/{policy_id}` | Get Public Policy | View |  |  |  |  |
 |  | PATCH | `/public_api/v1/policy/{policy_id}` | Update Public Policy | Edit |  |  |  |  |
+|  | DELETE | `/public_api/v1/policy/{policy_id}` | Delete Public Policy | Edit |  |  |  |  |
+<!-- END AUTO -->
 
 ## CWP (Cloud Workload Protection)
 
 Source: `cwp-papi.json`
 
+<!-- BEGIN AUTO: cwp-papi.json -->
 | ✓ | Method | Path | Description | Type | Elm | CLI | Test | Asserts |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 |  | GET | `/public_api/v2/cwp/policies` | Get CWP Policies (v2) | View |  |  |  |  |
@@ -255,19 +266,21 @@ Source: `cwp-papi.json`
 |  | PUT | `/public_api/v2/cwp/policies/{id}` | Update a CWP Policy by ID (v2) | Edit |  |  |  |  |
 |  | GET | `/public_api/v1/cwp/policies` | Get CWP Policies (v1) | View |  |  |  |  |
 |  | POST | `/public_api/v1/cwp/policies` | Add CWP Policies (v1) | Edit |  |  |  |  |
-|  | DELETE | `/public_api/v1/cwp/policies/{id}` | Delete a CWP Policy by ID (v1) | Edit |  |  |  |  |
 |  | GET | `/public_api/v1/cwp/policies/{id}` | Get a CWP Policy by ID (v1) | View |  |  |  |  |
+|  | DELETE | `/public_api/v1/cwp/policies/{id}` | Delete a CWP Policy by ID (v1) | Edit |  |  |  |  |
 |  | PUT | `/public_api/v1/cwp/policies/{id}` | Update a CWP Policy by ID (v1) | Edit |  |  |  |  |
 |  | GET | `/public_api/v1/assets/{assetID}/sbom` | Get the SBOM of the specified asset | View |  |  |  |  |
 |  | POST | `/public_api/v1/cwp/registry_onboarding/instances` | Create a registry connector | Edit |  |  |  |  |
-|  | DELETE | `/public_api/v1/cwp/registry_onboarding/instances/{connectorID}` | Delete a registry connector | Edit |  |  |  |  |
 |  | GET | `/public_api/v1/cwp/registry_onboarding/instances/{connectorID}` | Get a registry connector | View |  |  |  |  |
 |  | PUT | `/public_api/v1/cwp/registry_onboarding/instances/{connectorID}` | Update a registry connector | Edit |  |  |  |  |
+|  | DELETE | `/public_api/v1/cwp/registry_onboarding/instances/{connectorID}` | Delete a registry connector | Edit |  |  |  |  |
+<!-- END AUTO -->
 
 ## IAM Platform
 
 Source: `iam-platform-papi.json`
 
+<!-- BEGIN AUTO: iam-platform-papi.json -->
 | ✓ | Method | Path | Description | Type | Elm | CLI | Test | Asserts |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 |  | GET | `/platform/iam/v1/role` | List all roles | View |  |  |  |  |
@@ -276,8 +289,8 @@ Source: `iam-platform-papi.json`
 |  | GET | `/platform/iam/v1/role/permission-config` | List all permission configs | View |  |  |  |  |
 |  | GET | `/platform/iam/v1/user-group` | List all user groups | View |  |  |  |  |
 |  | POST | `/platform/iam/v1/user-group` | Create a new user group | Edit |  |  |  |  |
-|  | DELETE | `/platform/iam/v1/user-group/{group_id}` | Delete an existing user group | Edit |  |  |  |  |
 |  | PATCH | `/platform/iam/v1/user-group/{group_id}` | Edit an existing user group | Edit |  |  |  |  |
+|  | DELETE | `/platform/iam/v1/user-group/{group_id}` | Delete an existing user group | Edit |  |  |  |  |
 |  | GET | `/platform/iam/v1/scope/{entity_type}/{entity_id}` | Retrieve an existing scope | View |  |  |  |  |
 |  | PUT | `/platform/iam/v1/scope/{entity_type}/{entity_id}` | Edit an existing scope | Edit |  |  |  |  |
 |  | GET | `/platform/iam/v1/user` | List all users | View |  |  |  |  |
@@ -285,21 +298,25 @@ Source: `iam-platform-papi.json`
 |  | PATCH | `/platform/iam/v1/user/{user_email}` | Edit an existing user | Edit |  |  |  |  |
 |  | GET | `/platform/iam/v1/api-key/{api_key_id}` | Get API Key | View |  |  |  |  |
 |  | PUT | `/platform/iam/v1/api-key/{api_key_id}` | Edit an API key | Edit |  |  |  |  |
+<!-- END AUTO -->
 
 ## Vulnerability Intelligence
 
 Source: `vulnerability-intelligence-papi.json`
 
+<!-- BEGIN AUTO: vulnerability-intelligence-papi.json -->
 | ✓ | Method | Path | Description | Type | Elm | CLI | Test | Asserts |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 |  | POST | `/public_api/uvem/v1/get_vulnerabilities` | Get list of vulnerabilities | View |  |  |  |  |
 |  | POST | `/public_api/uvem/v1/get_affected_software` | Get affected software | View |  |  |  |  |
 |  | GET | `/public_api/uvem/v1/vulnerabilities` | Get vulnerability details | View |  |  |  |  |
+<!-- END AUTO -->
 
 ## UVEM (Vulnerability Management)
 
 Source: `uvem-papi.json`
 
+<!-- BEGIN AUTO: uvem-papi.json -->
 | ✓ | Method | Path | Description | Type | Elm | CLI | Test | Asserts |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 |  | POST | `/public_api/uvm_public/v1/list_policies` | Get Policies List | View |  |  |  |  |
@@ -308,39 +325,43 @@ Source: `uvem-papi.json`
 |  | GET | `/public_api/uvm_public/v1/get_policy/{id}` | Get Policy By ID | View |  |  |  |  |
 |  | DELETE | `/public_api/uvm_public/v1/delete_policy/{id}` | Delete Policy | Edit |  |  |  |  |
 |  | POST | `/public_api/vulnerability-management/v1/scan` | Trigger Scan for an AssetId | Edit |  |  |  |  |
+<!-- END AUTO -->
 
 ## NetScan
 
 Source: `netscan-papi.yaml`
 
+<!-- BEGIN AUTO: netscan-papi.yaml -->
 | ✓ | Method | Path | Description | Type | Elm | CLI | Test | Asserts |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-|  | GET | `/public_api/netscan/v1/scan/run` | Get scan run status | View |  |  |  |  |
 |  | POST | `/public_api/netscan/v1/scan/run` | Launch a scan run | Edit |  |  |  |  |
-|  | GET | `/public_api/netscan/v1/scan/run/{id}` | Get scan run status by ID | View |  |  |  |  |
+|  | GET | `/public_api/netscan/v1/scan/run` | Get scan run status | View |  |  |  |  |
 |  | POST | `/public_api/netscan/v1/scan/run/{id}` | Launch a scan run by definition ID | Edit |  |  |  |  |
+|  | GET | `/public_api/netscan/v1/scan/run/{id}` | Get scan run status by ID | View |  |  |  |  |
 |  | POST | `/public_api/netscan/v1/scan/definition` | Create a scan definition | Edit |  |  |  |  |
 |  | POST | `/public_api/netscan/v1/scan/run/{id}/command` | Send a command to a running scan | Edit |  |  |  |  |
+<!-- END AUTO -->
 
 ## AppSec
 
 Source: `appsec-papi.json`
 
+<!-- BEGIN AUTO: appsec-papi.json -->
 | ✓ | Method | Path | Description | Type | Elm | CLI | Test | Asserts |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 |  | GET | `/public_api/appsec/v1/application/configuration` | Get an application configuration | View |  |  |  |  |
-|  | GET | `/public_api/appsec/v1/application` | Get applications | View |  |  |  |  |
 |  | POST | `/public_api/appsec/v1/application` | Create an application | Edit |  |  |  |  |
-|  | DELETE | `/public_api/appsec/v1/application/{applicationId}` | Delete an application | Edit |  |  |  |  |
+|  | GET | `/public_api/appsec/v1/application` | Get applications | View |  |  |  |  |
 |  | GET | `/public_api/appsec/v1/application/{applicationId}` | Get an application | View |  |  |  |  |
 |  | PUT | `/public_api/appsec/v1/application/{applicationId}` | Update an application | Edit |  |  |  |  |
-|  | GET | `/public_api/appsec/v1/policies` | List AppSec policies | View |  |  |  |  |
+|  | DELETE | `/public_api/appsec/v1/application/{applicationId}` | Delete an application | Edit |  |  |  |  |
 |  | POST | `/public_api/appsec/v1/policies` | Create an AppSec policy | Edit |  |  |  |  |
+|  | GET | `/public_api/appsec/v1/policies` | List AppSec policies | View |  |  |  |  |
 |  | GET | `/public_api/appsec/v1/rules` | Get AppSec rules | View |  |  |  |  |
 |  | POST | `/public_api/appsec/v1/rules` | Create an AppSec rule | Edit |  |  |  |  |
-|  | DELETE | `/public_api/appsec/v1/rules/{ruleId}` | Delete an AppSec rule | Edit |  |  |  |  |
 |  | GET | `/public_api/appsec/v1/rules/{ruleId}` | Get an AppSec rule | View |  |  |  |  |
 |  | PATCH | `/public_api/appsec/v1/rules/{ruleId}` | Modify an AppSec rule | Edit |  |  |  |  |
+|  | DELETE | `/public_api/appsec/v1/rules/{ruleId}` | Delete an AppSec rule | Edit |  |  |  |  |
 |  | GET | `/public_api/appsec/v1/rules/rule-labels` | Get AppSec rule labels | View |  |  |  |  |
 |  | POST | `/public_api/appsec/v1/rules/validate` | Create an AppSec rule validation | Edit |  |  |  |  |
 |  | GET | `/public_api/appsec/v1/repositories` | Get repositories | View |  |  |  |  |
@@ -348,9 +369,9 @@ Source: `appsec-papi.json`
 |  | GET | `/public_api/appsec/v1/repositories/{assetId}/scan-configuration` | Get a repository scan configuration | View |  |  |  |  |
 |  | PUT | `/public_api/appsec/v1/repositories/{assetId}/scan-configuration` | Update a repository scan configuration | Edit |  |  |  |  |
 |  | GET | `/public_api/appsec/v1/integrations` | Get AppSec Data Source | View |  |  |  |  |
-|  | DELETE | `/public_api/appsec/v1/integrations/{id}` | Delete an AppSec Data Source | Edit |  |  |  |  |
 |  | GET | `/public_api/appsec/v1/integrations/{id}` | Get an AppSec Data Source | View |  |  |  |  |
 |  | PUT | `/public_api/appsec/v1/integrations/{id}` | Update an AppSec Data Source | Edit |  |  |  |  |
+|  | DELETE | `/public_api/appsec/v1/integrations/{id}` | Delete an AppSec Data Source | Edit |  |  |  |  |
 |  | GET | `/public_api/appsec/v1/repositories/{assetId}/branches` | Get AppSec repository branches | View |  |  |  |  |
 |  | PUT | `/public_api/appsec/v1/repositories/{assetId}/branches` | Update an AppSec repository branch | Edit |  |  |  |  |
 |  | GET | `/public_api/appsec/v1/scans/unscanned-repositories` | Get unscanned AppSec scan management repositories | View |  |  |  |  |
@@ -362,69 +383,79 @@ Source: `appsec-papi.json`
 |  | GET | `/public_api/appsec/v1/scans/{scanId}/issues` | List AppSec scan issues | View |  |  |  |  |
 |  | GET | `/public_api/appsec/v1/scans/{scanId}/findings` | List AppSec scan findings | View |  |  |  |  |
 |  | POST | `/public_api/appsec/v1/scan/repository/{repositoryId}` | Rerun a repository scan | Edit |  |  |  |  |
-|  | DELETE | `/public_api/appsec/v1/policies/{policyId}` | Delete an AppSec policy | Edit |  |  |  |  |
 |  | GET | `/public_api/appsec/v1/policies/{policyId}` | Get an AppSec policy | View |  |  |  |  |
+|  | DELETE | `/public_api/appsec/v1/policies/{policyId}` | Delete an AppSec policy | Edit |  |  |  |  |
 |  | PUT | `/public_api/appsec/v1/policies/{policyId}` | Update an AppSec policy | Edit |  |  |  |  |
 |  | GET | `/public_api/appsec/v1/application/criteria/all` | Get all criteria | View |  |  |  |  |
-|  | DELETE | `/public_api/appsec/v1/application/criteria/{criteriaId}` | Delete a Criteria | Edit |  |  |  |  |
 |  | GET | `/public_api/appsec/v1/application/criteria/{criteriaId}` | Get a Criteria by ID | View |  |  |  |  |
+|  | DELETE | `/public_api/appsec/v1/application/criteria/{criteriaId}` | Delete a Criteria | Edit |  |  |  |  |
 |  | POST | `/public_api/appsec/v1/application/criteria` | Create a Criteria | Edit |  |  |  |  |
 |  | GET | `/public_api/appsec/v1/issues/fix/{issueId}/fix_suggestion` | Get Fix Suggestion | View |  |  |  |  |
 |  | POST | `/public_api/appsec/v1/issues/fix/trigger_fix_pull_request` | Trigger Fix Pull Request | Edit |  |  |  |  |
 |  | GET | `/public_api/appsec/v1/issues/fix/{remediationId}` | Get Fix Status | View |  |  |  |  |
+<!-- END AUTO -->
 
 ## DSPM (Data Security)
 
 Source: `dspm-papi.json`
 
+<!-- BEGIN AUTO: dspm-papi.json -->
 | ✓ | Method | Path | Description | Type | Elm | CLI | Test | Asserts |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 |  | POST | `/public_api/v1/data-security/data-patterns` | Get data pattern inventory | View |  |  |  |  |
 |  | POST | `/public_api/v1/data-security/objects/fields` | Get field inventory details | View |  |  |  |  |
 |  | POST | `/public_api/v1/data-security/objects/files` | Get file inventory details | View |  |  |  |  |
+<!-- END AUTO -->
 
 ## Platform Notifications
 
 Source: `platform-notifications-papi.json`
 
+<!-- BEGIN AUTO: platform-notifications-papi.json -->
 | ✓ | Method | Path | Description | Type | Elm | CLI | Test | Asserts |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 |  | GET | `/platform/notifications/v1/list-rules` | List all rules | View |  |  |  |  |
 |  | POST | `/platform/notifications/v1/rule` | Create a new rule | Edit |  |  |  |  |
-|  | DELETE | `/platform/notifications/v1/rule/{rule_uuid}` | Delete an existing Alert Notification Rule | Edit |  |  |  |  |
 |  | GET | `/platform/notifications/v1/rule/{rule_uuid}` | Retrieve a specific alert notification rule | View |  |  |  |  |
+|  | DELETE | `/platform/notifications/v1/rule/{rule_uuid}` | Delete an existing Alert Notification Rule | Edit |  |  |  |  |
 |  | PUT | `/platform/notifications/v1/rule/{rule_uuid}` | Edit an existing Alert Notification Rule | Edit |  |  |  |  |
 |  | PATCH | `/platform/notifications/v1/update-rule-status/{rule_uuid}` | Edit the status of an existing Alert Notification Rule | Edit |  |  |  |  |
+<!-- END AUTO -->
 
 ## External Applications
 
 Source: `platform-external-application-papi.json`
 
+<!-- BEGIN AUTO: platform-external-application-papi.json -->
 | ✓ | Method | Path | Description | Type | Elm | CLI | Test | Asserts |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-|  | GET | `/platform/integration/v1/external-application` | List all applications | View |  |  |  |  |
 |  | POST | `/platform/integration/v1/external-application` | Create a new application | Edit |  |  |  |  |
+|  | GET | `/platform/integration/v1/external-application` | List all applications | View |  |  |  |  |
 |  | PUT | `/platform/integration/v1/external-application/{application_id}` | Update an existing application (full replacement) | Edit |  |  |  |  |
 |  | DELETE | `/platform/integration/v1/external-application/{application_type}/id/{application_id}` | Delete an application | Edit |  |  |  |  |
 |  | GET | `/platform/integration/v1/external-application/{application_type}/id/{application_id}` | Get External Application details by ID | View |  |  |  |  |
+<!-- END AUTO -->
 
 ## Managed Threat Detection (MTH/MDR)
 
 Source: `managed-threat-detection-papi.yaml`
 
+<!-- BEGIN AUTO: managed-threat-detection-papi.yaml -->
 | ✓ | Method | Path | Description | Type | Elm | CLI | Test | Asserts |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 |  | POST | `/public_api/v1/mth/child/add_comment` | Add a comment to an MTH/MDR report | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/mth/child/get_comments` | Get comments for MTH/MDR reports | View |  |  |  |  |
-|  | POST | `/public_api/v1/mth/child/report/update/status` | Update report status | View |  |  |  |  |
+|  | POST | `/public_api/v1/mth/child/report/update/status` | Update report status | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/mth/child/report/update/assign` | Update report assignment | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/mth/child/get_reports_by_source_id` | Get reports by source ID | View |  |  |  |  |
 |  | POST | `/public_api/v1/mth/child/get_reports_by_incident_id` | Get reports by incident ID | View |  |  |  |  |
+<!-- END AUTO -->
 
 ## Disable Prevention Rules
 
 Source: `disable-prevention-rule-papi.json`
 
+<!-- BEGIN AUTO: disable-prevention-rule-papi.json -->
 | ✓ | Method | Path | Description | Type | Elm | CLI | Test | Asserts |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | ✓ | POST | `/public_api/v1/disable_prevention/fetch` | Get Disable Prevention Rules | View | `Cortex.Api.DisablePrevention` | `disable-prevention fetch` | `disable_prevention.bats` | ✓ |
@@ -432,21 +463,25 @@ Source: `disable-prevention-rule-papi.json`
 |  | POST | `/public_api/v1/disable_prevention/add` | Add Disable Prevention Rule | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/disable_prevention/edit` | Edit Disable Prevention Rule | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/disable_prevention/delete` | Delete Disable Prevention Rules | Edit |  |  |  |  |
+<!-- END AUTO -->
 
 ## Disable Injection Prevention Rules
 
 Source: `disable-injection-prevention-rule-papi.json`
 
+<!-- BEGIN AUTO: disable-injection-prevention-rule-papi.json -->
 | ✓ | Method | Path | Description | Type | Elm | CLI | Test | Asserts |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | ✓ | POST | `/public_api/v1/disable_injection_prevention_rules/fetch` | Get Disable Injection and Prevention rules | View | `Cortex.Api.DisablePrevention` | `disable-prevention fetch-injection` | `disable_prevention.bats` | ✓ |
 |  | POST | `/public_api/v1/disable_injection_prevention_rules/add` | Add Disable Injection and Prevention rule | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/disable_injection_prevention_rules/disable` | Disable Disable Injection and Prevention Rules | Edit |  |  |  |  |
+<!-- END AUTO -->
 
 ## Trusted Images & CWP Rules
 
 Source: `trusted-images-policies-papi.json`
 
+<!-- BEGIN AUTO: trusted-images-policies-papi.json -->
 | ✓ | Method | Path | Description | Type | Elm | CLI | Test | Asserts |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 |  | DELETE | `/api/v1/policies` | Delete Policies | Edit |  |  |  |  |
@@ -461,7 +496,7 @@ Source: `trusted-images-policies-papi.json`
 |  | POST | `/api/v1/rules/fetch` | Get rules by IDs | View |  |  |  |  |
 |  | GET | `/api/v1/rules/get` | Get the Compliance Rules | View |  |  |  |  |
 |  | GET | `/api/v1/rules/get/{id}` | Get a rule by ID | View |  |  |  |  |
-|  | POST | `/api/v1/rules/lint/rego` | rego script linter | View |  |  |  |  |
+|  | POST | `/api/v1/rules/lint/rego` | rego script linter | Edit |  |  |  |  |
 |  | POST | `/api/v1/rules/update` | Update (custom) Compliance rules | Edit |  |  |  |  |
 |  | GET | `/api/v2/policies` | Get Policies | View |  |  |  |  |
 |  | POST | `/api/v2/policies` | Add Policies | Edit |  |  |  |  |
@@ -472,30 +507,37 @@ Source: `trusted-images-policies-papi.json`
 |  | DELETE | `/public_api/v1/cwp/policies/{id}` | Delete a Policy by ID | Edit |  |  |  |  |
 |  | GET | `/public_api/v1/cwp/policies/{id}` | Get a Policy by ID. | View |  |  |  |  |
 |  | PUT | `/public_api/v1/cwp/policies/{id}` | Update a Policy by ID. | Edit |  |  |  |  |
+<!-- END AUTO -->
 
 ## CWP Registry Connectors
 
 Source: `cwp-unmanaged-registry-connector-papi.json`
 
+<!-- BEGIN AUTO: cwp-unmanaged-registry-connector-papi.json -->
 | ✓ | Method | Path | Description | Type | Elm | CLI | Test | Asserts |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 |  | POST | `/public_api/v1/cwp/registry_onboarding/instances` | Create a registry connector | Edit |  |  |  |  |
-|  | DELETE | `/public_api/v1/cwp/registry_onboarding/instances/{connectorID}` | Delete a registry connector | Edit |  |  |  |  |
 |  | GET | `/public_api/v1/cwp/registry_onboarding/instances/{connectorID}` | Get a registry connector | View |  |  |  |  |
 |  | PUT | `/public_api/v1/cwp/registry_onboarding/instances/{connectorID}` | Update a registry connector | Edit |  |  |  |  |
+|  | DELETE | `/public_api/v1/cwp/registry_onboarding/instances/{connectorID}` | Delete a registry connector | Edit |  |  |  |  |
+<!-- END AUTO -->
 
 ## Asset Compliance
 
 Source: `asset-compliance-papi.yaml`
 
+<!-- BEGIN AUTO: asset-compliance-papi.yaml -->
 | ✓ | Method | Path | Description | Type | Elm | CLI | Test | Asserts |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 |  | POST | `/public_api/v1/compliance/get_asset` | Get asset compliance results | View |  |  |  |  |
+<!-- END AUTO -->
 
 ## CIEM
 
 Source: `ciem-papi.json`
 
+<!-- BEGIN AUTO: ciem-papi.json -->
 | ✓ | Method | Path | Description | Type | Elm | CLI | Test | Asserts |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 |  | POST | `/public_api/v1/ciem/access/search` | Search CIEM Access | View |  |  |  |  |
+<!-- END AUTO -->
