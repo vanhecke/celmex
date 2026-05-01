@@ -64,7 +64,7 @@ Source: `cortex-platform-papi.json`
 |  | POST | `/public_api/v1/indicators/insert_jsons` | Insert Simple Indicators, JSON | Edit |  |  |  |  |
 | ✓ | POST | `/public_api/v1/audits/management_logs` | Get Audit Management Log | View | `Cortex.Api.AuditLogs` | `audit-logs search` | `audit_logs.bats` | ✗ |
 | ✓ | GET | `/public_api/v1/healthcheck` | System Health Check | View | `Cortex.Api.Healthcheck` | `healthcheck` | `healthcheck.bats` | — |
-| ✓ | POST | `/public_api/v1/system/get_tenant_info` | Get Tenant Info | View | `Cortex.Api.TenantInfo` | `tenant-info` | `tenant_info.bats` | — |
+| ✓ | POST | `/public_api/v1/system/get_tenant_info` | Get Tenant Info | View | `Cortex.Api.TenantInfo` | `tenant-info` | `tenant_info.bats` | ✓ |
 | ✓ | POST | `/public_api/v1/rbac/get_users` | Get Users | View | `Cortex.Api.Rbac` | `rbac get-users` | `rbac.bats` | ✗ |
 | ✓ | POST | `/public_api/v1/rbac/get_roles` | Get Roles | View | `Cortex.Api.Rbac` | `rbac get-roles` | `rbac.bats` | ✗ |
 | ✓ | POST | `/public_api/v1/rbac/get_user_group` | Get User Groups | View | `Cortex.Api.Rbac` | `rbac get-user-groups` | `rbac.bats` | ✗ |

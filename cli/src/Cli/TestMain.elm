@@ -230,7 +230,23 @@ run stamp config endpoint =
             typed Healthcheck.check
 
         Commands.TenantInfo ->
-            typed TenantInfo.get
+            typedAssert TenantInfo.get
+                (\t ->
+                    [ present "xsiamPremiumExpiration" t.xsiamPremiumExpiration
+                    , present "purchasedXsiamPremium" t.purchasedXsiamPremium
+                    , nonNegative "installedPrevent" t.installedPrevent
+                    ]
+                        ++ (case t.purchasedXsiamPremium of
+                                Just p ->
+                                    [ positive "purchasedXsiamPremium.users" p.users
+                                    , positive "purchasedXsiamPremium.agents" p.agents
+                                    , positive "purchasedXsiamPremium.gb" p.gb
+                                    ]
+
+                                Nothing ->
+                                    []
+                           )
+                )
 
         Commands.CliVersion ->
             typed Cli.getVersion
