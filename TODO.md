@@ -163,8 +163,8 @@ Source: `cortex-platform-papi.json`
 |  | POST | `/public_api/v1/tags/agents/delete_permanently` | Delete Tags Permanently | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/endpoints/upgrade` | Upgrade Agents | Edit |  |  |  |  |
 | ✓ | POST | `/public_api/v1/endpoints/get_profiles` | Get endpoint security profiles | View | `Cortex.Api.Profiles` | `profiles list` | `profiles.bats` | ✗ |
-| ✓ | POST | `/public_api/v1/legacy_exceptions/get_modules` | Get Legacy Exceptions Modules | View | `Cortex.Api.LegacyExceptions` | `legacy-exceptions get-modules` | `legacy_exceptions.bats` | ✗ |
-| ✓ | POST | `/public_api/v1/legacy_exceptions/fetch` | Fetch Legacy Exception Rules | View | `Cortex.Api.LegacyExceptions` | `legacy-exceptions fetch` | `legacy_exceptions.bats` | ✗ |
+| ✓ | POST | `/public_api/v1/legacy_exceptions/get_modules` | Get Legacy Exceptions Modules | View | `Cortex.Api.LegacyExceptions` | `legacy-exceptions get-modules` | `legacy_exceptions.bats` | ✓ |
+| ✓ | POST | `/public_api/v1/legacy_exceptions/fetch` | Fetch Legacy Exception Rules | View | `Cortex.Api.LegacyExceptions` | `legacy-exceptions fetch` | `legacy_exceptions.bats` | ✓ |
 |  | POST | `/public_api/v1/legacy_exceptions/add` | Add Legacy Exception Rule | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/legacy_exceptions/edit` | Edit Legacy Exception Rule | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/legacy_exceptions/delete` | Delete Legacy Exception Rules | Edit |  |  |  |  |

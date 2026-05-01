@@ -1,23 +1,35 @@
 module Cortex.Api.LegacyExceptions exposing
-    ( Module, FetchResponse
+    ( Module, FetchResponse, ExceptionRule
     , getModules, fetch
     )
 
-{-| Legacy policy exception modules and their current rule set.
+{-| Legacy policy exception modules and the per-rule list of currently
+configured exceptions.
 
-@docs Module, FetchResponse
+Two endpoints:
+
+  - [`getModules`](#getModules) — list every module type that _can_ be
+    excepted (e.g. "Malware > Behavioral Threat Protection"), along with
+    a JSON-Schema-style `conditions_definition` describing what condition
+    shape that module accepts.
+
+  - [`fetch`](#fetch) — list the exception rules currently configured on
+    the tenant.
+
+@docs Module, FetchResponse, ExceptionRule
 @docs getModules, fetch
 
 -}
 
-import Cortex.Decode exposing (reply)
+import Cortex.Decode exposing (andMap, optionalList, reply)
 import Cortex.Request as Request exposing (Request)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
 
 
-{-| A single legacy-exception module definition. `conditionsDefinition` is a
-nested JSON tree whose shape depends on module type, so it is preserved as-is.
+{-| One legacy-exception module type — a category of policy that can have
+exceptions defined against it. `conditionsDefinition` is intentionally
+opaque (see field comment).
 -}
 type alias Module =
     { moduleId : Maybe Int
@@ -26,24 +38,54 @@ type alias Module =
     , label : Maybe String
     , profileType : Maybe String
     , platforms : List String
+
+    {- conditionsDefinition is a JSON-Schema-style description of the
+       condition shape this module accepts. It is genuinely polymorphic
+       across modules — every module defines its own custom condition
+       schema (whitelistFolders, allow, whitelistSigners, process_exceptions,
+       reverse-shell tuples, etc.) with module-specific properties and
+       enums. Cannot be typed at the SDK layer; preserved verbatim so
+       downstream consumers can introspect or re-emit per module type.
+    -}
     , conditionsDefinition : Encode.Value
     }
 
 
-{-| Legacy exception rules have many flexible fields (conditions structure,
-profile associations, etc.) that vary by module type. We preserve each rule
-as raw JSON and only type the paginated envelope counters.
+{-| Paginated envelope returned by [`fetch`](#fetch).
 -}
 type alias FetchResponse =
-    { data : List Encode.Value
+    { data : List ExceptionRule
     , filterCount : Maybe Int
     , totalCount : Maybe Int
     }
 
 
+{-| A single configured exception rule. `id` is a string (per spec — not
+the integer identifier other Cortex endpoints use).
+-}
+type alias ExceptionRule =
+    { id : Maybe String
+    , ruleName : Maybe String
+    , platform : Maybe String
+    , conditions : Maybe String
+    , module_ : Maybe Int
+    , moduleName : Maybe String
+    , description : Maybe String
+    , generatingAlertId : Maybe Encode.Value
+    , createdBy : Maybe String
+    , modificationTime : Maybe Int
+    , userEmail : Maybe String
+    , status : Maybe String
+    , profileIds : List Int
+    , associatedTargets : List String
+    , isInUserScope : Maybe Bool
+    }
+
+
 {-| POST /public\_api/v1/legacy\_exceptions/get\_modules
 
-No request body required — send empty.
+List every legacy-exception module type that can have rules defined
+against it.
 
 -}
 getModules : Request (List Module)
@@ -55,6 +97,10 @@ getModules =
 
 
 {-| POST /public\_api/v1/legacy\_exceptions/fetch
+
+Retrieve the legacy exception rules currently configured on the tenant,
+with optional filtering, sorting, and pagination.
+
 -}
 fetch : Request FetchResponse
 fetch =
@@ -63,14 +109,18 @@ fetch =
         (reply fetchResponseDecoder)
 
 
+
+-- DECODERS
+
+
 moduleDecoder : Decoder Module
 moduleDecoder =
     Decode.map7 Module
-        (Decode.maybe (Decode.field "module_id" Decode.int))
-        (Decode.maybe (Decode.field "pretty_name" Decode.string))
-        (Decode.maybe (Decode.field "title" Decode.string))
-        (Decode.maybe (Decode.field "label" Decode.string))
-        (Decode.maybe (Decode.field "profile_type" Decode.string))
+        (optionalField "module_id" Decode.int)
+        (optionalField "pretty_name" Decode.string)
+        (optionalField "title" Decode.string)
+        (optionalField "label" Decode.string)
+        (optionalField "profile_type" Decode.string)
         (Decode.oneOf
             [ Decode.field "platforms" (Decode.list Decode.string)
             , Decode.succeed []
@@ -87,8 +137,8 @@ fetchResponseDecoder : Decoder FetchResponse
 fetchResponseDecoder =
     Decode.map3 FetchResponse
         (Decode.oneOf
-            [ Decode.field "DATA" (Decode.list Decode.value)
-            , Decode.field "data" (Decode.list Decode.value)
+            [ Decode.field "DATA" (Decode.list exceptionRuleDecoder)
+            , Decode.field "data" (Decode.list exceptionRuleDecoder)
             , Decode.succeed []
             ]
         )
@@ -106,3 +156,28 @@ fetchResponseDecoder =
                 ]
             )
         )
+
+
+exceptionRuleDecoder : Decoder ExceptionRule
+exceptionRuleDecoder =
+    Decode.succeed ExceptionRule
+        |> andMap (optionalField "id" Decode.string)
+        |> andMap (optionalField "rule_name" Decode.string)
+        |> andMap (optionalField "platform" Decode.string)
+        |> andMap (optionalField "conditions" Decode.string)
+        |> andMap (optionalField "module" Decode.int)
+        |> andMap (optionalField "module_name" Decode.string)
+        |> andMap (optionalField "description" Decode.string)
+        |> andMap (optionalField "generating_alert_id" Decode.value)
+        |> andMap (optionalField "created_by" Decode.string)
+        |> andMap (optionalField "modification_time" Decode.int)
+        |> andMap (optionalField "user_email" Decode.string)
+        |> andMap (optionalField "status" Decode.string)
+        |> andMap (optionalList "profile_ids" Decode.int)
+        |> andMap (optionalList "associated_targets" Decode.string)
+        |> andMap (optionalField "is_in_user_scope" Decode.bool)
+
+
+optionalField : String -> Decoder a -> Decoder (Maybe a)
+optionalField name d =
+    Decode.maybe (Decode.field name d)

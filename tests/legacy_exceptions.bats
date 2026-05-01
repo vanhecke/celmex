@@ -7,8 +7,11 @@ setup() {
 @test "legacy-exceptions get-modules returns valid JSON array" {
     run "$CORTEX" legacy-exceptions get-modules
     [ "$status" -eq 0 ]
-    echo "$output" | jq . > /dev/null
     echo "$output" | jq -e 'type == "array"' > /dev/null
+    echo "$output" | jq -e 'length > 0' > /dev/null
+    echo "$output" | jq -e '.[0].module_id | type == "number"' > /dev/null
+    echo "$output" | jq -e '.[0].pretty_name | type == "string" and length > 0' > /dev/null
+    echo "$output" | jq -e '.[0].platforms | type == "array" and length > 0' > /dev/null
 }
 
 @test "legacy-exceptions get-modules typed decode succeeds" {
@@ -19,8 +22,9 @@ setup() {
 @test "legacy-exceptions fetch returns valid JSON with DATA array" {
     run "$CORTEX" legacy-exceptions fetch
     [ "$status" -eq 0 ]
-    echo "$output" | jq . > /dev/null
     echo "$output" | jq -e '.DATA | type == "array"' > /dev/null
+    echo "$output" | jq -e '.TOTAL_COUNT | type == "number"' > /dev/null
+    echo "$output" | jq -e '.FILTER_COUNT | type == "number"' > /dev/null
 }
 
 @test "legacy-exceptions fetch typed decode succeeds" {

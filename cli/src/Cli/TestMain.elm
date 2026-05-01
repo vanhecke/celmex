@@ -406,10 +406,42 @@ run stamp config endpoint =
                 )
 
         Commands.LegacyExceptionsGetModules ->
-            typed LegacyExceptions.getModules
+            typedAssert LegacyExceptions.getModules
+                (\modules ->
+                    nonEmpty "modules" modules
+                        :: sampleFirst "modules"
+                            modules
+                            (\m ->
+                                [ positive "moduleId" m.moduleId
+                                , nonBlank "prettyName" m.prettyName
+                                , nonBlank "title" m.title
+                                , nonBlank "profileType" m.profileType
+                                , nonEmpty "platforms" m.platforms
+                                ]
+                            )
+                )
 
         Commands.LegacyExceptionsFetch ->
-            typed LegacyExceptions.fetch
+            typedAssert LegacyExceptions.fetch
+                (\r ->
+                    [ nonNegative "totalCount" r.totalCount
+                    , nonNegative "filterCount" r.filterCount
+                    ]
+                        ++ (if List.isEmpty r.data then
+                                -- legitimately empty when no exceptions configured
+                                []
+
+                            else
+                                sampleFirst "data"
+                                    r.data
+                                    (\rule ->
+                                        [ nonBlank "id" rule.id
+                                        , nonBlank "ruleName" rule.ruleName
+                                        , nonBlank "status" rule.status
+                                        ]
+                                    )
+                           )
+                )
 
         Commands.ProfilesList profileType ->
             typed (Profiles.getProfiles { type_ = profileType })
