@@ -22,8 +22,11 @@
 just format         # elm-format all source files
 just build          # format + compile cli/dist/elm.js
 just test [JOBS]    # build + run BATS tests (JOBS = bats --jobs parallelism, default 1)
+just review         # run elm-review on both SDK (`/review/`) and CLI (`/cli/review/`) configs
 just curl           # raw authenticated API call: just curl GET /public_api/v1/healthcheck | jq .
 just clean          # remove elm-stuff and build artifacts
+just todo-sync      # refresh TODO.md coverage tables from OpenAPI specs (skill: todo-from-openapi)
+just todo-check     # CI-mode todo-sync that exits non-zero on drift
 elm make --docs=docs.json   # verify docs for the Elm package (required before `just publish`)
 just publish VERSION        # bump manifests in lockstep, tag, push, publish to npm + elm
 ```

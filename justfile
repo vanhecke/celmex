@@ -43,6 +43,16 @@ review:
     npx --yes elm-review
     cd cli && npx --yes elm-review
 
+# Refresh TODO.md from the OpenAPI specs and src/Cortex/Api/. See
+# .claude/skills/todo-from-openapi/ for what is/isn't regenerated.
+todo-sync:
+    node .claude/skills/todo-from-openapi/sync.mjs
+
+# Same as todo-sync but read-only — exits non-zero if TODO.md drifts
+# from what the script would produce. Suitable for CI.
+todo-check:
+    node .claude/skills/todo-from-openapi/sync.mjs --check
+
 # Publish the Elm package to package.elm-lang.org.
 # Requires a matching git tag (created by `just publish VERSION`) on origin.
 publish-elm:
