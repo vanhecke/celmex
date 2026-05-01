@@ -287,7 +287,20 @@ run stamp config endpoint =
             typed Rbac.getUsers
 
         Commands.AuthSettingsGet ->
-            typed AuthSettings.get
+            typedAssert AuthSettings.get
+                (\settings ->
+                    [ nonEmpty "settings" settings
+                    ]
+                        ++ sampleFirst "settings"
+                            settings
+                            (\s ->
+                                [ nonBlank "tenantId" s.tenantId
+                                , nonBlank "spEntityId" s.spEntityId
+                                , nonBlank "spUrl" s.spUrl
+                                , nonBlank "spLogoutUrl" s.spLogoutUrl
+                                ]
+                            )
+                )
 
         Commands.DeviceControlGetViolations ->
             typed DeviceControl.getViolations

@@ -98,7 +98,7 @@ Source: `cortex-platform-papi.json`
 |  | POST | `/public_api/v1/authentication-settings/create` | Create authentication settings for IdP SSO or metadata URL | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/authentication-settings/update` | Update authentication settings | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/authentication-settings/delete` | Delete authentication settings by domain | Edit |  |  |  |  |
-| ✓ | POST | `/public_api/v1/authentication-settings/get/settings` | Get authentication settings for all configured domains | View | `Cortex.Api.AuthSettings` | `authentication-settings get` | `authentication_settings.bats` | ✗ |
+| ✓ | POST | `/public_api/v1/authentication-settings/get/settings` | Get authentication settings for all configured domains | View | `Cortex.Api.AuthSettings` | `authentication-settings get` | `authentication_settings.bats` | ✓ |
 |  | POST | `/public_api/v1/authentication-settings/get/metadata` | Get IdP metadata | View |  |  |  |  |
 |  | POST | `/public_api/v1/asm_management/upload_asm_data` | Upload assets to the inventory | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/assets/get_external_website` | Get Website Details | View |  |  |  |  |
