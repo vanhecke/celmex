@@ -325,7 +325,24 @@ run stamp config endpoint =
                 )
 
         Commands.AttackSurfaceGetRules ->
-            typed AttackSurface.getRules
+            typedAssert AttackSurface.getRules
+                (\r ->
+                    [ positive "totalCount" r.totalCount
+                    , positive "resultCount" r.resultCount
+                    , nonEmpty "attackSurfaceRules" r.attackSurfaceRules
+                    ]
+                        ++ sampleFirst "attackSurfaceRules"
+                            r.attackSurfaceRules
+                            (\rule ->
+                                [ nonBlank "attackSurfaceRuleName" rule.attackSurfaceRuleName
+                                , nonBlank "attackSurfaceRuleId" rule.attackSurfaceRuleId
+                                , nonBlank "enabledStatus" rule.enabledStatus
+                                , nonBlank "priority" rule.priority
+                                , nonBlank "category" rule.category
+                                , nonBlank "description" rule.description
+                                ]
+                            )
+                )
 
         Commands.XqlGetQuota ->
             typedAssert Xql.getQuota
