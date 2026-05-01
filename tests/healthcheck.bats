@@ -7,8 +7,8 @@ setup() {
 @test "healthcheck returns valid JSON with status" {
     run "$CORTEX" healthcheck
     [ "$status" -eq 0 ]
-    echo "$output" | jq . > /dev/null
-    echo "$output" | jq -e '.status' > /dev/null
+    echo "$output" | jq -e '.status | type == "string"' > /dev/null
+    echo "$output" | jq -e '.status | length > 0' > /dev/null
 }
 
 @test "healthcheck typed decode succeeds" {
