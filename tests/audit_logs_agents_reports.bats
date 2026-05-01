@@ -7,8 +7,9 @@ setup() {
 @test "audit-logs agents-reports returns valid JSON with data array" {
     run "$CORTEX" audit-logs agents-reports
     [ "$status" -eq 0 ]
-    echo "$output" | jq . > /dev/null
     echo "$output" | jq -e '.data | type == "array"' > /dev/null
+    echo "$output" | jq -e '.total_count | type == "number"' > /dev/null
+    echo "$output" | jq -e '.result_count | type == "number"' > /dev/null
 }
 
 @test "audit-logs agents-reports typed decode succeeds" {

@@ -1,18 +1,31 @@
 module Cortex.Api.AuditLogs exposing
     ( SearchArgs, defaultSearchArgs
-    , AuditLog, SearchResponse, AgentsReportsResponse
+    , AuditLog, SearchResponse
+    , AgentReport, AgentsReportsResponse
     , search, agentsReports
     )
 
-{-| Cortex tenant audit-log queries (management events and agent reports).
+{-| Cortex tenant audit-log queries — both human-driven management events
+and agent-emitted reports.
+
+Two endpoints, two record shapes:
+
+  - [`search`](#search) — management actions (an admin changed a setting,
+    an API key was created, etc.). Records have UPPERCASE-prefixed
+    `AUDIT_*` fields.
+
+  - [`agentsReports`](#agentsReports) — agent-side events (policy updates,
+    scan completions, errors). Records have UPPERCASE field names with
+    floating-point millisecond timestamps.
 
 @docs SearchArgs, defaultSearchArgs
-@docs AuditLog, SearchResponse, AgentsReportsResponse
+@docs AuditLog, SearchResponse
+@docs AgentReport, AgentsReportsResponse
 @docs search, agentsReports
 
 -}
 
-import Cortex.Decode exposing (reply)
+import Cortex.Decode exposing (andMap, optionalList, reply)
 import Cortex.Query as Query exposing (Filter, Range, Sort, Timeframe)
 import Cortex.Request as Request exposing (Request)
 import Cortex.RequestData as RequestData
@@ -56,16 +69,65 @@ type alias SearchResponse =
     }
 
 
-{-| A single audit-management event (user action on the tenant).
+{-| A single audit-management event (a user/system action against the
+tenant). Field names mirror the wire format's `AUDIT_*` UPPERCASE shape.
 -}
 type alias AuditLog =
     { auditId : Int
     , ownerName : Maybe String
     , ownerEmail : Maybe String
     , entity : Maybe String
+    , entitySubtype : Maybe String
+    , severity : Maybe String
     , result : Maybe String
+    , reason : Maybe String
     , description : Maybe String
     , insertTime : Maybe Int
+    , hostname : Maybe String
+    , assetNames : Maybe String
+
+    {- AUDIT_ASSET_JSON varies per audit type — sometimes null, sometimes
+       a structured object describing the asset acted on. Preserved
+       verbatim because the populated shape depends on the entity type.
+    -}
+    , assetJson : Maybe Encode.Value
+    , sessionId : Maybe String
+    , caseId : Maybe Int
+    , link : Maybe String
+    , sourceIp : Maybe String
+    , userAgent : Maybe String
+    , userRoles : List String
+    , objectId : Maybe String
+    }
+
+
+{-| Paginated envelope returned by [`agentsReports`](#agentsReports).
+-}
+type alias AgentsReportsResponse =
+    { totalCount : Maybe Int
+    , resultCount : Maybe Int
+    , data : List AgentReport
+    }
+
+
+{-| A single agent report (an event emitted by an installed XDR agent).
+Field names mirror the wire format's UPPERCASE shape. Timestamps are
+emitted as floating-point milliseconds (not integers).
+-}
+type alias AgentReport =
+    { timestamp : Maybe Float
+    , receivedTime : Maybe Float
+    , endpointId : Maybe String
+    , endpointName : Maybe String
+    , domain : Maybe String
+    , category : Maybe String
+    , type_ : Maybe String
+    , subType : Maybe String
+    , severity : Maybe String
+    , result : Maybe String
+    , reason : Maybe String
+    , description : Maybe String
+    , xdrVersion : Maybe String
     }
 
 
@@ -91,6 +153,24 @@ search args =
         searchResponseDecoder
 
 
+{-| POST /public\_api/v1/audits/agents\_reports
+
+Retrieve agent-emitted reports — policy updates, scan completions, error
+notifications, etc. Each row carries timestamps as floating-point
+milliseconds.
+
+-}
+agentsReports : Request AgentsReportsResponse
+agentsReports =
+    Request.postEmpty
+        [ "public_api", "v1", "audits", "agents_reports" ]
+        (reply agentsReportsResponseDecoder)
+
+
+
+-- DECODERS
+
+
 searchResponseDecoder : Decoder SearchResponse
 searchResponseDecoder =
     reply
@@ -103,35 +183,27 @@ searchResponseDecoder =
 
 auditLogDecoder : Decoder AuditLog
 auditLogDecoder =
-    Decode.map7 AuditLog
-        (Decode.field "AUDIT_ID" Decode.int)
-        (Decode.maybe (Decode.field "AUDIT_OWNER_NAME" Decode.string))
-        (Decode.maybe (Decode.field "AUDIT_OWNER_EMAIL" Decode.string))
-        (Decode.maybe (Decode.field "AUDIT_ENTITY" Decode.string))
-        (Decode.maybe (Decode.field "AUDIT_RESULT" Decode.string))
-        (Decode.maybe (Decode.field "AUDIT_DESCRIPTION" Decode.string))
-        (Decode.maybe (Decode.field "AUDIT_INSERT_TIME" Decode.int))
-
-
-{-| Agent reports have uppercase field names (TIMESTAMP, ENDPOINTID, DOMAIN,
-CATEGORY, SUBTYPE, …) and some floating-point timestamps, so the report rows
-are preserved as raw JSON to capture every field without duplicating the agent
-event schema here.
--}
-type alias AgentsReportsResponse =
-    { totalCount : Maybe Int
-    , resultCount : Maybe Int
-    , data : List Encode.Value
-    }
-
-
-{-| POST /public\_api/v1/audits/agents\_reports
--}
-agentsReports : Request AgentsReportsResponse
-agentsReports =
-    Request.postEmpty
-        [ "public_api", "v1", "audits", "agents_reports" ]
-        (reply agentsReportsResponseDecoder)
+    Decode.succeed AuditLog
+        |> andMap (Decode.field "AUDIT_ID" Decode.int)
+        |> andMap (optionalField "AUDIT_OWNER_NAME" Decode.string)
+        |> andMap (optionalField "AUDIT_OWNER_EMAIL" Decode.string)
+        |> andMap (optionalField "AUDIT_ENTITY" Decode.string)
+        |> andMap (optionalField "AUDIT_ENTITY_SUBTYPE" Decode.string)
+        |> andMap (optionalField "AUDIT_SEVERITY" Decode.string)
+        |> andMap (optionalField "AUDIT_RESULT" Decode.string)
+        |> andMap (optionalField "AUDIT_REASON" Decode.string)
+        |> andMap (optionalField "AUDIT_DESCRIPTION" Decode.string)
+        |> andMap (optionalField "AUDIT_INSERT_TIME" Decode.int)
+        |> andMap (optionalField "AUDIT_HOSTNAME" Decode.string)
+        |> andMap (optionalField "AUDIT_ASSET_NAMES" Decode.string)
+        |> andMap (optionalField "AUDIT_ASSET_JSON" Decode.value)
+        |> andMap (optionalField "AUDIT_SESSION_ID" Decode.string)
+        |> andMap (optionalField "AUDIT_CASE_ID" Decode.int)
+        |> andMap (optionalField "AUDIT_LINK" Decode.string)
+        |> andMap (optionalField "AUDIT_SOURCE_IP" Decode.string)
+        |> andMap (optionalField "AUDIT_USER_AGENT" Decode.string)
+        |> andMap (optionalList "AUDIT_USER_ROLES" Decode.string)
+        |> andMap (optionalField "AUDIT_OBJECT_ID" Decode.string)
 
 
 agentsReportsResponseDecoder : Decoder AgentsReportsResponse
@@ -140,7 +212,30 @@ agentsReportsResponseDecoder =
         (Decode.maybe (Decode.field "total_count" Decode.int))
         (Decode.maybe (Decode.field "result_count" Decode.int))
         (Decode.oneOf
-            [ Decode.field "data" (Decode.list Decode.value)
+            [ Decode.field "data" (Decode.list agentReportDecoder)
             , Decode.succeed []
             ]
         )
+
+
+agentReportDecoder : Decoder AgentReport
+agentReportDecoder =
+    Decode.succeed AgentReport
+        |> andMap (optionalField "TIMESTAMP" Decode.float)
+        |> andMap (optionalField "RECEIVEDTIME" Decode.float)
+        |> andMap (optionalField "ENDPOINTID" Decode.string)
+        |> andMap (optionalField "ENDPOINTNAME" Decode.string)
+        |> andMap (optionalField "DOMAIN" Decode.string)
+        |> andMap (optionalField "CATEGORY" Decode.string)
+        |> andMap (optionalField "TYPE" Decode.string)
+        |> andMap (optionalField "SUBTYPE" Decode.string)
+        |> andMap (optionalField "SEVERITY" Decode.string)
+        |> andMap (optionalField "RESULT" Decode.string)
+        |> andMap (optionalField "REASON" Decode.string)
+        |> andMap (optionalField "DESCRIPTION" Decode.string)
+        |> andMap (optionalField "XDRVERSION" Decode.string)
+
+
+optionalField : String -> Decoder a -> Decoder (Maybe a)
+optionalField name d =
+    Decode.maybe (Decode.field name d)

@@ -263,10 +263,45 @@ run stamp config endpoint =
             typed (Endpoints.list args)
 
         Commands.AuditLogsSearch args ->
-            typed (AuditLogs.search args)
+            typedAssert (AuditLogs.search args)
+                (\r ->
+                    [ satisfies "totalCount" (r.totalCount > 0) "expected > 0"
+                    , satisfies "resultCount" (r.resultCount > 0) "expected > 0"
+                    , nonEmpty "data" r.data
+                    ]
+                        ++ sampleFirst "data"
+                            r.data
+                            (\a ->
+                                [ satisfies "auditId" (a.auditId > 0) "expected > 0"
+                                , nonBlank "result" a.result
+                                , nonBlank "description" a.description
+                                , present "insertTime" a.insertTime
+                                ]
+                            )
+                )
 
         Commands.AuditLogsAgentsReports ->
-            typed AuditLogs.agentsReports
+            typedAssert AuditLogs.agentsReports
+                (\r ->
+                    [ nonNegative "totalCount" r.totalCount
+                    , nonNegative "resultCount" r.resultCount
+                    ]
+                        ++ (if List.isEmpty r.data then
+                                []
+
+                            else
+                                sampleFirst "data"
+                                    r.data
+                                    (\rep ->
+                                        [ present "timestamp" rep.timestamp
+                                        , nonBlank "endpointId" rep.endpointId
+                                        , nonBlank "endpointName" rep.endpointName
+                                        , nonBlank "category" rep.category
+                                        , nonBlank "severity" rep.severity
+                                        ]
+                                    )
+                           )
+                )
 
         Commands.DistributionsGetVersions ->
             typed Distributions.getVersions

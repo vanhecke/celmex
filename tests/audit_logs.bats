@@ -9,10 +9,11 @@ setup() {
 @test "audit-logs search returns valid JSON with results" {
     run "$CORTEX" audit-logs search
     [ "$status" -eq 0 ]
-    echo "$output" | jq . > /dev/null
-    echo "$output" | jq -e '.total_count >= 0' > /dev/null
-    echo "$output" | jq -e '.result_count >= 0' > /dev/null
-    echo "$output" | jq -e '.data | type == "array"' > /dev/null
+    echo "$output" | jq -e '.total_count | type == "number" and . > 0' > /dev/null
+    echo "$output" | jq -e '.result_count | type == "number" and . > 0' > /dev/null
+    echo "$output" | jq -e '.data | type == "array" and length > 0' > /dev/null
+    echo "$output" | jq -e '.data[0].AUDIT_ID | type == "number"' > /dev/null
+    echo "$output" | jq -e '.data[0].AUDIT_DESCRIPTION | type == "string" and length > 0' > /dev/null
 }
 
 @test "audit-logs search typed decode succeeds" {

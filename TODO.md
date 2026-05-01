@@ -62,7 +62,7 @@ Source: `cortex-platform-papi.json`
 |  | POST | `/public_api/v1/scripts/get_script_code` | Get Script Code | View |  |  |  |  |
 |  | POST | `/public_api/v1/indicators/insert_csv` | Insert Simple Indicators, CSV | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/indicators/insert_jsons` | Insert Simple Indicators, JSON | Edit |  |  |  |  |
-| ✓ | POST | `/public_api/v1/audits/management_logs` | Get Audit Management Log | View | `Cortex.Api.AuditLogs` | `audit-logs search` | `audit_logs.bats` | ✗ |
+| ✓ | POST | `/public_api/v1/audits/management_logs` | Get Audit Management Log | View | `Cortex.Api.AuditLogs` | `audit-logs search` | `audit_logs.bats` | ✓ |
 | ✓ | GET | `/public_api/v1/healthcheck` | System Health Check | View | `Cortex.Api.Healthcheck` | `healthcheck` | `healthcheck.bats` | ✓ |
 | ✓ | POST | `/public_api/v1/system/get_tenant_info` | Get Tenant Info | View | `Cortex.Api.TenantInfo` | `tenant-info` | `tenant_info.bats` | ✓ |
 | ✓ | POST | `/public_api/v1/rbac/get_users` | Get Users | View | `Cortex.Api.Rbac` | `rbac get-users` | `rbac.bats` | ✗ |
@@ -75,7 +75,7 @@ Source: `cortex-platform-papi.json`
 | ✓ | POST | `/public_api/v1/get_risky_hosts` | Get Risky Hosts | View | `Cortex.Api.Risk` | `risk hosts` | `risk.bats` | ✗ |
 |  | POST | `/public_api/v1/endpoints/file_retrieval` | Retrieve File | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/endpoints/isolate` | Isolate Endpoints | Edit |  |  |  |  |
-| ✓ | POST | `/public_api/v1/audits/agents_reports` | Get Audit Agent Report | View | `Cortex.Api.AuditLogs` | `audit-logs agents-reports` | `audit_logs_agents_reports.bats` | ✗ |
+| ✓ | POST | `/public_api/v1/audits/agents_reports` | Get Audit Agent Report | View | `Cortex.Api.AuditLogs` | `audit-logs agents-reports` | `audit_logs_agents_reports.bats` | ✓ |
 |  | POST | `/public_api/v1/assets/get_external_service` | Get External Service | View |  |  |  |  |
 | ✓ | POST | `/public_api/v1/assets/get_external_services` | Get All Services | View | `Cortex.Api.Assets` | `assets external-services` | `assets.bats` | ✗ |
 | ✓ | POST | `/public_api/v1/assets/get_assets_internet_exposure` | Get all Internet Exposures | View | `Cortex.Api.Assets` | `assets internet-exposures` | `assets.bats` | ✗ |
