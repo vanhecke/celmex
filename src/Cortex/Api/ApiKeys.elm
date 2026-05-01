@@ -4,12 +4,23 @@ module Cortex.Api.ApiKeys exposing
     , getApiKeys
     )
 
+{-| Cortex advanced-API key management — list configured keys.
+
+@docs ApiKey, GetApiKeysResponse
+@docs getApiKeys
+
+-}
+
 import Cortex.Decode exposing (optionalList, reply)
 import Cortex.Request as Request exposing (Request)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
 
 
+{-| Paginated envelope returned by [`getApiKeys`](#getApiKeys): the
+configured [`ApiKey`](#ApiKey) records plus the filter / total counts
+from the standard Cortex paginated reply.
+-}
 type alias GetApiKeysResponse =
     { data : List ApiKey
     , filterCount : Maybe Int
@@ -17,6 +28,9 @@ type alias GetApiKeysResponse =
     }
 
 
+{-| A single advanced-API key record. Roles are role names, not IDs.
+Time fields are Unix epoch milliseconds.
+-}
 type alias ApiKey =
     { id : Int
     , creationTime : Maybe Int

@@ -25,6 +25,15 @@ module Cortex.Api.AgentConfig exposing
 `/public_api/v1/configurations/agent/*`. Each one returns a small, flat
 settings object directly (no `reply` envelope). Source of truth:
 `docs/cortex-api-openapi/agent-configurations-papi.yaml`.
+
+@docs ContentManagement, AutoUpgrade, WildfireAnalysis, CriticalEnvironmentVersions
+@docs AdvancedAnalysis, AgentStatus, InformativeBtpIssues, CortexXdrLogCollection
+@docs ActionCenterExpiration, EndpointAdministrationCleanup
+
+@docs getContentManagement, getAutoUpgrade, getWildfireAnalysis, getCriticalEnvironmentVersions
+@docs getAdvancedAnalysis, getAgentStatus, getInformativeBtpIssues, getCortexXdrLogCollection
+@docs getActionCenterExpiration, getEndpointAdministrationCleanup
+
 -}
 
 import Cortex.Request as Request exposing (Request)
@@ -32,6 +41,8 @@ import Dict exposing (Dict)
 import Json.Decode as Decode exposing (Decoder)
 
 
+{-| Content-update bandwidth and minor-version settings.
+-}
 type alias ContentManagement =
     { enableBandwidthControl : Maybe Bool
     , bandwidthInMbps : Maybe Int
@@ -56,6 +67,8 @@ contentManagementDecoder =
         (Decode.maybe (Decode.field "enable_minor_content_version_updates" Decode.bool))
 
 
+{-| Agent auto-upgrade parallelism setting.
+-}
 type alias AutoUpgrade =
     { amountOfParallelUpgrades : Maybe Int
     }
@@ -76,6 +89,8 @@ autoUpgradeDecoder =
         (Decode.maybe (Decode.field "amount_of_parallel_upgrades" Decode.int))
 
 
+{-| WildFire scoring toggle for benign verdicts.
+-}
 type alias WildfireAnalysis =
     { enableWildfireAnalysisScoringForBenignVerdicts : Maybe Bool
     }
@@ -96,6 +111,8 @@ wildfireAnalysisDecoder =
         (Decode.maybe (Decode.field "enable_wildfire_analysis_scoring_for_benign_verdicts" Decode.bool))
 
 
+{-| Toggle for the critical-environment-versions enforcement.
+-}
 type alias CriticalEnvironmentVersions =
     { enabledCriticalEnvironmentVersions : Maybe Bool
     }
@@ -116,6 +133,8 @@ criticalEnvironmentVersionsDecoder =
         (Decode.maybe (Decode.field "enabled_critical_environment_versions" Decode.bool))
 
 
+{-| Advanced-analysis upload and exception-application toggles.
+-}
 type alias AdvancedAnalysis =
     { automaticallyUploadDefinedIssueDataFiles : Maybe Bool
     , automaticallyApplyAdvancedAnalysisExceptions : Maybe Bool
@@ -138,6 +157,9 @@ advancedAnalysisDecoder =
         (Decode.maybe (Decode.field "automatically_apply_advanced_analysis_exceptions" Decode.bool))
 
 
+{-| Timeouts (in days) governing license revocation and agent deletion
+after lost connection.
+-}
 type alias AgentStatus =
     { licenseRevocationAfterLostConnection : Maybe Int
     , agentDeletionRetention : Maybe Int
@@ -160,6 +182,8 @@ agentStatusDecoder =
         (Decode.maybe (Decode.field "agent_deletion_retention" Decode.int))
 
 
+{-| Display toggle for informative BTP-rule issues.
+-}
 type alias InformativeBtpIssues =
     { displayUniqueAndInformativeBtpRules : Maybe Bool
     }
@@ -180,6 +204,8 @@ informativeBtpIssuesDecoder =
         (Decode.maybe (Decode.field "display_unique_and_informative_btp_rules" Decode.bool))
 
 
+{-| Master toggle for Cortex XDR agent log collection.
+-}
 type alias CortexXdrLogCollection =
     { allowLogsCollection : Maybe Bool
     }
@@ -218,6 +244,9 @@ getActionCenterExpiration =
         (Decode.dict Decode.int)
 
 
+{-| Periodic duplicate-endpoint cleanup configuration: which identity
+fields to match on, plus the recurrence interval in hours.
+-}
 type alias EndpointAdministrationCleanup =
     { periodicDuplicateCleanup : Maybe Bool
     , hostName : Maybe Bool
