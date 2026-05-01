@@ -1,24 +1,10 @@
 module Cortex.Api.AgentConfig exposing
-    ( ActionCenterExpiration
-    , AdvancedAnalysis
-    , AgentStatus
-    , AutoUpgrade
-    , ContentManagement
-    , CortexXdrLogCollection
-    , CriticalEnvironmentVersions
-    , EndpointAdministrationCleanup
-    , InformativeBtpIssues
-    , WildfireAnalysis
-    , getActionCenterExpiration
-    , getAdvancedAnalysis
-    , getAgentStatus
-    , getAutoUpgrade
-    , getContentManagement
-    , getCortexXdrLogCollection
-    , getCriticalEnvironmentVersions
-    , getEndpointAdministrationCleanup
-    , getInformativeBtpIssues
-    , getWildfireAnalysis
+    ( ContentManagement, AutoUpgrade, WildfireAnalysis, CriticalEnvironmentVersions
+    , AdvancedAnalysis, AgentStatus, InformativeBtpIssues, CortexXdrLogCollection
+    , ActionCenterExpiration, EndpointAdministrationCleanup
+    , getContentManagement, getAutoUpgrade, getWildfireAnalysis, getCriticalEnvironmentVersions
+    , getAdvancedAnalysis, getAgentStatus, getInformativeBtpIssues, getCortexXdrLogCollection
+    , getActionCenterExpiration, getEndpointAdministrationCleanup
     )
 
 {-| Read-only wrappers around the agent configuration GET endpoints under

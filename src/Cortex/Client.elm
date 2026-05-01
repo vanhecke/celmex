@@ -22,7 +22,7 @@ import Json.Decode as Decode exposing (Decoder)
 import Random
 import Task exposing (Task)
 import Time
-import Url
+import Url.Builder
 
 
 {-| Opaque HTTP client configuration. Holds the tenant base URL, the API
@@ -145,26 +145,10 @@ toRequestRecord (Config cfg) s req =
 
 buildUrl : String -> List String -> List ( String, String ) -> String
 buildUrl tenant path query =
-    let
-        base =
-            stripTrailingSlash tenant
-                ++ "/"
-                ++ String.join "/" (List.map Url.percentEncode path)
-
-        queryString =
-            case query of
-                [] ->
-                    ""
-
-                params ->
-                    "?"
-                        ++ String.join "&"
-                            (List.map
-                                (\( k, v ) -> Url.percentEncode k ++ "=" ++ Url.percentEncode v)
-                                params
-                            )
-    in
-    base ++ queryString
+    Url.Builder.crossOrigin
+        (stripTrailingSlash tenant)
+        path
+        (List.map (\( k, v ) -> Url.Builder.string k v) query)
 
 
 stripTrailingSlash : String -> String

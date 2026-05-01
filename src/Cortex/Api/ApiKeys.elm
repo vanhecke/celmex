@@ -1,6 +1,5 @@
 module Cortex.Api.ApiKeys exposing
-    ( ApiKey
-    , GetApiKeysResponse
+    ( ApiKey, GetApiKeysResponse
     , getApiKeys
     )
 
