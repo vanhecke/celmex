@@ -822,7 +822,27 @@ run stamp config endpoint =
                 )
 
         Commands.CasesSearch args ->
-            typed (Cases.search args)
+            typedAssert (Cases.search args)
+                (\r ->
+                    [ nonNegative "totalCount" r.totalCount
+                    , nonNegative "filterCount" r.filterCount
+                    ]
+                        ++ (if List.isEmpty r.data then
+                                []
+
+                            else
+                                sampleFirst "data"
+                                    r.data
+                                    (\c ->
+                                        [ positive "caseId" c.caseId
+                                        , nonBlank "caseName" c.caseName
+                                        , nonBlank "severity" c.severity
+                                        , nonBlank "statusProgress" c.statusProgress
+                                        , present "creationTime" c.creationTime
+                                        ]
+                                    )
+                           )
+                )
 
         Commands.IssuesSchema ->
             typedAssert Issues.schema

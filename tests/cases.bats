@@ -7,8 +7,11 @@ setup() {
 @test "cases search returns valid JSON with DATA array" {
     run "$CORTEX" cases search
     [ "$status" -eq 0 ]
-    echo "$output" | jq . > /dev/null
-    echo "$output" | jq -e '.DATA | type == "array"' > /dev/null
+    echo "$output" | jq -e '.DATA | type == "array" and length > 0' > /dev/null
+    echo "$output" | jq -e '.TOTAL_COUNT | type == "number"' > /dev/null
+    echo "$output" | jq -e '.DATA[0].case_id | type == "number"' > /dev/null
+    echo "$output" | jq -e '.DATA[0].case_name | type == "string" and length > 0' > /dev/null
+    echo "$output" | jq -e '.DATA[0].severity | type == "string" and length > 0' > /dev/null
 }
 
 @test "cases search typed decode succeeds" {
