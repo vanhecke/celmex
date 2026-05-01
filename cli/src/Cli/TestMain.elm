@@ -640,10 +640,28 @@ run stamp config endpoint =
                 )
 
         Commands.ProfilesList profileType ->
-            typed (Profiles.getProfiles { type_ = profileType })
+            typedAssert (Profiles.getProfiles { type_ = profileType })
+                (\profiles ->
+                    if List.isEmpty profiles then
+                        []
+
+                    else
+                        sampleFirst "profiles"
+                            profiles
+                            (\p ->
+                                [ positive "id" p.id
+                                , nonBlank "uuid" p.uuid
+                                , nonBlank "name" p.name
+                                , nonBlank "type" p.type_
+                                , nonBlank "platform" p.platform
+                                , present "isDefault" p.isDefault
+                                ]
+                            )
+                )
 
         Commands.ProfilesGetPolicy endpointId ->
-            typed (Profiles.getPolicy { endpointId = endpointId })
+            typedAssert (Profiles.getPolicy { endpointId = endpointId })
+                (\r -> [ nonBlank "policyName" r.policyName ])
 
         Commands.AgentConfigContentManagement ->
             typedAssert AgentConfig.getContentManagement

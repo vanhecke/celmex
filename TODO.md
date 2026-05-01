@@ -32,7 +32,7 @@ Source: `cortex-platform-papi.json`
 |  | POST | `/public_api/v1/xql/get_query_results_stream` | Get XQL query results Stream | View |  |  |  |  |
 | ✓ | POST | `/public_api/v1/distributions/get_versions` | Get Distribution version | View | `Cortex.Api.Distributions` | `distributions get-versions` | `distributions.bats` | ✓ |
 | ✓ | POST | `/public_api/v1/endpoints/get_endpoints` | Get all Endpoints | View | `Cortex.Api.Endpoints` | `endpoints list` | `endpoints.bats` | ✓ |
-| ✓ | POST | `/public_api/v1/endpoints/get_policy` | Get Policy | View | `Cortex.Api.Profiles` | `profiles get-policy` | `profiles.bats` | ✗ |
+| ✓ | POST | `/public_api/v1/endpoints/get_policy` | Get Policy | View | `Cortex.Api.Profiles` | `profiles get-policy` | `profiles.bats` | ✓ |
 |  | POST | `/public_api/v1/endpoints/delete` | Delete Endpoints | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/distributions/create` | Create distributions | Edit |  |  |  |  |
 | ✓ | POST | `/public_api/v1/distributions/get_distributions` | Get Distributions | View | `Cortex.Api.Distributions` | `distributions list` | `distributions.bats` | ✓ |
@@ -162,7 +162,7 @@ Source: `cortex-platform-papi.json`
 |  | POST | `/public_api/v1/api_keys/delete` | Delete API keys | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/tags/agents/delete_permanently` | Delete Tags Permanently | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/endpoints/upgrade` | Upgrade Agents | Edit |  |  |  |  |
-| ✓ | POST | `/public_api/v1/endpoints/get_profiles` | Get endpoint security profiles | View | `Cortex.Api.Profiles` | `profiles list` | `profiles.bats` | ✗ |
+| ✓ | POST | `/public_api/v1/endpoints/get_profiles` | Get endpoint security profiles (tenant-unsupported) | View | `Cortex.Api.Profiles` | `profiles list` | `profiles.bats` | ✓ |
 | ✓ | POST | `/public_api/v1/legacy_exceptions/get_modules` | Get Legacy Exceptions Modules | View | `Cortex.Api.LegacyExceptions` | `legacy-exceptions get-modules` | `legacy_exceptions.bats` | ✓ |
 | ✓ | POST | `/public_api/v1/legacy_exceptions/fetch` | Fetch Legacy Exception Rules | View | `Cortex.Api.LegacyExceptions` | `legacy-exceptions fetch` | `legacy_exceptions.bats` | ✓ |
 |  | POST | `/public_api/v1/legacy_exceptions/add` | Add Legacy Exception Rule | Edit |  |  |  |  |
