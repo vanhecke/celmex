@@ -39,7 +39,7 @@ just publish VERSION        # bump manifests in lockstep, tag, push, publish to 
 - SHA-256 via `folkertdev/elm-sha2` (v1.0.0)
 - elm-format enforced on all source files
 - Integration testing only (no unit tests). Tests hit a real tenant.
-- API response decoders must parse **all** fields from the API response. Never drop data from incoming responses. Use `Decode.value` for complex/nested objects if needed, but always capture every field the API returns.
+- API response decoders must parse **all** fields from the API response into typed Elm records. Never drop data, and never leave a payload as `Encode.Value` pass-through — typing IS the preservation. `Decode.value` is a last-resort escape hatch reserved for genuinely free-form maps, polymorphic shapes determined by user input (e.g., XQL query rows), or raw byte streams; each occurrence must carry an inline `{-| ... -}` justification. See the `endpoint-workflow` skill (Phase 3 hard rules) for the full decoder typing contract.
 
 ## Documentation requirements (Elm package)
 

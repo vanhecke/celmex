@@ -76,10 +76,21 @@ import Json.Decode as Decode exposing (Decoder)
 - `{-| ... -}` doc comment immediately above every exposed type alias, custom type, and function (no blank line between doc and definition).
 - Path is a `List String` of segments, no leading slash: `["public_api", "v1", "distributions", "get_versions"]`.
 - Request constructor: `Request.get`, `Request.post`, or `Request.postEmpty`.
-- **Decoders MUST capture every field from the API response** (CLAUDE.md). Strategies:
+- **Decoders MUST capture every field from the API response — and must produce a typed Elm record, not raw JSON** (CLAUDE.md). The "preserve every field" rule is satisfied by *typing*, not by retaining `Encode.Value`. Strategies, in priority order:
+  - Required fields: `Decode.field "field_name" Decoder` for the appropriate primitive (`Decode.string`, `Decode.int`, `Decode.bool`, `Decode.list`, etc.).
   - Optional fields: `Decode.maybe (Decode.field "field_name" Decoder)`.
   - Lists that may be absent: `Cortex.Decode.optionalList`.
-  - Complex/nested or undocumented objects: `Decode.value` (raw JSON) — never silently drop.
+  - Nested objects: define a typed `type alias` for the inner shape and decode with its own `Decoder`. Expose nested types from the module so consumers can pattern-match on them.
+  - Polymorphic fields (e.g., a value that is sometimes `Int 0` and sometimes `String "Mar 19th 2027"`): define a custom union (`type Expiration = Disabled | Timestamp Int | DateString String`) and decode with `Decode.oneOf [...]`.
+- **`Decode.value` is a last-resort escape hatch — never the first choice.** It is allowed *only* in these cases, and each occurrence must carry an inline `{-| ... -}` justification comment on the field:
+  - The payload is genuinely free-form (no fixed key set), e.g., a user-supplied `tags` map with unconstrained keys.
+  - The shape is polymorphic across an unbounded set of variants determined by user input (e.g., XQL query result rows, where the row schema depends on the user's SELECT).
+  - The payload is a raw byte stream.
+- **Forbidden patterns:**
+  - Whole-payload pass-through: `type alias Foo = { raw : Encode.Value }`. Type the response, even if it has 40 fields (use `mapN` + `andMap`).
+  - List of opaque domain objects: `data : List Encode.Value` for known entities (issues, BIOCs, audit logs, etc.). Each element is a domain object — type it.
+  - `extra : List ( String, Encode.Value )` catch-all as a permanent design. Acceptable as a temporary forward-compat aid during initial implementation; the Review-mode audit removes it once known fields are typed.
+- When a typed record replaces a `Decode.value` payload, also provide a hand-written `encodeFoo : Foo -> Encode.Value` round-trip encoder so the CLI's JSON output path keeps working. Encoders live in the same module as the decoder. See `src/Cortex/Api/Quarantine.elm` for the encoder pattern.
 - Records with >8 fields: use `Decode.mapN` then `|> andMap` for the rest (see `src/Cortex/Api/Distributions.elm` around line 101).
 - Sub-API modules stay pure — no effects, no HTTP. They return `Request a`. Effects only flow through `Cortex.Client.send`/`sendWith`.
 
@@ -328,11 +339,12 @@ Apply the same checklist to an already-shipped endpoint:
 
 - **Phase 1**: re-read the OpenAPI spec for the endpoint. Diff the response schema against the current decoder — any fields silently dropped?
 - **Phase 2**: probe with `just curl`. Compare keys in the live response to the decoder fields. If the spec and live disagree, prefer the live response and update both decoder and any spec-driven assumptions.
-- **Phase 3**: check the SDK module — is the module-level docstring complete? `@docs` line for every exposed symbol? Per-symbol docs present? Decoder using `mapN`/`andMap` cleanly?
+- **Phase 3 — decoder typing audit**: walk every `Encode.Value` / `Decode.value` reference in the SDK module. Whole-payload pass-through (`{ raw : Encode.Value }`) and list-of-opaque (`data : List Encode.Value`) are forbidden — rewrite as typed records (define nested `type alias` records; use a custom union for polymorphic shapes; use `mapN` + `|> andMap` for >8-field records). Single-field `Encode.Value` either gets typed or earns an inline `{-| ... -}` justification comment (free-form, polymorphic, or out-of-scope DSL). `extra : List ( String, Encode.Value )` catch-alls get removed and replaced with explicit typed `Maybe` fields. When typing replaces a pass-through, add an `encodeFoo : Foo -> Encode.Value` round-trip so the CLI's JSON output path keeps working.
+- **Phase 3 — module docs**: is the module-level docstring complete? `@docs` line for every exposed symbol (including newly exposed nested types)? Per-symbol docs present? Decoder using `mapN`/`andMap` cleanly?
 - **Phase 6**: do the tests assert content (specific field types/shapes), or just exit code 0? Per-parameter coverage for CLI args? Dynamic fixture pattern where applicable? Are documented `Maybe` fields wired as typed assertions in `cli/src/Cli/TestMain.elm`, using the strongest helper that fits (`positive` / `nonNegative` / `nonBlank` over a bare `present` where applicable)? Are list responses sampled with `sampleFirst`? If the `Asserts` column in `TODO.md` shows `✗`, this is the time to flip it to `✓`.
 - **Phase 7/8**: if endpoint is tenant-unsupported, is `skip_if_unsupported` used AND the `TODO.md` row annotated?
 
-Report findings first (concise list of gaps + severity), then fix in place. Same Phase 9 + 10 flow applies — review-mode commits use a verb like `Tighten`, `Audit`, or `Add typed assertions for` instead of `Add`.
+Report findings first (concise list of gaps + severity), then fix in place. Same Phase 9 + 10 flow applies — review-mode commits use a verb like `Type` (typed-record rewrite), `Tighten`, `Audit`, or `Add typed assertions for` instead of `Add`.
 
 ---
 
