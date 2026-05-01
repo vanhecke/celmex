@@ -140,9 +140,9 @@ Source: `cortex-platform-papi.json`
 |  | POST | `/public_api/v1/widgets/insert` | Insert or update widgets | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/widgets/delete` | Delete widgets | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/issue` | Create a new issue | Edit |  |  |  |  |
-| ✓ | POST | `/public_api/v1/issue/search` | Retrieve issues based on filters | View | `Cortex.Api.Issues` | `issues search` | `issues.bats` | ✗ |
+| ✓ | POST | `/public_api/v1/issue/search` | Retrieve issues based on filters | View | `Cortex.Api.Issues` | `issues search` | `issues.bats` | ✓ |
 |  | POST | `/public_api/v1/issue/{issue-id}` | Update existing issue | Edit |  |  |  |  |
-| ✓ | POST | `/public_api/v1/issue/schema` | Retrieve issue schema | View | `Cortex.Api.Issues` | `issues schema` | `issues.bats` | ✗ |
+| ✓ | POST | `/public_api/v1/issue/schema` | Retrieve issue schema (tenant-unsupported on this fixture) | View | `Cortex.Api.Issues` | `issues schema` | `issues.bats` | ✓ |
 | ✓ | POST | `/public_api/v1/case/search` | Retrieve Cases based on filters | View | `Cortex.Api.Cases` | `cases search` | `cases.bats` | ✗ |
 |  | POST | `/public_api/v1/case/update/{case-id}` | Update existing case | Edit |  |  |  |  |
 |  | GET | `/public_api/v1/case/artifacts/{case-id}` | Retrieve Case Artifacts by Case ID | View |  |  |  |  |

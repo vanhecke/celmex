@@ -7,8 +7,10 @@ setup() {
 @test "issues search returns valid JSON with DATA array" {
     run "$CORTEX" issues search
     [ "$status" -eq 0 ]
-    echo "$output" | jq . > /dev/null
     echo "$output" | jq -e '.DATA | type == "array"' > /dev/null
+    echo "$output" | jq -e '.TOTAL_COUNT | type == "number"' > /dev/null
+    echo "$output" | jq -e '.FILTER_COUNT | type == "number"' > /dev/null
+    echo "$output" | jq -e '.DATA[0].id | type == "number"' > /dev/null
 }
 
 @test "issues search typed decode succeeds" {

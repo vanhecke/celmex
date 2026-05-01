@@ -371,7 +371,20 @@ run stamp config endpoint =
             typed (Correlations.get args)
 
         Commands.IssuesSearch args ->
-            typed (Issues.search args)
+            typedAssert (Issues.search args)
+                (\r ->
+                    [ nonEmpty "data" r.data
+                    , nonNegative "totalCount" r.totalCount
+                    , nonNegative "filterCount" r.filterCount
+                    ]
+                        ++ sampleFirst "data"
+                            r.data
+                            (\issue ->
+                                [ positive "id" issue.id
+                                , present "observationTime" issue.observationTime
+                                ]
+                            )
+                )
 
         Commands.LegacyExceptionsGetModules ->
             typed LegacyExceptions.getModules
@@ -437,7 +450,17 @@ run stamp config endpoint =
             typed (Cases.search args)
 
         Commands.IssuesSchema ->
-            typed Issues.schema
+            typedAssert Issues.schema
+                (\fields ->
+                    nonEmpty "schemaFields" fields
+                        :: sampleFirst "schemaFields"
+                            fields
+                            (\f ->
+                                [ nonBlank "fieldName" f.fieldName
+                                , nonBlank "dataType" f.dataType
+                                ]
+                            )
+                )
 
         Commands.DisablePreventionFetch ->
             typed DisablePrevention.fetchRules
