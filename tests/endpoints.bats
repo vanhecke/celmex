@@ -7,8 +7,12 @@ setup() {
 @test "endpoints list returns valid JSON array" {
     run "$CORTEX" endpoints list
     [ "$status" -eq 0 ]
-    echo "$output" | jq . > /dev/null
-    echo "$output" | jq -e 'type == "array"' > /dev/null
+    echo "$output" | jq -e 'type == "array" and length > 0' > /dev/null
+    echo "$output" | jq -e '.[0].agent_id | type == "string" and length > 0' > /dev/null
+    echo "$output" | jq -e '.[0].host_name | type == "string" and length > 0' > /dev/null
+    echo "$output" | jq -e '.[0].ip | type == "array" and length > 0' > /dev/null
+    echo "$output" | jq -e '.[0].tags.server_tags | type == "array"' > /dev/null
+    echo "$output" | jq -e '.[0].tags.endpoint_tags | type == "array"' > /dev/null
 }
 
 @test "endpoints list typed decode succeeds" {

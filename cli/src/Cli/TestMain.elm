@@ -260,7 +260,22 @@ run stamp config endpoint =
                 )
 
         Commands.EndpointsList args ->
-            typed (Endpoints.list args)
+            typedAssert (Endpoints.list args)
+                (\r ->
+                    nonEmpty "endpoints" r.endpoints
+                        :: sampleFirst "endpoints"
+                            r.endpoints
+                            (\e ->
+                                [ satisfies "agentId" (not (String.isEmpty e.agentId)) "blank agentId"
+                                , nonBlank "agentStatus" e.agentStatus
+                                , nonBlank "operationalStatus" e.operationalStatus
+                                , nonBlank "hostName" e.hostName
+                                , nonBlank "agentType" e.agentType
+                                , nonEmpty "ip" e.ip
+                                , present "lastSeen" e.lastSeen
+                                ]
+                            )
+                )
 
         Commands.AuditLogsSearch args ->
             typedAssert (AuditLogs.search args)
