@@ -36,7 +36,6 @@ import Cortex.Error exposing (Error)
 import Cortex.Request as Request exposing (Request)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
-import Platform
 import Process
 import Task
 
@@ -85,25 +84,25 @@ init : Decode.Value -> ( Model, Cmd Msg )
 init flagsValue =
     case Decode.decodeValue Flags.decoder flagsValue of
         Ok flags ->
-            let
-                config =
-                    Client.config
-                        { tenant = flags.tenant
-                        , credentials =
-                            Auth.credentials
-                                { apiKeyId = flags.apiKeyId
-                                , apiKey = flags.apiKey
-                                }
-                        }
-
-                stamp =
-                    Auth.stamp
-                        { timestamp = flags.timestamp
-                        , nonce = flags.nonce
-                        }
-            in
             case Commands.argvToEndpoint flags.argv of
                 Ok endpoint ->
+                    let
+                        config =
+                            Client.config
+                                { tenant = flags.tenant
+                                , credentials =
+                                    Auth.credentials
+                                        { apiKeyId = flags.apiKeyId
+                                        , apiKey = flags.apiKey
+                                        }
+                                }
+
+                        stamp =
+                            Auth.stamp
+                                { timestamp = flags.timestamp
+                                , nonce = flags.nonce
+                                }
+                    in
                     run stamp config endpoint
 
                 Err msg ->

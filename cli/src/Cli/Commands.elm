@@ -584,14 +584,15 @@ parseKeyValuePair s =
             let
                 k =
                     String.slice 0 i s
-
-                v =
-                    String.dropLeft (i + 1) s
             in
             if String.isEmpty k then
                 Nothing
 
             else
+                let
+                    v =
+                        String.dropLeft (i + 1) s
+                in
                 Just ( k, v )
 
         [] ->

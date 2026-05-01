@@ -10,7 +10,7 @@ module Cortex.Api.Risk exposing
 
 -}
 
-import Cortex.Decode exposing (andMap, optionalList, reply)
+import Cortex.Decode exposing (optionalList, reply)
 import Cortex.Request as Request exposing (Request)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode

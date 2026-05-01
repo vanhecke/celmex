@@ -102,4 +102,4 @@ nonceGenerator =
                     )
     in
     Random.list 64 charGen
-        |> Random.map (String.join "")
+        |> Random.map String.concat

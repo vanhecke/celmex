@@ -275,14 +275,15 @@ parseOneExtra raw =
             let
                 key =
                     String.slice 0 i raw
-
-                jsonStr =
-                    String.dropLeft (i + 1) raw
             in
             if String.isEmpty key then
                 Err ("--extra: empty key in '" ++ raw ++ "'")
 
             else
+                let
+                    jsonStr =
+                        String.dropLeft (i + 1) raw
+                in
                 case Decode.decodeString Decode.value jsonStr of
                     Ok v ->
                         Ok ( key, v )

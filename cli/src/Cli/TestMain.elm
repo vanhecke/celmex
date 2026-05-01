@@ -36,7 +36,6 @@ import Cortex.Error exposing (Error)
 import Cortex.Request as Request exposing (Request)
 import Dict
 import Json.Decode as Decode
-import Platform
 
 
 {-| Integration test runner for the typed SDK decoders. Same argv surface as
@@ -162,25 +161,25 @@ init : Decode.Value -> ( (), Cmd Msg )
 init flagsValue =
     case Decode.decodeValue Flags.decoder flagsValue of
         Ok flags ->
-            let
-                config =
-                    Client.config
-                        { tenant = flags.tenant
-                        , credentials =
-                            Auth.credentials
-                                { apiKeyId = flags.apiKeyId
-                                , apiKey = flags.apiKey
-                                }
-                        }
-
-                stamp =
-                    Auth.stamp
-                        { timestamp = flags.timestamp
-                        , nonce = flags.nonce
-                        }
-            in
             case Commands.argvToEndpoint flags.argv of
                 Ok endpoint ->
+                    let
+                        config =
+                            Client.config
+                                { tenant = flags.tenant
+                                , credentials =
+                                    Auth.credentials
+                                        { apiKeyId = flags.apiKeyId
+                                        , apiKey = flags.apiKey
+                                        }
+                                }
+
+                        stamp =
+                            Auth.stamp
+                                { timestamp = flags.timestamp
+                                , nonce = flags.nonce
+                                }
+                    in
                     ( (), run stamp config endpoint )
 
                 Err msg ->
@@ -210,10 +209,6 @@ run stamp config endpoint =
     let
         name =
             Commands.endpointName endpoint
-
-        typed : Request a -> Cmd Msg
-        typed req =
-            Client.sendWith stamp config (Decoded name) (Request.map (\_ -> []) req)
 
         typedAssert : Request a -> (a -> List Assertion) -> Cmd Msg
         typedAssert req checks =
@@ -393,9 +388,8 @@ run stamp config endpoint =
         Commands.AuthSettingsGet ->
             typedAssert AuthSettings.get
                 (\settings ->
-                    [ nonEmpty "settings" settings
-                    ]
-                        ++ sampleFirst "settings"
+                    nonEmpty "settings" settings
+                        :: sampleFirst "settings"
                             settings
                             (\s ->
                                 [ nonBlank "tenantId" s.tenantId
