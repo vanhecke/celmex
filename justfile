@@ -37,6 +37,12 @@ curl METHOD PATH BODY='':
 clean:
     rm -rf elm-stuff cli/elm-stuff cli/dist
 
+# Run elm-review against both projects (SDK package and CLI application).
+# The CLI config ignores ../src so the SDK is reviewed once.
+review:
+    npx --yes elm-review
+    cd cli && npx --yes elm-review
+
 # Publish the Elm package to package.elm-lang.org.
 # Requires a matching git tag (created by `just publish VERSION`) on origin.
 publish-elm:
@@ -61,7 +67,16 @@ check-docs:
 # the registry hard-rejects anything else for an unpublished package.
 #   just publish 1.0.0   # initial
 #   just publish 1.0.1   # subsequent
-publish VERSION: check-docs
+publish VERSION:
+    @[ -z "$(git status --porcelain)" ] || { echo "error: working tree not clean"; exit 1; }
+    @[ "$(git rev-parse --abbrev-ref HEAD)" = "main" ] || { echo "error: not on main"; exit 1; }
+    git fetch origin main --quiet
+    @[ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ] || { echo "error: local main not in sync with origin/main"; exit 1; }
+    @if npm view @vanhecke/celmex@{{VERSION}} version 2>/dev/null | grep -q .; then echo "error: @vanhecke/celmex@{{VERSION}} already published to npm"; exit 1; fi
+    elm-format src/ cli/src/ --validate
+    just check-docs
+    just review
+    just test 4
     npm version --no-git-tag-version {{VERSION}}
     sed -i '' 's/"version": "[^"]*"/"version": "{{VERSION}}"/' elm.json
     git add elm.json package.json package-lock.json
