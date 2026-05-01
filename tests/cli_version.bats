@@ -7,8 +7,8 @@ setup() {
 @test "cli version returns valid JSON with version field" {
     run "$CORTEX" cli version
     [ "$status" -eq 0 ]
-    echo "$output" | jq . > /dev/null
-    echo "$output" | jq -e '.version' > /dev/null
+    echo "$output" | jq -e '.version | type == "string"' > /dev/null
+    echo "$output" | jq -e '.version | length > 0' > /dev/null
 }
 
 @test "cli version typed decode succeeds" {

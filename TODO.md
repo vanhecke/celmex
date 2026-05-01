@@ -25,7 +25,7 @@ Source: `cortex-platform-papi.json`
 
 | ✓ | Method | Path | Description | Type | Elm | CLI | Test | Asserts |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ✓ | GET | `/public_api/v1/cli/releases/version` | Get the latest version of the Cortex CLI | View | `Cortex.Api.Cli` | `cli version` | `cli_version.bats` | ✗ |
+| ✓ | GET | `/public_api/v1/cli/releases/version` | Get the latest version of the Cortex CLI | View | `Cortex.Api.Cli` | `cli version` | `cli_version.bats` | ✓ |
 |  | POST | `/public_api/v1/xql/start_xql_query` | Start an XQL query | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/xql/get_query_results` | Get XQL query results | View |  |  |  |  |
 | ✓ | POST | `/public_api/v1/xql/get_quota` | Get XQL query Quota | View | `Cortex.Api.Xql` | `xql get-quota` | `xql.bats` | ✓ |
@@ -63,7 +63,7 @@ Source: `cortex-platform-papi.json`
 |  | POST | `/public_api/v1/indicators/insert_csv` | Insert Simple Indicators, CSV | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/indicators/insert_jsons` | Insert Simple Indicators, JSON | Edit |  |  |  |  |
 | ✓ | POST | `/public_api/v1/audits/management_logs` | Get Audit Management Log | View | `Cortex.Api.AuditLogs` | `audit-logs search` | `audit_logs.bats` | ✗ |
-| ✓ | GET | `/public_api/v1/healthcheck` | System Health Check | View | `Cortex.Api.Healthcheck` | `healthcheck` | `healthcheck.bats` | — |
+| ✓ | GET | `/public_api/v1/healthcheck` | System Health Check | View | `Cortex.Api.Healthcheck` | `healthcheck` | `healthcheck.bats` | ✓ |
 | ✓ | POST | `/public_api/v1/system/get_tenant_info` | Get Tenant Info | View | `Cortex.Api.TenantInfo` | `tenant-info` | `tenant_info.bats` | ✓ |
 | ✓ | POST | `/public_api/v1/rbac/get_users` | Get Users | View | `Cortex.Api.Rbac` | `rbac get-users` | `rbac.bats` | ✗ |
 | ✓ | POST | `/public_api/v1/rbac/get_roles` | Get Roles | View | `Cortex.Api.Rbac` | `rbac get-roles` | `rbac.bats` | ✗ |

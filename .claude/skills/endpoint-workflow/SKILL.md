@@ -196,9 +196,18 @@ The `Maybe`-aware helpers (`positive`, `nonNegative`, `nonBlank`) imply existenc
 fail: xql get-quota: licenseQuota: expected > 0; usedQuota: missing
 ```
 
+**Non-`Maybe` primitive fields still need value-level guards.** A required `String` or `Int` field is structurally guaranteed by the decoder (a missing field fails the decode), but degenerate values like `""`, `0`, or negative counters slip through. For each non-`Maybe` field where a degenerate value would be a regression, wire a `satisfies` assertion:
+
+```elm
+satisfies "version" (not (String.isEmpty r.version)) "blank version"
+satisfies "totalCount" (r.totalCount > 0) "expected > 0"
+```
+
+This applies even when the response has no `Maybe` fields at all — the bare `typed` is *not enough*. The Asserts column in TODO.md should be `✓` whenever any `satisfies` or Maybe-aware assertion is wired.
+
 **Do not** add assertions for fields the OpenAPI spec marks optional/nullable, for `Encode.Value` pass-through fields, for mutating endpoints (those use `skip` in TestMain), or for fields whose values legitimately vary across tenants in ways the test can't predict.
 
-If no `Maybe` fields are worth asserting on (e.g. `Healthcheck`'s `Bool` response), keep the bare `typed` and mark `—` in the `Asserts` column of TODO.md.
+`—` in the Asserts column is reserved for the *rare* cases where no value-level assertion is meaningful — e.g., a `Bool` response where both `True` and `False` are valid (`Healthcheck` is *not* this case; its `status : String` warrants a `satisfies` non-blank guard).
 
 **3. Per-parameter test cases** (only for endpoints that accept CLI parameters):
 

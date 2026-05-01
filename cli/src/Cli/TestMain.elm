@@ -227,7 +227,11 @@ run stamp config endpoint =
     in
     case endpoint of
         Commands.Healthcheck ->
-            typed Healthcheck.check
+            typedAssert Healthcheck.check
+                (\r ->
+                    [ satisfies "status" (not (String.isEmpty r.status)) "blank status"
+                    ]
+                )
 
         Commands.TenantInfo ->
             typedAssert TenantInfo.get
@@ -249,7 +253,11 @@ run stamp config endpoint =
                 )
 
         Commands.CliVersion ->
-            typed Cli.getVersion
+            typedAssert Cli.getVersion
+                (\r ->
+                    [ satisfies "version" (not (String.isEmpty r.version)) "blank version"
+                    ]
+                )
 
         Commands.EndpointsList args ->
             typed (Endpoints.list args)
