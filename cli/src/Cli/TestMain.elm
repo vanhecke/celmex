@@ -34,6 +34,7 @@ import Cortex.Auth as Auth
 import Cortex.Client as Client exposing (Config)
 import Cortex.Error exposing (Error)
 import Cortex.Request as Request exposing (Request)
+import Dict
 import Json.Decode as Decode
 import Platform
 
@@ -604,34 +605,64 @@ run stamp config endpoint =
             typed (Profiles.getPolicy { endpointId = endpointId })
 
         Commands.AgentConfigContentManagement ->
-            typed AgentConfig.getContentManagement
+            typedAssert AgentConfig.getContentManagement
+                (\r ->
+                    [ present "enableBandwidthControl" r.enableBandwidthControl
+                    , nonNegative "bandwidthInMbps" r.bandwidthInMbps
+                    , present "enableMinorContentVersionUpdates" r.enableMinorContentVersionUpdates
+                    ]
+                )
 
         Commands.AgentConfigAutoUpgrade ->
-            typed AgentConfig.getAutoUpgrade
+            typedAssert AgentConfig.getAutoUpgrade
+                (\r -> [ positive "amountOfParallelUpgrades" r.amountOfParallelUpgrades ])
 
         Commands.AgentConfigWildfireAnalysis ->
-            typed AgentConfig.getWildfireAnalysis
+            typedAssert AgentConfig.getWildfireAnalysis
+                (\r -> [ present "enableWildfireAnalysisScoringForBenignVerdicts" r.enableWildfireAnalysisScoringForBenignVerdicts ])
 
         Commands.AgentConfigCriticalEnvironmentVersions ->
-            typed AgentConfig.getCriticalEnvironmentVersions
+            typedAssert AgentConfig.getCriticalEnvironmentVersions
+                (\r -> [ present "enabledCriticalEnvironmentVersions" r.enabledCriticalEnvironmentVersions ])
 
         Commands.AgentConfigAdvancedAnalysis ->
-            typed AgentConfig.getAdvancedAnalysis
+            typedAssert AgentConfig.getAdvancedAnalysis
+                (\r ->
+                    [ present "automaticallyUploadDefinedIssueDataFiles" r.automaticallyUploadDefinedIssueDataFiles
+                    , present "automaticallyApplyAdvancedAnalysisExceptions" r.automaticallyApplyAdvancedAnalysisExceptions
+                    ]
+                )
 
         Commands.AgentConfigAgentStatus ->
-            typed AgentConfig.getAgentStatus
+            typedAssert AgentConfig.getAgentStatus
+                (\r ->
+                    [ positive "licenseRevocationAfterLostConnection" r.licenseRevocationAfterLostConnection
+                    , positive "agentDeletionRetention" r.agentDeletionRetention
+                    ]
+                )
 
         Commands.AgentConfigInformativeBtpIssues ->
-            typed AgentConfig.getInformativeBtpIssues
+            typedAssert AgentConfig.getInformativeBtpIssues
+                (\r -> [ present "displayUniqueAndInformativeBtpRules" r.displayUniqueAndInformativeBtpRules ])
 
         Commands.AgentConfigCortexXdrLogCollection ->
-            typed AgentConfig.getCortexXdrLogCollection
+            typedAssert AgentConfig.getCortexXdrLogCollection
+                (\r -> [ present "allowLogsCollection" r.allowLogsCollection ])
 
         Commands.AgentConfigActionCenterExpiration ->
-            typed AgentConfig.getActionCenterExpiration
+            typedAssert AgentConfig.getActionCenterExpiration
+                (\dict -> [ satisfies "expirations" (not (Dict.isEmpty dict)) "empty expirations dict" ])
 
         Commands.AgentConfigEndpointAdministrationCleanup ->
-            typed AgentConfig.getEndpointAdministrationCleanup
+            typedAssert AgentConfig.getEndpointAdministrationCleanup
+                (\r ->
+                    [ present "periodicDuplicateCleanup" r.periodicDuplicateCleanup
+                    , present "hostName" r.hostName
+                    , present "ip" r.ip
+                    , present "mac" r.mac
+                    , positive "timeIntervalHours" r.timeIntervalHours
+                    ]
+                )
 
         Commands.RbacGetRoles roleName ->
             typedAssert (Rbac.getRoles { roleNames = [ roleName ] })
