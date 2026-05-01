@@ -95,6 +95,7 @@ jobs:
     name: Integration tests
     needs: compile
     runs-on: ubuntu-latest
+    if: github.actor != 'dependabot[bot]'
     env:
       CORTEX_TENANT_URL: ${{ secrets.CORTEX_TENANT_URL }}
       CORTEX_API_KEY: ${{ secrets.CORTEX_API_KEY }}
