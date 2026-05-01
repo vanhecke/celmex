@@ -121,10 +121,10 @@ Source: `cortex-platform-papi.json`
 | ✓ | POST | `/public_api/v1/indicators/get` | Get Indicators (IOCs) | View | `Cortex.Api.Indicators` | `indicators get` | `indicators.bats` | ✓ |
 |  | POST | `/public_api/v1/indicators/insert` | Insert or update IOCs | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/indicators/delete` | Delete Indicators (IOCs) | Edit |  |  |  |  |
-| ✓ | POST | `/public_api/v1/bioc/get` | Get BIOCs | View | `Cortex.Api.Biocs` | `bioc get` | `biocs.bats` | ✗ |
+| ✓ | POST | `/public_api/v1/bioc/get` | Get BIOCs | View | `Cortex.Api.Biocs` | `bioc get` | `biocs.bats` | ✓ |
 |  | POST | `/public_api/v1/bioc/insert` | Insert or update BIOCs | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/bioc/delete` | Delete BIOCs | Edit |  |  |  |  |
-| ✓ | POST | `/public_api/v1/correlations/get` | Get Correlation Rules | View | `Cortex.Api.Correlations` | `correlations get` | `correlations.bats` | ✗ |
+| ✓ | POST | `/public_api/v1/correlations/get` | Get Correlation Rules | View | `Cortex.Api.Correlations` | `correlations get` | `correlations.bats` | ✓ |
 |  | POST | `/public_api/v1/correlations/insert` | Insert or update Correlation Rules | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/correlations/delete` | Delete Correlation Rules | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/playbooks/get` | Get a playbook | View |  |  |  |  |

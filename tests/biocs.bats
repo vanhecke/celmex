@@ -7,8 +7,9 @@ setup() {
 @test "bioc get returns valid JSON with objects array" {
     run "$CORTEX" bioc get
     [ "$status" -eq 0 ]
-    echo "$output" | jq . > /dev/null
     echo "$output" | jq -e '.objects | type == "array"' > /dev/null
+    echo "$output" | jq -e '.objects_count | type == "number"' > /dev/null
+    echo "$output" | jq -e '.objects_type | type == "string" and length > 0' > /dev/null
 }
 
 @test "bioc get typed decode succeeds" {

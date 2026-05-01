@@ -420,10 +420,48 @@ run stamp config endpoint =
                 )
 
         Commands.BiocsGet args ->
-            typed (Biocs.get args)
+            typedAssert (Biocs.get args)
+                (\r ->
+                    [ nonNegative "objectsCount" r.objectsCount
+                    , nonBlank "objectsType" r.objectsType
+                    ]
+                        ++ (if List.isEmpty r.objects then
+                                []
+
+                            else
+                                sampleFirst "objects"
+                                    r.objects
+                                    (\b ->
+                                        [ positive "ruleId" b.ruleId
+                                        , nonBlank "name" b.name
+                                        , nonBlank "type" b.type_
+                                        , nonBlank "severity" b.severity
+                                        ]
+                                    )
+                           )
+                )
 
         Commands.CorrelationsGet args ->
-            typed (Correlations.get args)
+            typedAssert (Correlations.get args)
+                (\r ->
+                    [ nonNegative "objectsCount" r.objectsCount
+                    , nonBlank "objectsType" r.objectsType
+                    ]
+                        ++ (if List.isEmpty r.objects then
+                                []
+
+                            else
+                                sampleFirst "objects"
+                                    r.objects
+                                    (\c ->
+                                        [ positive "id" c.id
+                                        , nonBlank "name" c.name
+                                        , nonBlank "severity" c.severity
+                                        , nonBlank "xqlQuery" c.xqlQuery
+                                        ]
+                                    )
+                           )
+                )
 
         Commands.IssuesSearch args ->
             typedAssert (Issues.search args)
