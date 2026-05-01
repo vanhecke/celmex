@@ -319,7 +319,19 @@ run stamp config endpoint =
             typed TriagePresets.list
 
         Commands.RbacGetUsers ->
-            typed Rbac.getUsers
+            typedAssert Rbac.getUsers
+                (\users ->
+                    nonEmpty "users" users
+                        :: sampleFirst "users"
+                            users
+                            (\u ->
+                                [ satisfies "userEmail" (not (String.isEmpty u.userEmail)) "blank email"
+                                , nonBlank "userFirstName" u.userFirstName
+                                , nonBlank "userLastName" u.userLastName
+                                , nonBlank "userType" u.userType
+                                ]
+                            )
+                )
 
         Commands.AuthSettingsGet ->
             typedAssert AuthSettings.get
@@ -607,10 +619,37 @@ run stamp config endpoint =
             typed AgentConfig.getEndpointAdministrationCleanup
 
         Commands.RbacGetRoles roleName ->
-            typed (Rbac.getRoles { roleNames = [ roleName ] })
+            typedAssert (Rbac.getRoles { roleNames = [ roleName ] })
+                (\roles ->
+                    nonEmpty "roles" roles
+                        :: sampleFirst "roles"
+                            roles
+                            (\r ->
+                                [ nonBlank "prettyName" r.prettyName
+                                , nonBlank "createdBy" r.createdBy
+                                , nonBlank "description" r.description
+                                , nonEmpty "permissions" r.permissions
+                                , nonEmpty "users" r.users
+                                ]
+                            )
+                )
 
         Commands.RbacGetUserGroups groupName ->
-            typed (Rbac.getUserGroups { groupNames = [ groupName ] })
+            typedAssert (Rbac.getUserGroups { groupNames = [ groupName ] })
+                (\groups ->
+                    -- groups list may be empty when the requested group does not exist;
+                    -- skip sample assertions in that case
+                    if List.isEmpty groups then
+                        []
+
+                    else
+                        sampleFirst "groups"
+                            groups
+                            (\g ->
+                                [ nonBlank "groupName" g.groupName
+                                ]
+                            )
+                )
 
         Commands.ApiKeysList ->
             typed ApiKeys.getApiKeys

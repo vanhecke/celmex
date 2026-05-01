@@ -14,8 +14,9 @@ skip_if_unsupported() {
 @test "rbac get-users returns valid JSON array" {
     run "$CORTEX" rbac get-users
     [ "$status" -eq 0 ]
-    echo "$output" | jq . > /dev/null
-    echo "$output" | jq -e 'type == "array"' > /dev/null
+    echo "$output" | jq -e 'type == "array" and length > 0' > /dev/null
+    echo "$output" | jq -e '.[0].user_email | type == "string" and length > 0' > /dev/null
+    echo "$output" | jq -e '.[0].user_type | type == "string" and length > 0' > /dev/null
 }
 
 @test "rbac get-users typed decode succeeds" {

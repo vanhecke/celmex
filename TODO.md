@@ -65,9 +65,9 @@ Source: `cortex-platform-papi.json`
 | ✓ | POST | `/public_api/v1/audits/management_logs` | Get Audit Management Log | View | `Cortex.Api.AuditLogs` | `audit-logs search` | `audit_logs.bats` | ✓ |
 | ✓ | GET | `/public_api/v1/healthcheck` | System Health Check | View | `Cortex.Api.Healthcheck` | `healthcheck` | `healthcheck.bats` | ✓ |
 | ✓ | POST | `/public_api/v1/system/get_tenant_info` | Get Tenant Info | View | `Cortex.Api.TenantInfo` | `tenant-info` | `tenant_info.bats` | ✓ |
-| ✓ | POST | `/public_api/v1/rbac/get_users` | Get Users | View | `Cortex.Api.Rbac` | `rbac get-users` | `rbac.bats` | ✗ |
-| ✓ | POST | `/public_api/v1/rbac/get_roles` | Get Roles | View | `Cortex.Api.Rbac` | `rbac get-roles` | `rbac.bats` | ✗ |
-| ✓ | POST | `/public_api/v1/rbac/get_user_group` | Get User Groups | View | `Cortex.Api.Rbac` | `rbac get-user-groups` | `rbac.bats` | ✗ |
+| ✓ | POST | `/public_api/v1/rbac/get_users` | Get Users | View | `Cortex.Api.Rbac` | `rbac get-users` | `rbac.bats` | ✓ |
+| ✓ | POST | `/public_api/v1/rbac/get_roles` | Get Roles | View | `Cortex.Api.Rbac` | `rbac get-roles` | `rbac.bats` | ✓ |
+| ✓ | POST | `/public_api/v1/rbac/get_user_group` | Get User Groups | View | `Cortex.Api.Rbac` | `rbac get-user-groups` | `rbac.bats` | ✓ |
 |  | POST | `/public_api/v1/rbac/set_user_role` | Set a User Role | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/endpoints/get_endpoint` | Get Endpoint | View |  |  |  |  |
 | ✓ | POST | `/public_api/v1/get_risk_score` | Get Risk Score | View | `Cortex.Api.Risk` | `risk score` | `risk.bats` | ✗ |
