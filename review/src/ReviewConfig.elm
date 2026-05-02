@@ -22,9 +22,11 @@ import NoDeprecated
 import NoEffectsInApiModules
 import NoExposingEverything
 import NoImportingEverything
+import NoLocalDecoderHelpers
 import NoMissingTypeAnnotation
 import NoMissingTypeExpose
 import NoPrematureLetComputation
+import NoUndocumentedDecodeValue
 import NoUnused.CustomTypeConstructorArgs
 import NoUnused.CustomTypeConstructors
 import NoUnused.Dependencies
@@ -60,6 +62,8 @@ config =
     , NoDebug.Log.rule
     , NoDebug.TodoOrToString.rule
     , NoEffectsInApiModules.rule
+    , NoUndocumentedDecodeValue.rule
+    , NoLocalDecoderHelpers.rule
     , Docs.ReviewAtDocs.rule
     , Docs.NoMissing.rule
         { document = Docs.NoMissing.onlyExposed
