@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+# Sweep clxtest_* objects from the live Cortex tenant.
+#
+# Invoked by `just test` before AND after the BATS run, so a crashed
+# write-endpoint test cannot leave permanent fixtures behind. Also
+# available standalone via `just test-clean`.
+#
+# Each reap_* function below:
+#   1. Lists tenant objects via the corresponding GET/list endpoint.
+#   2. Filters names starting with "clxtest_".
+#   3. POSTs the matching deletes.
+#   4. Echoes "<n> <noun> removed" if n > 0; stays silent on n == 0.
+#
+# When a new write endpoint lands in the SDK, add a new reap_<noun>
+# function here and append it to $REAPERS. See tests/SETUP_TEARDOWN.md
+# for the contract.
+
+set -euo pipefail
+
+cd "$(dirname "$0")/../.."
+
+CURL="./cli/bin/cortex-curl"
+
+: "${CORTEX_TENANT_URL:?set in .envrc}"
+: "${CORTEX_API_KEY:?set in .envrc}"
+: "${CORTEX_API_KEY_ID:?set in .envrc}"
+
+# --- Reapers -----------------------------------------------------------------
+#
+# Add new entries here. Each function should be idempotent and silent
+# when the tenant has no clxtest_* objects of its kind.
+#
+# Template:
+#
+#   reap_<noun>() {
+#       local list deletes=0
+#       list="$("$CURL" POST /public_api/v1/<list-path> '{"request_data":{}}')"
+#       while IFS= read -r name; do
+#           [[ -z "$name" ]] && continue
+#           "$CURL" POST /public_api/v1/<delete-path> \
+#               "$(jq -n --arg n "$name" '{request_data:{name:$n}}')" \
+#               >/dev/null
+#           deletes=$((deletes + 1))
+#       done < <(printf '%s' "$list" | jq -r '.reply[]?.name | select(startswith("clxtest_"))')
+#       (( deletes > 0 )) && echo "$deletes <noun>s removed"
+#   }
+#
+# Then: REAPERS+=(reap_<noun>)
+
+REAPERS=()
+
+# --- Driver ------------------------------------------------------------------
+
+if (( ${#REAPERS[@]} == 0 )); then
+    # No registered reapers yet. The scaffold is in place so write-endpoint
+    # contributors can add their list/delete pair without touching the
+    # Justfile or any test plumbing.
+    exit 0
+fi
+
+for r in "${REAPERS[@]}"; do
+    "$r"
+done

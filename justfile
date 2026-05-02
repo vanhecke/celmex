@@ -10,10 +10,55 @@ build: format
 
 # Run the full bats suite. JOBS sets bats's --jobs parallelism (default 1 =
 # serial). For Claude/agentic coding sessions, prefer `just test 4` so the
-# 180+ integration tests don't serialise the tenant round-trips. Tests are
-# read-only against the tenant and safe to parallelise.
+# 180+ integration tests don't serialise the tenant round-trips. Read-only
+# tests are safe to parallelise; write-endpoint tests follow the
+# create→list→delete round-trip with `clxtest_` prefixed fixture names so
+# parallel files cannot collide. See tests/SETUP_TEARDOWN.md.
+#
+# Sweeps `clxtest_*` orphans from the tenant before AND after the run so a
+# crashed write-endpoint test cannot leave permanent fixtures behind. The
+# glob `tests/*.bats` is non-recursive, so `tests/destructive/` is ignored
+# here — those tests run individually via `just test-destructive`.
 test JOBS='1': build
-    bats --jobs {{JOBS}} tests/
+    just test-clean
+    BATS_RUN_ID="$(date +%s)_$(openssl rand -hex 2)" bats --jobs {{JOBS}} tests/*.bats; status=$?; just test-clean; exit $status
+
+# Sweep clxtest_* objects from the live tenant. Idempotent. Wired into
+# `just test` automatically; invoke standalone for a manual cleanup.
+test-clean:
+    ./cli/bin/cortex-test-clean
+
+# List or run destructive (Tier 2) tests one at a time.
+#   just test-destructive          → list available destructive .bats files
+#   just test-destructive <file>   → run that file (always --jobs 1)
+# Argument can be a full path, a basename, or a name without the .bats
+# suffix. `just test` never picks these up. See CLAUDE.md for what
+# counts as destructive and why batch runs are not supported.
+test-destructive *ARGS='':
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if [ -z "${1:-}" ]; then
+        echo "Destructive tests (run individually, one at a time):"
+        if compgen -G 'tests/destructive/*.bats' >/dev/null; then
+            ls -1 tests/destructive/*.bats | sed 's/^/  /'
+        else
+            echo "  (none yet)"
+        fi
+        echo ""
+        echo "Usage: just test-destructive <file>"
+        exit 0
+    fi
+    arg="$1"
+    target=""
+    for candidate in "$arg" "tests/destructive/$arg" "tests/destructive/$arg.bats"; do
+        if [ -f "$candidate" ]; then target="$candidate"; break; fi
+    done
+    if [ -z "$target" ]; then
+        echo "error: no destructive test matches '$arg'" >&2
+        exit 1
+    fi
+    just test-clean
+    BATS_RUN_ID="$(date +%s)_$(openssl rand -hex 2)" bats --jobs 1 "$target"; status=$?; just test-clean; exit $status
 
 # Run a single bats file (or any subset) AND the package-docs check.
 # Useful when iterating on one endpoint — `just test-one tests/quarantine.bats`
@@ -23,7 +68,7 @@ test JOBS='1': build
 # code (Cortex.Decode, Cortex.Request, CLI parser helpers, StandardFlags)
 # has been touched. JOBS works the same as in `test`.
 test-one FILE JOBS='1': build
-    bats --jobs {{JOBS}} {{FILE}}
+    BATS_RUN_ID="$(date +%s)_$(openssl rand -hex 2)" bats --jobs {{JOBS}} {{FILE}}
     elm make --docs=docs.json
     rm -f docs.json
 
