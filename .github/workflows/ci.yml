@@ -21,13 +21,25 @@ jobs:
       - name: Check formatting
         run: elm-format src/ cli/src/ --validate
 
+  todo-check:
+    name: TODO/OpenAPI sync
+    needs: format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+
+      - uses: extractions/setup-just@v3
+
+      - run: just todo-check
+
   review:
     name: elm-review
     needs: format
     runs-on: ubuntu-latest
-    # TODO: remove continue-on-error once the initial elm-review backlog
-    # is cleaned up (see QUALITY_TOOLING_PLAN.md Tier 1).
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v6
 
