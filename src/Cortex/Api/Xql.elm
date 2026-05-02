@@ -338,6 +338,9 @@ getQueryResultsStream args =
     Request.post
         [ "public_api", "v1", "xql", "get_query_results_stream" ]
         (encodeStreamBody args)
+        {- Decoder escape: chunked / optionally gzipped result-stream payload
+           with no published schema; passed through as raw JSON.
+        -}
         Decode.value
 
 
@@ -503,6 +506,10 @@ quotaDecoder =
         (Decode.maybe (Decode.field "eval_quota" Decode.float))
         (Decode.maybe (Decode.field "total_daily_running_queries" Decode.int))
         (Decode.maybe (Decode.field "total_daily_concurrent_rejected_queries" Decode.int))
+        {- Decoder escape: server-defined per-query active-queries map;
+           keys/values are tenant-scoped and not in the published schema.
+           Preserved verbatim — see the same-rationale comment below.
+        -}
         (Decode.oneOf
             [ Decode.field "current_concurrent_active_queries" Decode.value
             , Decode.succeed Encode.null
@@ -600,6 +607,9 @@ libraryQueryDecoder =
         |> andMap (Decode.maybe (Decode.field "modified_at" Decode.int))
         |> andMap (Decode.maybe (Decode.field "modified_by" Decode.string))
         |> andMap (Decode.maybe (Decode.field "modified_by_pretty" Decode.string))
+        {- Decoder escape: free-form query metadata blob; shape varies per
+           query and is not in the OpenAPI spec.
+        -}
         |> andMap (Decode.maybe (Decode.field "query_metadata" Decode.value))
         |> andMap (Decode.maybe (Decode.field "is_private" Decode.bool))
         |> andMap (eitherListField "xql_query_tags" "labels" Decode.string)
@@ -630,6 +640,10 @@ queryResultsDecoder =
     Decode.map7 QueryResults
         (Decode.field "status" statusDecoder)
         (Decode.maybe (Decode.field "number_of_results" Decode.int))
+        {- Decoder escape: query-cost counter map keyed by data-source name
+           with floating-point values; keys depend on the query and are
+           tenant-scoped. Preserved verbatim.
+        -}
         (Decode.maybe
             (Decode.oneOf
                 [ Decode.field "query_cost_charged" Decode.value
@@ -639,6 +653,10 @@ queryResultsDecoder =
         )
         (Decode.maybe (Decode.field "remaining_quota" Decode.float))
         (Decode.maybe (Decode.field "remaining_yearly_quota" Decode.float))
+        {- Decoder escape: XQL result rows — shape is determined by the
+           user-supplied query (`SELECT ...`) and cannot be typed at the
+           SDK layer. Each row is preserved verbatim.
+        -}
         (Decode.oneOf
             [ Decode.at [ "results", "data" ] (Decode.list Decode.value)
             , Decode.succeed []
@@ -667,6 +685,9 @@ lookupAddResultDecoder =
 lookupGetResultDecoder : Decoder LookupGetResult
 lookupGetResultDecoder =
     Decode.map3 LookupGetResult
+        {- Decoder escape: lookup-table rows whose columns are defined by
+           the lookup schema the tenant provisioned. Opaque to the SDK.
+        -}
         (Decode.maybe (Decode.field "data" Decode.value))
         (Decode.maybe (Decode.field "filter_count" Decode.int))
         (Decode.maybe (Decode.field "total_count" Decode.int))

@@ -161,7 +161,13 @@ scheduledQueryDecoder =
         |> andMap (optionalField "xql" Decode.string)
         |> andMap (optionalField "enable" Decode.bool)
         |> andMap (optionalField "schedule" scheduleDecoder)
+        {- Decoder escape: free-form timeframe selector; shape varies per
+           query (relative window, absolute range, etc.) and is opaque.
+        -}
         |> andMap (optionalField "timeframe" Decode.value)
+        {- Decoder escape: free-form tenants selector; shape varies per
+           query (single tenant, list, predicate, etc.) and is opaque.
+        -}
         |> andMap (optionalField "tenants" Decode.value)
 
 

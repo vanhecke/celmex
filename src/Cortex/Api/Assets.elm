@@ -549,6 +549,10 @@ externalServiceDecoder =
         |> andMap (optionalField "discovery_type" Decode.string)
         |> andMap (optionalList "business_units_list" Decode.string)
         |> andMap (optionalList "tags" Decode.string)
+        {- Decoder escape: per-asset-type `details` map; keys/shape vary
+           with the asset's protocol/service and cannot be typed at the
+           SDK layer.
+        -}
         |> andMap (optionalField "details" Decode.value)
 
 

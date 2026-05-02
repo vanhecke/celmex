@@ -130,4 +130,7 @@ biocDecoder =
         |> andMap (optionalField "is_xql" Decode.bool)
         |> andMap (optionalList "mitre_tactic_id_and_name" Decode.string)
         |> andMap (optionalList "mitre_technique_id_and_name" Decode.string)
+        {- Decoder escape: tenant-defined indicator object; shape depends
+           on the BIOC rule type (XQL/process/network/...) and is opaque.
+        -}
         |> andMap (optionalField "indicator" Decode.value)

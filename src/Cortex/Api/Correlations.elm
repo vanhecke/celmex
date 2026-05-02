@@ -159,9 +159,15 @@ correlationDecoder =
         |> andMap (optionalField "alert_category" Decode.string)
         |> andMap (optionalField "alert_description" Decode.string)
         |> andMap (optionalField "alert_domain" Decode.string)
+        {- Decoder escape: per-rule field projection map; keys depend on the
+           XQL query the rule emits and cannot be typed at the SDK layer.
+        -}
         |> andMap (optionalField "alert_fields" Decode.value)
         |> andMap (optionalField "user_defined_severity" Decode.string)
         |> andMap (optionalField "user_defined_category" Decode.string)
+        {- Decoder escape: free-form MITRE definitions map; keys are
+           tactic/technique IDs whose values are tenant-defined.
+        -}
         |> andMap (optionalField "mitre_defs" Decode.value)
         |> andMap (optionalField "investigation_query_link" Decode.string)
         |> andMap (optionalField "drilldown_query_timeframe" Decode.string)

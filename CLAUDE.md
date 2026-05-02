@@ -47,7 +47,8 @@ is read-only against the tenant, no shared mutable fixtures.
 - SHA-256 via `folkertdev/elm-sha2` (v1.0.0)
 - elm-format enforced on all source files
 - Integration testing only (no unit tests). Tests hit a real tenant.
-- API response decoders must parse **all** fields from the API response into typed Elm records. Never drop data, and never leave a payload as `Encode.Value` pass-through — typing IS the preservation. `Decode.value` is a last-resort escape hatch reserved for genuinely free-form maps, polymorphic shapes determined by user input (e.g., XQL query rows), or raw byte streams; each occurrence must carry an inline `{-| ... -}` justification. See the `endpoint-workflow` skill (Phase 3 hard rules) for the full decoder typing contract.
+- API response decoders must parse **all** fields from the API response into typed Elm records. Never drop data, and never leave a payload as `Encode.Value` pass-through — typing IS the preservation. `Decode.value` is a last-resort escape hatch reserved for genuinely free-form maps, polymorphic shapes determined by user input (e.g., XQL query rows), or raw byte streams. See the `endpoint-workflow` skill (Phase 3 hard rules) for the full decoder typing contract.
+- Every `Decode.value` reference must sit immediately next to a `{- Decoder escape: <reason> -}` block comment (typically on the line above the call inside a parenthesised group). Use a regular block comment, not a doc comment — `{-| -}` is doc-only and elm-format will strip or reject it inline. The `Decoder escape:` sentinel is enforced by `NoUndocumentedDecodeValue` in elm-review and lets any contributor `grep -rn "Decoder escape:"` for a complete catalog of opacity in the SDK. The same marker may guard preserved `Encode.Value` fields when typing them is genuinely impossible.
 
 ## Documentation requirements (Elm package)
 

@@ -282,8 +282,16 @@ issueDecoder =
         |> andMap (optionalStringField "agentic_assistant_id")
         |> andMap (optionalStringField "agentic_response_conversation_id")
         |> andMap (optionalStringField "action_status")
-        |> andMap (optionalField "normalized_fields" Decode.value)
-        |> andMap (optionalField "custom_fields" Decode.value)
+        |> andMap
+            {- Decoder escape: tenant-defined `normalized_fields` map; shape varies
+               per tenant configuration and is opaque to the SDK.
+            -}
+            (optionalField "normalized_fields" Decode.value)
+        |> andMap
+            {- Decoder escape: tenant-defined `custom_fields` map; shape varies
+               per tenant and is opaque to the SDK.
+            -}
+            (optionalField "custom_fields" Decode.value)
 
 
 issueSchemaFieldDecoder : Decoder IssueSchemaField

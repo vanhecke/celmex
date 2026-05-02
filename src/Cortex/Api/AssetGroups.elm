@@ -120,6 +120,9 @@ assetGroupDecoder =
         |> andMap (optionalField "XDM.ASSET_GROUP.LAST_UPDATE_TIME" Decode.int)
         |> andMap (optionalField "XDM.ASSET_GROUP.MODIFIED_BY" Decode.string)
         |> andMap (optionalField "XDM.ASSET_GROUP.MODIFIED_BY_PRETTY" Decode.string)
+        {- Decoder escape: XDM membership predicate — a DSL expression tree
+           whose shape varies per group type. Opaque to the SDK.
+        -}
         |> andMap (optionalField "XDM.ASSET_GROUP.MEMBERSHIP_PREDICATE" Decode.value)
         |> andMap (optionalField "IS_USED_BY_SBAC" Decode.bool)
 

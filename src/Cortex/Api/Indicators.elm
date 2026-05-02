@@ -125,11 +125,19 @@ indicatorDecoder =
         (Decode.maybe (Decode.field "expiration_date" Decode.int))
         (Decode.maybe (Decode.field "default_expiration_enabled" Decode.bool))
         (Decode.maybe (Decode.field "comment" Decode.string))
+        {- Decoder escape: polymorphic field — server returns either a
+           string label or an object with sub-fields depending on the
+           indicator type. Preserved verbatim.
+        -}
         (Decode.oneOf
             [ Decode.field "reputation" Decode.value
             , Decode.succeed Encode.null
             ]
         )
+        {- Decoder escape: polymorphic field — server returns either a
+           string label or an object with sub-fields depending on the
+           indicator type. Preserved verbatim.
+        -}
         |> andMap
             (Decode.oneOf
                 [ Decode.field "reliability" Decode.value

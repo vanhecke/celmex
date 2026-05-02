@@ -57,6 +57,10 @@ original string. Matters on large error bodies.
 -}
 decodeApiError : String -> Maybe ApiError
 decodeApiError body =
+    {- Decoder escape: parse the body once into a generic Value so each
+       error-envelope shape decoder can be tried against it without re-
+       parsing the original string.
+    -}
     case Decode.decodeString Decode.value body of
         Err _ ->
             Nothing
@@ -94,6 +98,9 @@ directWithMetadataDecoder =
     Decode.map3 ApiError
         (Decode.at [ "metadata", "code" ] Decode.string |> Decode.map Just)
         (Decode.field "err_msg" Decode.string)
+        {- Decoder escape: server-defined free-form metadata blob; shape
+           varies per error code and is not in the OpenAPI spec.
+        -}
         (Decode.maybe (Decode.field "err_extra" Decode.value))
 
 
@@ -123,6 +130,9 @@ apiErrorFieldsDecoder =
     Decode.map3 ApiError
         (Decode.maybe (Decode.field "err_code" apiErrorCodeDecoder))
         (Decode.field "err_msg" Decode.string)
+        {- Decoder escape: server-defined free-form metadata blob; shape
+           varies per error code and is not in the OpenAPI spec.
+        -}
         (Decode.maybe (Decode.field "err_extra" Decode.value))
 
 

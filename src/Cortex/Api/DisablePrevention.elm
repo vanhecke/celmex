@@ -130,6 +130,9 @@ ruleDecoder =
         |> andMap (optionalField "rule_name" Decode.string)
         |> andMap (optionalField "description" Decode.string)
         |> andMap (optionalField "platform" Decode.string)
+        {- Decoder escape: free-form rule conditions DSL; shape varies per
+           rule type and is not in the OpenAPI spec.
+        -}
         |> andMap (optionalField "conditions" Decode.value)
         |> andMap (optionalList "module_ids" Decode.int)
         |> andMap (optionalList "profile_ids" Decode.int)
@@ -148,4 +151,7 @@ moduleDecoder =
         (optionalField "name" Decode.string)
         (optionalField "description" Decode.string)
         (optionalField "profile_type" Decode.string)
+        {- Decoder escape: free-form module conditions DSL; shape varies
+           per module and is not in the OpenAPI spec.
+        -}
         (optionalField "conditions_definition" Decode.value)

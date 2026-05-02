@@ -284,6 +284,10 @@ parseOneExtra raw =
                     jsonStr =
                         String.dropLeft (i + 1) raw
                 in
+                {- Decoder escape: CLI parses arbitrary user-supplied JSON
+                   from the --extra flag; shape is unconstrained by
+                   definition.
+                -}
                 case Decode.decodeString Decode.value jsonStr of
                     Ok v ->
                         Ok ( key, v )

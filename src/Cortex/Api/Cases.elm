@@ -170,4 +170,7 @@ caseDecoder =
         |> andMap (optionalList "assets" Decode.string)
         |> andMap (optionalList "mitre_tactics_ids_and_names" Decode.string)
         |> andMap (optionalList "mitre_techniques_ids_and_names" Decode.string)
+        {- Decoder escape: tenant-defined `custom_fields` map; shape varies
+           per tenant configuration and is opaque to the SDK.
+        -}
         |> andMap (optionalField "custom_fields" Decode.value)

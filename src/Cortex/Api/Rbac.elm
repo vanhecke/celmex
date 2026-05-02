@@ -134,6 +134,9 @@ userDecoder =
         (Decode.maybe (Decode.field "last_logged_in" Decode.int))
         (Decode.maybe (Decode.field "user_type" Decode.string))
         (optionalList "groups" Decode.string)
+        {- Decoder escape: free-form RBAC scope map; tenant-defined keys
+           (asset groups, tenant IDs, etc.) with arbitrary nesting.
+        -}
         (Decode.maybe (Decode.field "scope" Decode.value))
 
 
@@ -148,6 +151,9 @@ roleDecoder =
         |> andMap (Decode.maybe (Decode.field "created_by" Decode.string))
         |> andMap (optionalList "groups" Decode.string)
         |> andMap (optionalList "users" Decode.string)
+        {- Decoder escape: free-form tags map; tenant-defined keys/values
+           with no API-level schema.
+        -}
         |> andMap (Decode.maybe (Decode.field "tags" Decode.value))
 
 

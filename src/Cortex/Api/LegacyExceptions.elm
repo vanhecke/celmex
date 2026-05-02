@@ -126,6 +126,9 @@ moduleDecoder =
             , Decode.succeed []
             ]
         )
+        {- Decoder escape: legacy free-form conditions DSL; shape varies
+           per module and is not in the OpenAPI spec.
+        -}
         (Decode.oneOf
             [ Decode.field "conditions_definition" Decode.value
             , Decode.succeed Encode.null
@@ -168,6 +171,9 @@ exceptionRuleDecoder =
         |> andMap (optionalField "module" Decode.int)
         |> andMap (optionalField "module_name" Decode.string)
         |> andMap (optionalField "description" Decode.string)
+        {- Decoder escape: polymorphic alert-id field — server may send a
+           string, integer, or object depending on rule version.
+        -}
         |> andMap (optionalField "generating_alert_id" Decode.value)
         |> andMap (optionalField "created_by" Decode.string)
         |> andMap (optionalField "modification_time" Decode.int)

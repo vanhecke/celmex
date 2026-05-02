@@ -686,6 +686,9 @@ parseRemoveFilters flags =
 
 parseJsonValue : String -> Result String Encode.Value
 parseJsonValue s =
+    {- Decoder escape: CLI parses arbitrary user-supplied JSON from
+       --filter / --extra flags; shape is unconstrained by definition.
+    -}
     case Decode.decodeString Decode.value s of
         Ok v ->
             Ok v

@@ -196,6 +196,9 @@ auditLogDecoder =
         |> andMap (optionalField "AUDIT_INSERT_TIME" Decode.int)
         |> andMap (optionalField "AUDIT_HOSTNAME" Decode.string)
         |> andMap (optionalField "AUDIT_ASSET_NAMES" Decode.string)
+        {- Decoder escape: audit asset payload — shape varies per audited
+           operation (rule/profile/policy/IoC/...) and is unconstrained.
+        -}
         |> andMap (optionalField "AUDIT_ASSET_JSON" Decode.value)
         |> andMap (optionalField "AUDIT_SESSION_ID" Decode.string)
         |> andMap (optionalField "AUDIT_CASE_ID" Decode.int)

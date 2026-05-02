@@ -116,6 +116,10 @@ profileDecoder =
         |> andMap (Decode.maybe (Decode.field "modified_by" Decode.string))
         |> andMap (Decode.maybe (Decode.field "modified_by_pretty" Decode.string))
         |> andMap (Decode.maybe (Decode.field "modification_time" Decode.int))
+        {- Decoder escape: per-module configuration map keyed by module
+           name. Each value is a module-specific config object whose shape
+           varies by module type and platform. Genuinely polymorphic.
+        -}
         |> andMap (Decode.maybe (Decode.field "modules" Decode.value))
 
 

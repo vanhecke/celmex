@@ -110,7 +110,13 @@ authSettingDecoder =
         |> andMap (optionalField "name" Decode.string)
         |> andMap (optionalField "domain" Decode.string)
         |> andMap (optionalField "idp_enabled" Decode.bool)
+        {- Decoder escape: IdP-specific role assignment value; shape varies
+           per identity provider (string/object/array) and is opaque to the SDK.
+        -}
         |> andMap (optionalField "default_role" Decode.value)
+        {- Decoder escape: IdP-specific role-account discriminator; shape
+           varies per identity provider and is opaque to the SDK.
+        -}
         |> andMap (optionalField "is_account_role" Decode.value)
         |> andMap (optionalField "idp_certificate" Decode.string)
         |> andMap (optionalField "idp_issuer" Decode.string)
@@ -136,6 +142,9 @@ advancedSettingsDecoder : Decoder AdvancedSettings
 advancedSettingsDecoder =
     Decode.map6 AdvancedSettings
         (optionalField "authn_context_enabled" Decode.bool)
+        {- Decoder escape: IdP-specific force-authentication flag; some
+           providers send a bool, others a config object. Opaque to the SDK.
+        -}
         (optionalField "force_authn" Decode.value)
         (optionalField "idp_single_logout_url" Decode.string)
         (optionalField "relay_state" Decode.string)
