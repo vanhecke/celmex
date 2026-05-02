@@ -1,5 +1,5 @@
 module Cortex.Api.DisablePrevention exposing
-    ( FetchResponse, Rule, Module
+    ( Response, Rule, Module
     , fetchRules, fetchInjectionRules, getModules
     )
 
@@ -14,7 +14,7 @@ Three endpoints:
   - [`getModules`](#getModules) — list disable-able modules for a given
     platform.
 
-@docs FetchResponse, Rule, Module
+@docs Response, Rule, Module
 @docs fetchRules, fetchInjectionRules, getModules
 
 -}
@@ -28,7 +28,7 @@ import Json.Encode as Encode
 {-| Paginated envelope for both [`fetchRules`](#fetchRules) and
 [`fetchInjectionRules`](#fetchInjectionRules).
 -}
-type alias FetchResponse =
+type alias Response =
     { data : List Rule
     , filterCount : Maybe Int
     , totalCount : Maybe Int
@@ -79,20 +79,20 @@ type alias Module =
 
 {-| POST /public\_api/v1/disable\_prevention/fetch
 -}
-fetchRules : Request FetchResponse
+fetchRules : Request Response
 fetchRules =
     Request.postEmpty
         [ "public_api", "v1", "disable_prevention", "fetch" ]
-        (reply fetchResponseDecoder)
+        (reply responseDecoder)
 
 
 {-| POST /public\_api/v1/disable\_injection\_prevention\_rules/fetch
 -}
-fetchInjectionRules : Request FetchResponse
+fetchInjectionRules : Request Response
 fetchInjectionRules =
     Request.postEmpty
         [ "public_api", "v1", "disable_injection_prevention_rules", "fetch" ]
-        (reply fetchResponseDecoder)
+        (reply responseDecoder)
 
 
 {-| POST /public\_api/v1/disable\_prevention/get\_modules
@@ -115,9 +115,9 @@ getModules platform =
 -- DECODERS
 
 
-fetchResponseDecoder : Decoder FetchResponse
-fetchResponseDecoder =
-    Decode.map3 FetchResponse
+responseDecoder : Decoder Response
+responseDecoder =
+    Decode.map3 Response
         (optionalList "data" ruleDecoder)
         (Decode.maybe (Decode.field "filter_count" Decode.int))
         (Decode.maybe (Decode.field "total_count" Decode.int))

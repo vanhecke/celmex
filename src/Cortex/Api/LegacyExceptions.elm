@@ -1,5 +1,5 @@
 module Cortex.Api.LegacyExceptions exposing
-    ( Module, FetchResponse, ExceptionRule
+    ( Module, Response, ExceptionRule
     , getModules, list
     )
 
@@ -16,7 +16,7 @@ Two endpoints:
   - [`list`](#list) — list the exception rules currently configured on
     the tenant.
 
-@docs Module, FetchResponse, ExceptionRule
+@docs Module, Response, ExceptionRule
 @docs getModules, list
 
 -}
@@ -53,7 +53,7 @@ type alias Module =
 
 {-| Paginated envelope returned by [`list`](#list).
 -}
-type alias FetchResponse =
+type alias Response =
     { data : List ExceptionRule
     , filterCount : Maybe Int
     , totalCount : Maybe Int
@@ -102,11 +102,11 @@ Retrieve the legacy exception rules currently configured on the tenant,
 with optional filtering, sorting, and pagination.
 
 -}
-list : Request FetchResponse
+list : Request Response
 list =
     Request.postEmpty
         [ "public_api", "v1", "legacy_exceptions", "fetch" ]
-        (reply fetchResponseDecoder)
+        (reply responseDecoder)
 
 
 
@@ -136,9 +136,9 @@ moduleDecoder =
         )
 
 
-fetchResponseDecoder : Decoder FetchResponse
-fetchResponseDecoder =
-    Decode.map3 FetchResponse
+responseDecoder : Decoder Response
+responseDecoder =
+    Decode.map3 Response
         (Decode.oneOf
             [ Decode.field "DATA" (Decode.list exceptionRuleDecoder)
             , Decode.field "data" (Decode.list exceptionRuleDecoder)
