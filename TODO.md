@@ -17,7 +17,7 @@ Complete inventory of all API endpoints from the OpenAPI specs in `docs/cortex-a
 > Raw total across all 22 spec files: 521. After removing the 2 duplicate files: 341 listed below.
 
 <!-- BEGIN AUTO: progress -->
-**Progress:** 66/341 endpoints implemented | 170 View | 171 Edit
+**Progress:** 68/341 endpoints implemented | 170 View | 171 Edit
 <!-- END AUTO -->
 
 
@@ -122,8 +122,8 @@ Source: `cortex-platform-papi.json`
 |  | POST | `/public_api/xql_library/insert` | Insert or update XQL queries | Edit |  |  |  |  |
 |  | POST | `/public_api/xql_library/delete` | Delete XQL Queries | Edit |  |  |  |  |
 | ✓ | POST | `/public_api/v1/indicators/get` | Get Indicators (IOCs) | View | `Cortex.Api.Indicators` | `indicators get` | `indicators.bats` | ✓ |
-|  | POST | `/public_api/v1/indicators/insert` | Insert or update IOCs | Edit |  |  |  |  |
-|  | POST | `/public_api/v1/indicators/delete` | Delete Indicators (IOCs) | Edit |  |  |  |  |
+| ✓ | POST | `/public_api/v1/indicators/insert` | Insert or update IOCs | Edit | `Cortex.Api.Indicators` | `indicators insert` | `indicators.bats` | skip |
+| ✓ | POST | `/public_api/v1/indicators/delete` | Delete Indicators (IOCs) | Edit | `Cortex.Api.Indicators` | `indicators delete` | `indicators.bats` | skip |
 | ✓ | POST | `/public_api/v1/bioc/get` | Get BIOCs | View | `Cortex.Api.Biocs` | `bioc get` | `biocs.bats` | ✓ |
 | ✓ | POST | `/public_api/v1/bioc/insert` | Insert or update BIOCs | Edit | `Cortex.Api.Biocs` | `bioc insert` | `biocs.bats` | skip |
 | ✓ | POST | `/public_api/v1/bioc/delete` | Delete BIOCs | Edit | `Cortex.Api.Biocs` | `bioc delete` | `biocs.bats` | skip |

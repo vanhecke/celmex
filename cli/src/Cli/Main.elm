@@ -353,6 +353,12 @@ run stamp config endpoint =
         Commands.IndicatorsGet args ->
             ( Idle, raw (Indicators.get args) )
 
+        Commands.IndicatorsInsert args ->
+            ( Idle, raw (Indicators.insert args) )
+
+        Commands.IndicatorsDelete args ->
+            ( Idle, raw (Indicators.delete args) )
+
         Commands.BiocsList args ->
             ( Idle, raw (Biocs.list args) )
 

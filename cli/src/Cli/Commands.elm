@@ -51,6 +51,8 @@ type Endpoint
     | XqlLookupsRemoveData Xql.LookupRemoveArgs
     | ScheduledQueriesList ScheduledQueries.SearchArgs
     | IndicatorsGet Indicators.SearchArgs
+    | IndicatorsInsert Indicators.InsertArgs
+    | IndicatorsDelete Indicators.DeleteArgs
     | BiocsList Biocs.SearchArgs
     | BiocsInsert Biocs.InsertArgs
     | BiocsDelete Biocs.DeleteArgs
@@ -156,6 +158,12 @@ argvToEndpoint args =
         "indicators" :: "get" :: rest ->
             parseStandardSearch rest
                 |> Result.map (\sa -> IndicatorsGet (toIndicatorsArgs sa))
+
+        "indicators" :: "insert" :: rest ->
+            parseIndicatorsInsert rest
+
+        "indicators" :: "delete" :: rest ->
+            parseIndicatorsDelete rest
 
         "bioc" :: "list" :: rest ->
             parseStandardSearch rest
@@ -477,6 +485,83 @@ parseLookupsRemove args =
                     _ ->
                         Err "xql lookups remove-data: expected one positional argument <DATASET>"
             )
+
+
+parseIndicatorsInsert : List String -> Result String Endpoint
+parseIndicatorsInsert args =
+    splitArgs [] args
+        |> Result.andThen
+            (\( positionals, _ ) ->
+                case positionals of
+                    [ jsonStr ] ->
+                        parseJsonValue jsonStr
+                            |> Result.map
+                                (\items ->
+                                    IndicatorsInsert { items = items }
+                                )
+
+                    _ ->
+                        Err "indicators insert: expected one positional argument <JSON> (the request_data array)"
+            )
+
+
+parseIndicatorsDelete : List String -> Result String Endpoint
+parseIndicatorsDelete args =
+    splitArgs [] args
+        |> Result.andThen
+            (\( positionals, flags ) ->
+                if not (List.isEmpty positionals) then
+                    Err ("indicators delete: unexpected positional arguments: " ++ String.join " " positionals)
+
+                else
+                    parseIndicatorsDeleteFilters flags
+                        |> Result.andThen
+                            (\filters ->
+                                if List.isEmpty filters then
+                                    Err "indicators delete: needs at least one --filter field=op=value"
+
+                                else
+                                    Ok (IndicatorsDelete { filters = filters })
+                            )
+            )
+
+
+parseIndicatorsDeleteFilters : List ( String, Maybe String ) -> Result String (List Indicators.DeleteFilter)
+parseIndicatorsDeleteFilters flags =
+    allFlagValues "--filter" flags
+        |> List.map parseOneIndicatorsDeleteFilter
+        |> resultSequence
+
+
+parseOneIndicatorsDeleteFilter : String -> Result String Indicators.DeleteFilter
+parseOneIndicatorsDeleteFilter raw =
+    case String.split "=" raw of
+        field :: op :: rest ->
+            if String.isEmpty field then
+                Err ("--filter: empty field in '" ++ raw ++ "'")
+
+            else
+                buildIndicatorsDeleteFilter field op (String.join "=" rest)
+
+        _ ->
+            Err ("--filter: expected 'field=op=value', got '" ++ raw ++ "'")
+
+
+buildIndicatorsDeleteFilter : String -> String -> String -> Result String Indicators.DeleteFilter
+buildIndicatorsDeleteFilter field op value =
+    case String.toLower op of
+        "eq" ->
+            Ok (Indicators.deleteFilter { field = field, operator = "EQ", value = Encode.string value })
+
+        "neq" ->
+            Ok (Indicators.deleteFilter { field = field, operator = "NEQ", value = Encode.string value })
+
+        _ ->
+            Err
+                ("indicators delete --filter: unsupported operator '"
+                    ++ op
+                    ++ "' (supported: eq, neq)"
+                )
 
 
 parseBiocInsert : List String -> Result String Endpoint
@@ -976,6 +1061,12 @@ endpointName endpoint =
         IndicatorsGet _ ->
             "indicators get"
 
+        IndicatorsInsert _ ->
+            "indicators insert"
+
+        IndicatorsDelete _ ->
+            "indicators delete"
+
         BiocsList _ ->
             "bioc list"
 
@@ -1178,6 +1269,8 @@ usage args =
             , "    --filter k=v                                Repeatable; combined as AND"
             , ""
             , "  cortex indicators get                       List indicators (IOCs)"
+            , "  cortex indicators insert <JSON>             Insert or upsert IOCs (request_data array)"
+            , "  cortex indicators delete --filter k=op=v    Delete matching IOCs (op: eq|neq; repeatable)"
             , "  cortex bioc list                            List BIOCs"
             , "  cortex correlations get                     List correlation rules"
             , "  cortex issues search                        Search issues"

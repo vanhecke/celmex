@@ -586,6 +586,12 @@ run stamp config endpoint =
                            )
                 )
 
+        Commands.IndicatorsInsert _ ->
+            skip
+
+        Commands.IndicatorsDelete _ ->
+            skip
+
         Commands.BiocsInsert _ ->
             skip
 

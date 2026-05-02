@@ -66,7 +66,23 @@ reap_biocs() {
     fi
 }
 
-REAPERS=(reap_biocs)
+reap_indicators() {
+    local list deletes=0
+    list="$("$CURL" POST /public_api/v1/indicators/get '{"request_data":{}}')"
+    while IFS= read -r name; do
+        [[ -z "$name" ]] && continue
+        "$CURL" POST /public_api/v1/indicators/delete \
+            "$(jq -c -n --arg n "$name" \
+                '{request_data:{filters:[{field:"indicator",operator:"EQ",value:$n}]}}')" \
+            >/dev/null
+        deletes=$((deletes + 1))
+    done < <(printf '%s' "$list" | jq -r '.objects[]? | (.indicator // "") | select(startswith("clxtest_"))')
+    if (( deletes > 0 )); then
+        echo "$deletes IOC(s) removed"
+    fi
+}
+
+REAPERS=(reap_biocs reap_indicators)
 
 # --- Driver ------------------------------------------------------------------
 
