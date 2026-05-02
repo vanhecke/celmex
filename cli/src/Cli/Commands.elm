@@ -3,7 +3,6 @@ module Cli.Commands exposing
     , argvToEndpoint
     , endpointName
     , errorToString
-    , usage
     )
 
 import Cli.StandardFlags as StandardFlags
@@ -602,7 +601,7 @@ parseKeyValuePair s =
 buildStartArgs : String -> List ( String, Maybe String ) -> Result String Xql.StartQueryArgs
 buildStartArgs q flags =
     Result.map3
-        (\rel from_ to_ -> ( rel, from_, to_ ))
+        (\rel from to -> ( rel, from, to ))
         (parseOptionalInt "--relative" flags)
         (parseOptionalInt "--from" flags)
         (parseOptionalInt "--to" flags)

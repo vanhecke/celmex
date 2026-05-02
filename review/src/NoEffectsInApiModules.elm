@@ -35,6 +35,10 @@ forbidden : List ModuleName
 forbidden =
     [ [ "Cortex", "Client" ]
     , [ "Http" ]
+    , [ "Task" ]
+    , [ "Process" ]
+    , [ "Random" ]
+    , [ "Time" ]
     ]
 
 

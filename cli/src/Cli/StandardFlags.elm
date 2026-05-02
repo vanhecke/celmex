@@ -1,4 +1,4 @@
-module Cli.StandardFlags exposing (StandardArgs, empty, parse)
+module Cli.StandardFlags exposing (StandardArgs, parse)
 
 {-| Canonical CLI flag surface for Cortex list/search commands.
 
@@ -37,16 +37,6 @@ type alias StandardArgs =
     , range : Maybe Range
     , timeframe : Maybe Timeframe
     , extra : List ( String, Encode.Value )
-    }
-
-
-empty : StandardArgs
-empty =
-    { filters = []
-    , sort = Nothing
-    , range = Nothing
-    , timeframe = Nothing
-    , extra = []
     }
 
 
@@ -191,7 +181,7 @@ parseRange flags =
 
         ( Nothing, Just l, Just o ) ->
             Result.map2
-                (\limit_ off -> Just (Query.offset off limit_))
+                (\limit off -> Just (Query.offset off limit))
                 (parseIntOp "--limit" l)
                 (parseIntOp "--offset" o)
 
@@ -224,13 +214,13 @@ parseTimeframe flags =
         rel =
             flagValue "--relative" flags
 
-        from_ =
+        from =
             flagValue "--from" flags
 
-        to_ =
+        to =
             flagValue "--to" flags
     in
-    case ( rel, from_, to_ ) of
+    case ( rel, from, to ) of
         ( Nothing, Nothing, Nothing ) ->
             Ok Nothing
 
@@ -240,7 +230,7 @@ parseTimeframe flags =
 
         ( Nothing, Just f, Just t ) ->
             Result.map2
-                (\from to -> Just (Query.between from to))
+                (\fromMs toMs -> Just (Query.between fromMs toMs))
                 (parseIntOp "--from" f)
                 (parseIntOp "--to" t)
 
@@ -340,6 +330,10 @@ raw). Used for `--filter field=op=value` where the value itself may contain
 -}
 splitN : Int -> String -> String -> List String
 splitN n sep s =
+    -- IGNORE TCO
+    --   `splitN` is bounded by `n` (always ≤ 3 in practice) and operates on
+    --   short flag values; tail-recursive rewrite would obscure the algorithm
+    --   with no meaningful runtime gain.
     if n <= 1 then
         [ s ]
 

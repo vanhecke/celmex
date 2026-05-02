@@ -1,4 +1,4 @@
-module Cli.Main exposing (main)
+module Cli.Main exposing (Model, Msg, main)
 
 import Cli.Commands as Commands exposing (Endpoint)
 import Cli.Flags as Flags
