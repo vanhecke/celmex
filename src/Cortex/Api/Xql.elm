@@ -68,7 +68,17 @@ emitted as a string ("TRUE" / "FALSE"), not a boolean.
 -}
 type alias Dataset =
     { datasetName : Maybe String
+
+    {- Decoder escape: open-ended per spec; preserved as raw string.
+       Live tenants emit `SYSTEM` for built-in datasets, but the spec
+       declares `type: string` with no enum — could grow new variants.
+    -}
     , type_ : Maybe String
+
+    {- Decoder escape: open-ended per spec; preserved as raw string.
+       Live tenants emit `LOGS`, but the spec describes the field in
+       prose ("Logs"/"State") with no closed enum.
+    -}
     , logUpdateType : Maybe String
     , lastUpdated : Maybe Int
     , totalDaysStored : Maybe Int

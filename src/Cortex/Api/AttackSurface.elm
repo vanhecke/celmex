@@ -29,8 +29,21 @@ type alias RulesResponse =
 type alias AttackSurfaceRule =
     { attackSurfaceRuleName : Maybe String
     , attackSurfaceRuleId : Maybe String
+
+    {- Decoder escape: open-ended per spec; preserved as raw string.
+       The spec lists `enabled_status` as a sortable filter field but
+       declares the response type as bare `type: string` with no enum.
+    -}
     , enabledStatus : Maybe String
+
+    {- Decoder escape: open-ended per spec; preserved as raw string.
+       Same as enabled_status — listed as a filter/sort key, no enum.
+    -}
     , priority : Maybe String
+
+    {- Decoder escape: open-ended per spec; preserved as raw string.
+       Same as enabled_status — listed as a filter/sort key, no enum.
+    -}
     , category : Maybe String
     , description : Maybe String
     , knowledgeBaseLink : Maybe String

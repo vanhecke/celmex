@@ -54,6 +54,10 @@ standard `reply`.
 type alias CorrelationsResponse =
     { objectsCount : Maybe Int
     , objects : List Correlation
+
+    {- Decoder escape: open-ended per spec; preserved as raw string.
+       The spec declares `objects_type: type: string` with no enum.
+    -}
     , objectsType : Maybe String
     }
 

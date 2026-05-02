@@ -806,7 +806,7 @@ run stamp config endpoint =
                     , nonBlank "id" r.id
                     , present "score" r.score
                     , present "normRiskScore" r.normRiskScore
-                    , nonBlank "riskLevel" r.riskLevel
+                    , present "riskLevel" r.riskLevel
                     ]
                 )
 
@@ -822,7 +822,7 @@ run stamp config endpoint =
                             (\u ->
                                 [ nonBlank "id" u.id
                                 , present "score" u.score
-                                , nonBlank "riskLevel" u.riskLevel
+                                , present "riskLevel" u.riskLevel
                                 ]
                             )
                 )
@@ -839,7 +839,7 @@ run stamp config endpoint =
                             (\h ->
                                 [ nonBlank "id" h.id
                                 , present "score" h.score
-                                , nonBlank "riskLevel" h.riskLevel
+                                , present "riskLevel" h.riskLevel
                                 ]
                             )
                 )

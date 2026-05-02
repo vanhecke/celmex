@@ -1,11 +1,11 @@
 module Cortex.Api.Risk exposing
-    ( RiskScoreResponse, RiskyEntity, Reason
+    ( RiskLevel(..), RiskScoreResponse, RiskyEntity, Reason
     , getRiskScore, listRiskyHosts, listRiskyUsers
     )
 
 {-| Cortex identity-threat risk scoring for users and endpoints.
 
-@docs RiskScoreResponse, RiskyEntity, Reason
+@docs RiskLevel, RiskScoreResponse, RiskyEntity, Reason
 @docs getRiskScore, listRiskyHosts, listRiskyUsers
 
 -}
@@ -16,6 +16,19 @@ import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
 
 
+{-| Cortex risk-level bucket — closed enum per the spec.
+
+  - `Low` — wire value `"LOW"`
+  - `Med` — wire value `"MED"` (note: not `"MEDIUM"`)
+  - `High` — wire value `"HIGH"`
+
+-}
+type RiskLevel
+    = Low
+    | Med
+    | High
+
+
 {-| Risk-score record for a single user or endpoint, returned by
 [`getRiskScore`](#getRiskScore).
 -}
@@ -24,7 +37,7 @@ type alias RiskScoreResponse =
     , id : Maybe String
     , score : Maybe Int
     , normRiskScore : Maybe Int
-    , riskLevel : Maybe String
+    , riskLevel : Maybe RiskLevel
     , reasons : List Reason
     , email : Maybe String
     }
@@ -40,7 +53,7 @@ type alias RiskyEntity =
     , id : Maybe String
     , score : Maybe Int
     , normRiskScore : Maybe Int
-    , riskLevel : Maybe String
+    , riskLevel : Maybe RiskLevel
     , reasons : List Reason
     , email : Maybe String
     }
@@ -115,7 +128,7 @@ riskScoreDecoder =
         (Decode.maybe (Decode.field "id" Decode.string))
         (Decode.maybe (Decode.field "score" Decode.int))
         (Decode.maybe (Decode.field "norm_risk_score" Decode.int))
-        (Decode.maybe (Decode.field "risk_level" Decode.string))
+        (Decode.maybe (Decode.field "risk_level" riskLevelDecoder))
         (optionalList "reasons" reasonDecoder)
         (Decode.maybe (Decode.field "email" Decode.string))
 
@@ -127,9 +140,29 @@ riskyEntityDecoder =
         (Decode.maybe (Decode.field "id" Decode.string))
         (Decode.maybe (Decode.field "score" Decode.int))
         (Decode.maybe (Decode.field "norm_risk_score" Decode.int))
-        (Decode.maybe (Decode.field "risk_level" Decode.string))
+        (Decode.maybe (Decode.field "risk_level" riskLevelDecoder))
         (optionalList "reasons" reasonDecoder)
         (Decode.maybe (Decode.field "email" Decode.string))
+
+
+riskLevelDecoder : Decoder RiskLevel
+riskLevelDecoder =
+    Decode.string
+        |> Decode.andThen
+            (\s ->
+                case s of
+                    "LOW" ->
+                        Decode.succeed Low
+
+                    "MED" ->
+                        Decode.succeed Med
+
+                    "HIGH" ->
+                        Decode.succeed High
+
+                    other ->
+                        Decode.fail ("unknown risk_level: " ++ other)
+            )
 
 
 reasonDecoder : Decoder Reason
