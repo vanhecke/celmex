@@ -52,6 +52,8 @@ type Endpoint
     | ScheduledQueriesList ScheduledQueries.SearchArgs
     | IndicatorsGet Indicators.SearchArgs
     | BiocsList Biocs.SearchArgs
+    | BiocsInsert Biocs.InsertArgs
+    | BiocsDelete Biocs.DeleteArgs
     | CorrelationsGet Correlations.SearchArgs
     | IssuesSearch Issues.SearchArgs
     | LegacyExceptionsGetModules
@@ -158,6 +160,12 @@ argvToEndpoint args =
         "bioc" :: "list" :: rest ->
             parseStandardSearch rest
                 |> Result.map (\sa -> BiocsList (toBiocsArgs sa))
+
+        "bioc" :: "insert" :: rest ->
+            parseBiocInsert rest
+
+        "bioc" :: "delete" :: rest ->
+            parseBiocDelete rest
 
         "correlations" :: "get" :: rest ->
             parseStandardSearch rest
@@ -469,6 +477,83 @@ parseLookupsRemove args =
                     _ ->
                         Err "xql lookups remove-data: expected one positional argument <DATASET>"
             )
+
+
+parseBiocInsert : List String -> Result String Endpoint
+parseBiocInsert args =
+    splitArgs [] args
+        |> Result.andThen
+            (\( positionals, _ ) ->
+                case positionals of
+                    [ jsonStr ] ->
+                        parseJsonValue jsonStr
+                            |> Result.map
+                                (\items ->
+                                    BiocsInsert { items = items }
+                                )
+
+                    _ ->
+                        Err "bioc insert: expected one positional argument <JSON> (the request_data array)"
+            )
+
+
+parseBiocDelete : List String -> Result String Endpoint
+parseBiocDelete args =
+    splitArgs [] args
+        |> Result.andThen
+            (\( positionals, flags ) ->
+                if not (List.isEmpty positionals) then
+                    Err ("bioc delete: unexpected positional arguments: " ++ String.join " " positionals)
+
+                else
+                    parseBiocDeleteFilters flags
+                        |> Result.andThen
+                            (\filters ->
+                                if List.isEmpty filters then
+                                    Err "bioc delete: needs at least one --filter field=op=value"
+
+                                else
+                                    Ok (BiocsDelete { filters = filters })
+                            )
+            )
+
+
+parseBiocDeleteFilters : List ( String, Maybe String ) -> Result String (List Biocs.DeleteFilter)
+parseBiocDeleteFilters flags =
+    allFlagValues "--filter" flags
+        |> List.map parseOneBiocDeleteFilter
+        |> resultSequence
+
+
+parseOneBiocDeleteFilter : String -> Result String Biocs.DeleteFilter
+parseOneBiocDeleteFilter raw =
+    case String.split "=" raw of
+        field :: op :: rest ->
+            if String.isEmpty field then
+                Err ("--filter: empty field in '" ++ raw ++ "'")
+
+            else
+                buildBiocDeleteFilter field op (String.join "=" rest)
+
+        _ ->
+            Err ("--filter: expected 'field=op=value', got '" ++ raw ++ "'")
+
+
+buildBiocDeleteFilter : String -> String -> String -> Result String Biocs.DeleteFilter
+buildBiocDeleteFilter field op value =
+    case String.toLower op of
+        "eq" ->
+            Ok (Biocs.deleteFilter { field = field, operator = "EQ", value = Encode.string value })
+
+        "neq" ->
+            Ok (Biocs.deleteFilter { field = field, operator = "NEQ", value = Encode.string value })
+
+        _ ->
+            Err
+                ("bioc delete --filter: unsupported operator '"
+                    ++ op
+                    ++ "' (supported: eq, neq)"
+                )
 
 
 
@@ -893,6 +978,12 @@ endpointName endpoint =
 
         BiocsList _ ->
             "bioc list"
+
+        BiocsInsert _ ->
+            "bioc insert"
+
+        BiocsDelete _ ->
+            "bioc delete"
 
         CorrelationsGet _ ->
             "correlations get"

@@ -17,6 +17,9 @@ The workflow ends with a commit. Phases 1–9 implement and verify; Phase 10 sta
 - HTTP method + full path (e.g., `GET /public_api/v1/distributions/get_versions`).
 - Which OpenAPI spec file under `docs/cortex-api-openapi/` describes it.
 - Module placement: extend an existing `Cortex.Api.X` or create a new module.
+- **Read or write?** A "write" endpoint is anything that mutates persistent tenant state — `/insert`, `/create`, `/delete`, `/update`, `/assign`, etc. Writes follow a stricter contract (see CLAUDE.md "Integration testing for write endpoints" and Phase 6 below). Two hard gates apply before you start coding:
+  - **Need a delete API.** If the resource can be created via API but cannot be deleted via API, do NOT add an integration test. The SDK can still ship the endpoint; mark the row in `TODO.md`'s test column as `n/a (no delete)`. Skipping is preferable to leaking permanent test fixtures into the tenant.
+  - **Tier 1 vs Tier 2.** Most write endpoints are Tier 1 (self-owned object CRUD: lookups, syslog integrations, scheduled queries, BIOCs, etc.) and live in `tests/<api>.bats`. Tier 2 (`endpoints/delete`, `scripts/run_script`, `rbac/set_user_role`, etc. — anything irreversible or with shared-tenant blast radius) goes in `tests/destructive/<api>.bats` and runs only via `just test-destructive <file>`. When in doubt, propose Tier 1 and let the user redirect.
 - For review mode: which existing module/endpoint to audit.
 
 If any of these are unclear, ask before proceeding.
@@ -123,7 +126,74 @@ Keep CLI subcommand naming consistent: hyphenate snake_case (`get_versions` → 
 
 ## Phase 6 — BATS tests (`tests/<api_module>.bats`)
 
-One BATS file per `Cortex.Api.*` module. For **every** endpoint, write at least these tests:
+One BATS file per `Cortex.Api.*` module. For **every** endpoint, write at least these tests.
+
+### Write-endpoint contract (mutating endpoints only)
+
+If the endpoint creates or modifies persistent tenant state, this section applies AND the read-endpoint sub-sections below still apply (the create/list/delete cycle exercises a read along the way). Skip ahead to "1. Content-validating test" only for pure read endpoints.
+
+The repo enforces a strict round-trip pattern documented in `tests/SETUP_TEARDOWN.md` and CLAUDE.md. Summary:
+
+- **One tenant.** No separate lab tenant. Every test creates and tears down its own objects in the same tenant.
+- **Round-trip.** Each test (or `setup_file`/`teardown_file` pair) is `create → list → mutate → delete (→ list)`. If a resource has no create API (a real agent, a real user), don't write a destructive test — defer.
+- **Naming.** Every fixture name uses `fixture_name <slug>` from `tests/test_helper/fixtures.bash`, which builds `clxtest_${BATS_RUN_ID}_${file}_${slug}` (underscore-only — Cortex coerces hyphens). The `clxtest_` marker is what the reaper greps for.
+- **Test file requires** `bats_require_minimum_version 1.7.0` and loads `test_helper/fixtures` after `test_helper/common`.
+- **Tier 1 placement** is `tests/<api>.bats` (default-on for `just test`). Tier 2 placement is `tests/destructive/<api>.bats` (run individually via `just test-destructive`); each Tier 2 test must contain create+delete in the **same** `@test` block — no `setup_file`/`teardown_file` split for that tier.
+
+The canonical Tier 1 example is `tests/biocs.bats` (BIOC insert/delete). Read it before writing your own. The minimal pattern for a single round-trip:
+
+```bash
+@test "<api> insert + delete round-trip via CLI" {
+    name="$(fixture_name roundtrip)"
+    items="$(make_<api>_payload "$name")"          # local helper that builds JSON
+    register_<api>_cleanup "$name"                  # safety net via cleanup_register
+
+    run "$CORTEX" <api> insert "$items"
+    [ "$status" -eq 0 ]
+    echo "$output" | jq -e '.added_objects[0].id | type == "number"' > /dev/null
+
+    list_after_create="$("$CORTEX" <api> list --filter "name=eq=$name")"
+    echo "$list_after_create" | jq -e --arg n "$name" '.objects | map(select(.name == $n)) | length == 1' > /dev/null
+
+    run "$CORTEX" <api> delete --filter "name=eq=$name"
+    [ "$status" -eq 0 ]
+    echo "$output" | jq -e '.objects_count == 1' > /dev/null
+
+    list_after_delete="$("$CORTEX" <api> list --filter "name=eq=$name")"
+    echo "$list_after_delete" | jq -e --arg n "$name" '.objects | map(select(.name == $n)) | length == 0' > /dev/null
+}
+```
+
+`cleanup_register <delete-path> <delete-body>` queues a delete that fires from the per-test `teardown` (which must call `cleanup_drain`). Register **before** any potentially-failing assertion so a flaky test doesn't strand a fixture.
+
+When multiple `@test`s share one fixture, use `setup_file`/`teardown_file` instead — same naming and helpers, but `cortex_post` directly in setup/teardown for create/delete. See `tests/SETUP_TEARDOWN.md` for that pattern.
+
+### Reaper registration
+
+Every new write endpoint MUST register with `cli/bin/cortex-test-clean` so a crashed test cannot leak. Add a `reap_<noun>()` function next to the existing reapers, then append it to `REAPERS=(...)`. The function:
+
+1. Lists tenant objects via the corresponding GET/list endpoint.
+2. Filters to names starting with `clxtest_` client-side via `jq`.
+3. POSTs the per-object delete with the filter shape that endpoint requires.
+4. Increments a counter and (only when > 0) prints `<n> <noun>(s) removed`.
+
+`tests/biocs.bats` + `reap_biocs` in `cli/bin/cortex-test-clean` are the canonical pair. **Pitfall:** `(( deletes > 0 )) && echo …` exits the script under `set -e` whenever the count is zero; use an explicit `if` block.
+
+### TestMain.elm for write endpoints
+
+Mutating endpoints `skip` in `cli/src/Cli/TestMain.elm` — the typed-decode test runs through `$CORTEX_TEST`, which prints `ok: <name> (typed test skipped)` and exits without hitting the API. This means typed-decode tests are dispatch checks only; they do NOT create tenant fixtures, so they don't need cleanup.
+
+```elm
+Commands.<Api>Insert _ ->
+    skip
+
+Commands.<Api>Delete _ ->
+    skip
+```
+
+`TODO.md`'s `Asserts` column gets `skip` for these endpoints (matches the TestMain branch).
+
+### Read-endpoint tests (apply to every endpoint, read or write)
 
 **1. Content-validating test** (uses `$CORTEX`):
 
@@ -368,7 +438,11 @@ Don't re-document these in this skill — read the source for examples.
 - `cli/src/Cli/Main.elm` — flag decoding + dispatch.
 - `tests/distributions.bats` — content validation + dynamic fixtures (`first_distribution` helper).
 - `tests/agent_config.bats` — `skip_if_unsupported` pattern.
-- `tests/test_helper/common.bash` — shared BATS setup.
-- `TODO.md` — tracker columns and progress line.
-- `justfile` — `format`, `build`, `test`, `curl`, `publish` recipes.
-- `CLAUDE.md` — project-wide conventions and the "decode every field" rule.
+- `tests/biocs.bats` — canonical write-endpoint test (round-trip insert/delete with `cleanup_register`).
+- `tests/test_helper/common.bash` — shared BATS setup, `BATS_RUN_ID` export.
+- `tests/test_helper/fixtures.bash` — `fixture_name`, `cortex_post`, `cleanup_register`/`cleanup_drain` for write tests.
+- `tests/SETUP_TEARDOWN.md` — full write-endpoint test contract.
+- `cli/bin/cortex-test-clean` — reaper; one `reap_<noun>` function per write-endpoint family.
+- `TODO.md` — tracker columns and progress line. `Asserts` column accepts `n/a (no delete)` for endpoints whose artifact has no delete API.
+- `justfile` — `format`, `build`, `test`, `curl`, `test-clean`, `test-destructive`, `publish` recipes.
+- `CLAUDE.md` — project-wide conventions, the "decode every field" rule, and the write-endpoint contract.

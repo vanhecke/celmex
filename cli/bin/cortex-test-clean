@@ -42,21 +42,33 @@ CURL="./cli/bin/cortex-curl"
 #               >/dev/null
 #           deletes=$((deletes + 1))
 #       done < <(printf '%s' "$list" | jq -r '.reply[]?.name | select(startswith("clxtest_"))')
-#       (( deletes > 0 )) && echo "$deletes <noun>s removed"
+#       if (( deletes > 0 )); then echo "$deletes <noun>s removed"; fi
 #   }
+#
+# Note: `(( expr )) && echo …` looks tempting but exits the script under
+# `set -e` whenever `expr` is false. Use an explicit `if` block instead.
 #
 # Then: REAPERS+=(reap_<noun>)
 
-REAPERS=()
+reap_biocs() {
+    local list deletes=0
+    list="$("$CURL" POST /public_api/v1/bioc/get '{"request_data":{}}')"
+    while IFS= read -r name; do
+        [[ -z "$name" ]] && continue
+        "$CURL" POST /public_api/v1/bioc/delete \
+            "$(jq -c -n --arg n "$name" \
+                '{request_data:{filters:[{field:"name",operator:"EQ",value:$n}]}}')" \
+            >/dev/null
+        deletes=$((deletes + 1))
+    done < <(printf '%s' "$list" | jq -r '.objects[]? | (.name // "") | select(startswith("clxtest_"))')
+    if (( deletes > 0 )); then
+        echo "$deletes BIOC(s) removed"
+    fi
+}
+
+REAPERS=(reap_biocs)
 
 # --- Driver ------------------------------------------------------------------
-
-if (( ${#REAPERS[@]} == 0 )); then
-    # No registered reapers yet. The scaffold is in place so write-endpoint
-    # contributors can add their list/delete pair without touching the
-    # Justfile or any test plumbing.
-    exit 0
-fi
 
 for r in "${REAPERS[@]}"; do
     "$r"

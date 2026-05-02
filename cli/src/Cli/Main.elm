@@ -356,6 +356,12 @@ run stamp config endpoint =
         Commands.BiocsList args ->
             ( Idle, raw (Biocs.list args) )
 
+        Commands.BiocsInsert args ->
+            ( Idle, raw (Biocs.insert args) )
+
+        Commands.BiocsDelete args ->
+            ( Idle, raw (Biocs.delete args) )
+
         Commands.CorrelationsGet args ->
             ( Idle, raw (Correlations.get args) )
 

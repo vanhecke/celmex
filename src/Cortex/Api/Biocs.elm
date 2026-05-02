@@ -2,6 +2,10 @@ module Cortex.Api.Biocs exposing
     ( SearchArgs, defaultSearchArgs
     , Bioc, BiocsResponse
     , list
+    , InsertArgs, InsertResult, BiocChange
+    , insert
+    , DeleteArgs, DeleteFilter, deleteFilter, DeleteResult
+    , delete
     )
 
 {-| Cortex behavioral indicators of compromise (BIOCs).
@@ -9,6 +13,10 @@ module Cortex.Api.Biocs exposing
 @docs SearchArgs, defaultSearchArgs
 @docs Bioc, BiocsResponse
 @docs list
+@docs InsertArgs, InsertResult, BiocChange
+@docs insert
+@docs DeleteArgs, DeleteFilter, deleteFilter, DeleteResult
+@docs delete
 
 -}
 
@@ -103,6 +111,115 @@ list args =
 
 
 
+-- INSERT
+
+
+{-| Arguments to [`insert`](#insert). `items` is the raw `request_data` array
+of BIOC objects — each entry must include at least `name`, `type`, `severity`,
+`status`, `is_xql`, and `indicator`. The `indicator` field is the deeply
+nested investigation-rule DSL (see [`Bioc`](#Bioc)) so the SDK does not type
+it ahead of time; callers build the JSON shape themselves and pass it through.
+Pass an existing `rule_id` on an item to upsert that BIOC instead of
+inserting a new one.
+-}
+type alias InsertArgs =
+    { items : Encode.Value
+    }
+
+
+{-| Outcome of an [`insert`](#insert) call. `addedObjects` lists the newly
+created BIOC IDs and the server's status string for each; `updatedObjects`
+lists upserts; `errors` collects per-item failures the server flagged
+without aborting the batch.
+-}
+type alias InsertResult =
+    { addedObjects : List BiocChange
+    , updatedObjects : List BiocChange
+    , errors : List String
+    }
+
+
+{-| One row in the [`InsertResult`](#InsertResult) `addedObjects` /
+`updatedObjects` arrays — the rule ID the server assigned and the matching
+human-readable status it returned.
+-}
+type alias BiocChange =
+    { id : Int
+    , status : String
+    }
+
+
+{-| POST /public\_api/v1/bioc/insert — insert or upsert a batch of BIOCs.
+The response carries the rule IDs of every BIOC the server touched, which a
+test can use to delete what it inserted.
+-}
+insert : InsertArgs -> Request InsertResult
+insert args =
+    Request.post
+        [ "public_api", "v1", "bioc", "insert" ]
+        (Encode.object [ ( "request_data", args.items ) ])
+        insertResultDecoder
+
+
+
+-- DELETE
+
+
+{-| Arguments to [`delete`](#delete). `filters` is AND-ed server-side; pass
+multiple entries to narrow the match further. Build entries via
+[`deleteFilter`](#deleteFilter) so the wire shape stays an SDK detail.
+-}
+type alias DeleteArgs =
+    { filters : List DeleteFilter
+    }
+
+
+{-| One `{field, operator, value}` predicate accepted by `bioc/delete`. The
+delete endpoint accepts only a constrained operator set (`EQ`, `NEQ`, `IN`,
+`GTE`, `LTE`) and a closed field set (`name`, `severity`, `type`, `is_xql`,
+`comment`, `status`, `indicator`, `mitre_*`); the SDK does not validate
+either — the server will reject invalid combinations.
+-}
+type DeleteFilter
+    = DeleteFilter { field : String, operator : String, value : Encode.Value }
+
+
+{-| Build a [`DeleteFilter`](#DeleteFilter) from the raw triple. The
+`operator` should already be one of the API's uppercase keywords (`EQ`,
+`NEQ`, `IN`, `GTE`, `LTE`); the encoder writes it through verbatim.
+-}
+deleteFilter : { field : String, operator : String, value : Encode.Value } -> DeleteFilter
+deleteFilter =
+    DeleteFilter
+
+
+{-| Outcome of a [`delete`](#delete) call. `objectsCount` is the number of
+BIOCs the server removed; `objects` is the list of rule IDs it removed.
+-}
+type alias DeleteResult =
+    { objectsCount : Int
+    , objects : List Int
+    }
+
+
+{-| POST /public\_api/v1/bioc/delete — remove every BIOC matching the
+filters.
+-}
+delete : DeleteArgs -> Request DeleteResult
+delete args =
+    Request.post
+        [ "public_api", "v1", "bioc", "delete" ]
+        (Encode.object
+            [ ( "request_data"
+              , Encode.object
+                    [ ( "filters", Encode.list encodeDeleteFilter args.filters ) ]
+              )
+            ]
+        )
+        deleteResultDecoder
+
+
+
 -- DECODERS
 
 
@@ -134,3 +251,38 @@ biocDecoder =
            on the BIOC rule type (XQL/process/network/...) and is opaque.
         -}
         |> andMap (optionalField "indicator" Decode.value)
+
+
+insertResultDecoder : Decoder InsertResult
+insertResultDecoder =
+    Decode.map3 InsertResult
+        (optionalList "added_objects" biocChangeDecoder)
+        (optionalList "updated_objects" biocChangeDecoder)
+        (optionalList "errors" Decode.string)
+
+
+biocChangeDecoder : Decoder BiocChange
+biocChangeDecoder =
+    Decode.map2 BiocChange
+        (Decode.field "id" Decode.int)
+        (Decode.field "status" Decode.string)
+
+
+deleteResultDecoder : Decoder DeleteResult
+deleteResultDecoder =
+    Decode.map2 DeleteResult
+        (Decode.oneOf [ Decode.field "objects_count" Decode.int, Decode.succeed 0 ])
+        (Decode.oneOf [ Decode.field "objects" (Decode.list Decode.int), Decode.succeed [] ])
+
+
+
+-- ENCODERS
+
+
+encodeDeleteFilter : DeleteFilter -> Encode.Value
+encodeDeleteFilter (DeleteFilter f) =
+    Encode.object
+        [ ( "field", Encode.string f.field )
+        , ( "operator", Encode.string f.operator )
+        , ( "value", f.value )
+        ]
