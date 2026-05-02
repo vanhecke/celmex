@@ -1,14 +1,14 @@
 module Cortex.Api.Biocs exposing
     ( SearchArgs, defaultSearchArgs
     , Bioc, BiocsResponse
-    , get
+    , list
     )
 
 {-| Cortex behavioral indicators of compromise (BIOCs).
 
 @docs SearchArgs, defaultSearchArgs
 @docs Bioc, BiocsResponse
-@docs get
+@docs list
 
 -}
 
@@ -20,7 +20,7 @@ import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
 
 
-{-| Arguments to [`get`](#get). All fields are optional; pass
+{-| Arguments to [`list`](#list). All fields are optional; pass
 [`defaultSearchArgs`](#defaultSearchArgs) for an unfiltered request. `extra`
 is merged last into `request_data` and overrides any SDK-generated key on
 collision — e.g. `extended_view` is reachable through it.
@@ -47,7 +47,7 @@ defaultSearchArgs =
     }
 
 
-{-| Top-level envelope returned by [`get`](#get). Not wrapped in the
+{-| Top-level envelope returned by [`list`](#list). Not wrapped in the
 standard `reply`.
 -}
 type alias BiocsResponse =
@@ -87,8 +87,8 @@ Response is top-level `{objects_count, objects, objects_type}` — NOT wrapped
 in the usual `reply` envelope.
 
 -}
-get : SearchArgs -> Request BiocsResponse
-get args =
+list : SearchArgs -> Request BiocsResponse
+list args =
     Request.post
         [ "public_api", "v1", "bioc", "get" ]
         (RequestData.encode Query.standard

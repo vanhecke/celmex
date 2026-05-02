@@ -51,11 +51,11 @@ type Endpoint
     | XqlLookupsRemoveData Xql.LookupRemoveArgs
     | ScheduledQueriesList ScheduledQueries.SearchArgs
     | IndicatorsGet Indicators.SearchArgs
-    | BiocsGet Biocs.SearchArgs
+    | BiocsList Biocs.SearchArgs
     | CorrelationsGet Correlations.SearchArgs
     | IssuesSearch Issues.SearchArgs
     | LegacyExceptionsGetModules
-    | LegacyExceptionsFetch
+    | LegacyExceptionsList
     | ProfilesList String
     | ProfilesGetPolicy String
     | AgentConfigContentManagement
@@ -155,9 +155,9 @@ argvToEndpoint args =
             parseStandardSearch rest
                 |> Result.map (\sa -> IndicatorsGet (toIndicatorsArgs sa))
 
-        "bioc" :: "get" :: rest ->
+        "bioc" :: "list" :: rest ->
             parseStandardSearch rest
-                |> Result.map (\sa -> BiocsGet (toBiocsArgs sa))
+                |> Result.map (\sa -> BiocsList (toBiocsArgs sa))
 
         "correlations" :: "get" :: rest ->
             parseStandardSearch rest
@@ -170,8 +170,8 @@ argvToEndpoint args =
         [ "legacy-exceptions", "get-modules" ] ->
             Ok LegacyExceptionsGetModules
 
-        [ "legacy-exceptions", "fetch" ] ->
-            Ok LegacyExceptionsFetch
+        [ "legacy-exceptions", "list" ] ->
+            Ok LegacyExceptionsList
 
         [ "profiles", "list", profileType ] ->
             Ok (ProfilesList profileType)
@@ -891,8 +891,8 @@ endpointName endpoint =
         IndicatorsGet _ ->
             "indicators get"
 
-        BiocsGet _ ->
-            "bioc get"
+        BiocsList _ ->
+            "bioc list"
 
         CorrelationsGet _ ->
             "correlations get"
@@ -903,8 +903,8 @@ endpointName endpoint =
         LegacyExceptionsGetModules ->
             "legacy-exceptions get-modules"
 
-        LegacyExceptionsFetch ->
-            "legacy-exceptions fetch"
+        LegacyExceptionsList ->
+            "legacy-exceptions list"
 
         ProfilesList profileType ->
             "profiles list " ++ profileType
@@ -1087,7 +1087,7 @@ usage args =
             , "    --filter k=v                                Repeatable; combined as AND"
             , ""
             , "  cortex indicators get                       List indicators (IOCs)"
-            , "  cortex bioc get                             List BIOCs"
+            , "  cortex bioc list                            List BIOCs"
             , "  cortex correlations get                     List correlation rules"
             , "  cortex issues search                        Search issues"
             , "  cortex issues schema                        Get issue field schema"
@@ -1116,7 +1116,7 @@ usage args =
             , "                                              Get quarantine status for a file on an endpoint"
             , ""
             , "  cortex legacy-exceptions get-modules        List legacy exception modules"
-            , "  cortex legacy-exceptions fetch              Fetch legacy exception rules"
+            , "  cortex legacy-exceptions list               List legacy exception rules"
             , ""
             , "  cortex profiles list <type>                 List endpoint security profiles (type: prevention|extension)"
             , "  cortex profiles get-policy <endpoint-id>    Get policy assigned to an endpoint"

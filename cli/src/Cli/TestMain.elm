@@ -564,8 +564,8 @@ run stamp config endpoint =
                            )
                 )
 
-        Commands.BiocsGet args ->
-            typedAssert (Biocs.get args)
+        Commands.BiocsList args ->
+            typedAssert (Biocs.list args)
                 (\r ->
                     [ nonNegative "objectsCount" r.objectsCount
                     , nonBlank "objectsType" r.objectsType
@@ -640,8 +640,8 @@ run stamp config endpoint =
                             )
                 )
 
-        Commands.LegacyExceptionsFetch ->
-            typedAssert LegacyExceptions.fetch
+        Commands.LegacyExceptionsList ->
+            typedAssert LegacyExceptions.list
                 (\r ->
                     [ nonNegative "totalCount" r.totalCount
                     , nonNegative "filterCount" r.filterCount
@@ -811,7 +811,7 @@ run stamp config endpoint =
                 )
 
         Commands.RiskUsers ->
-            typedAssert Risk.getRiskyUsers
+            typedAssert Risk.listRiskyUsers
                 (\users ->
                     if List.isEmpty users then
                         []
@@ -828,7 +828,7 @@ run stamp config endpoint =
                 )
 
         Commands.RiskHosts ->
-            typedAssert Risk.getRiskyHosts
+            typedAssert Risk.listRiskyHosts
                 (\hosts ->
                     if List.isEmpty hosts then
                         []

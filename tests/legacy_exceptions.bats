@@ -19,15 +19,15 @@ setup() {
     [ "$status" -eq 0 ]
 }
 
-@test "legacy-exceptions fetch returns valid JSON with DATA array" {
-    run "$CORTEX" legacy-exceptions fetch
+@test "legacy-exceptions list returns valid JSON with DATA array" {
+    run "$CORTEX" legacy-exceptions list
     [ "$status" -eq 0 ]
     echo "$output" | jq -e '.DATA | type == "array"' > /dev/null
     echo "$output" | jq -e '.TOTAL_COUNT | type == "number"' > /dev/null
     echo "$output" | jq -e '.FILTER_COUNT | type == "number"' > /dev/null
 }
 
-@test "legacy-exceptions fetch typed decode succeeds" {
-    run "$CORTEX_TEST" legacy-exceptions fetch
+@test "legacy-exceptions list typed decode succeeds" {
+    run "$CORTEX_TEST" legacy-exceptions list
     [ "$status" -eq 0 ]
 }

@@ -353,8 +353,8 @@ run stamp config endpoint =
         Commands.IndicatorsGet args ->
             ( Idle, raw (Indicators.get args) )
 
-        Commands.BiocsGet args ->
-            ( Idle, raw (Biocs.get args) )
+        Commands.BiocsList args ->
+            ( Idle, raw (Biocs.list args) )
 
         Commands.CorrelationsGet args ->
             ( Idle, raw (Correlations.get args) )
@@ -365,8 +365,8 @@ run stamp config endpoint =
         Commands.LegacyExceptionsGetModules ->
             ( Idle, raw LegacyExceptions.getModules )
 
-        Commands.LegacyExceptionsFetch ->
-            ( Idle, raw LegacyExceptions.fetch )
+        Commands.LegacyExceptionsList ->
+            ( Idle, raw LegacyExceptions.list )
 
         Commands.ProfilesList profileType ->
             ( Idle, raw (Profiles.getProfiles { type_ = profileType }) )
@@ -417,10 +417,10 @@ run stamp config endpoint =
             ( Idle, raw (Risk.getRiskScore { id = id }) )
 
         Commands.RiskUsers ->
-            ( Idle, raw Risk.getRiskyUsers )
+            ( Idle, raw Risk.listRiskyUsers )
 
         Commands.RiskHosts ->
-            ( Idle, raw Risk.getRiskyHosts )
+            ( Idle, raw Risk.listRiskyHosts )
 
         Commands.CasesSearch args ->
             ( Idle, raw (Cases.search args) )

@@ -1,6 +1,6 @@
 module Cortex.Api.LegacyExceptions exposing
     ( Module, FetchResponse, ExceptionRule
-    , getModules, fetch
+    , getModules, list
     )
 
 {-| Legacy policy exception modules and the per-rule list of currently
@@ -13,11 +13,11 @@ Two endpoints:
     a JSON-Schema-style `conditions_definition` describing what condition
     shape that module accepts.
 
-  - [`fetch`](#fetch) — list the exception rules currently configured on
+  - [`list`](#list) — list the exception rules currently configured on
     the tenant.
 
 @docs Module, FetchResponse, ExceptionRule
-@docs getModules, fetch
+@docs getModules, list
 
 -}
 
@@ -51,7 +51,7 @@ type alias Module =
     }
 
 
-{-| Paginated envelope returned by [`fetch`](#fetch).
+{-| Paginated envelope returned by [`list`](#list).
 -}
 type alias FetchResponse =
     { data : List ExceptionRule
@@ -102,8 +102,8 @@ Retrieve the legacy exception rules currently configured on the tenant,
 with optional filtering, sorting, and pagination.
 
 -}
-fetch : Request FetchResponse
-fetch =
+list : Request FetchResponse
+list =
     Request.postEmpty
         [ "public_api", "v1", "legacy_exceptions", "fetch" ]
         (reply fetchResponseDecoder)

@@ -1,12 +1,12 @@
 module Cortex.Api.Risk exposing
     ( RiskScoreResponse, RiskyEntity, Reason
-    , getRiskScore, getRiskyHosts, getRiskyUsers
+    , getRiskScore, listRiskyHosts, listRiskyUsers
     )
 
 {-| Cortex identity-threat risk scoring for users and endpoints.
 
 @docs RiskScoreResponse, RiskyEntity, Reason
-@docs getRiskScore, getRiskyHosts, getRiskyUsers
+@docs getRiskScore, listRiskyHosts, listRiskyUsers
 
 -}
 
@@ -31,7 +31,7 @@ type alias RiskScoreResponse =
 
 
 {-| One risky-user / risky-host entry returned by
-[`getRiskyUsers`](#getRiskyUsers) / [`getRiskyHosts`](#getRiskyHosts).
+[`listRiskyUsers`](#listRiskyUsers) / [`listRiskyHosts`](#listRiskyHosts).
 Shape matches [`RiskScoreResponse`](#RiskScoreResponse) — `email` is
 populated for user entries only.
 -}
@@ -83,8 +83,8 @@ getRiskScore { id } =
 Returns the highest-risk users on the tenant.
 
 -}
-getRiskyUsers : Request (List RiskyEntity)
-getRiskyUsers =
+listRiskyUsers : Request (List RiskyEntity)
+listRiskyUsers =
     Request.post
         [ "public_api", "v1", "get_risky_users" ]
         (Encode.object [])
@@ -96,8 +96,8 @@ getRiskyUsers =
 Returns the highest-risk endpoints on the tenant.
 
 -}
-getRiskyHosts : Request (List RiskyEntity)
-getRiskyHosts =
+listRiskyHosts : Request (List RiskyEntity)
+listRiskyHosts =
     Request.post
         [ "public_api", "v1", "get_risky_hosts" ]
         (Encode.object [])
