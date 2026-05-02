@@ -10,7 +10,7 @@ jobs:
     name: Format check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: actions/setup-node@v4
         with:
@@ -29,7 +29,7 @@ jobs:
     # is cleaned up (see QUALITY_TOOLING_PLAN.md Tier 1).
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: jorelali/setup-elm@v6
         with:
@@ -61,7 +61,7 @@ jobs:
     needs: [format, review]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: jorelali/setup-elm@v6
         with:
@@ -101,7 +101,7 @@ jobs:
       CORTEX_API_KEY: ${{ secrets.CORTEX_API_KEY }}
       CORTEX_API_KEY_ID: ${{ secrets.CORTEX_API_KEY_ID }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: actions/setup-node@v4
         with:
