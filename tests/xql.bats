@@ -1,7 +1,21 @@
 #!/usr/bin/env bats
 
+bats_require_minimum_version 1.7.0
+
 setup() {
     load test_helper/common
+    load test_helper/fixtures
+}
+
+teardown() {
+    cleanup_drain
+}
+
+# Register a delete by name so cleanup_drain fires it on test teardown.
+register_xql_library_cleanup() {
+    local name="$1"
+    cleanup_register /public_api/xql_library/delete \
+        "$(jq -c -n --arg n "$name" '{request_data:{xql_query_names:[$n]}}')"
 }
 
 @test "xql get-quota returns valid JSON object" {
@@ -78,4 +92,61 @@ setup() {
     # exercise the CLI argv + raw-decoder path. A decoder / transport bug would
     # produce neither.
     [ "$status" -eq 0 ] || [ "$status" -eq 1 ]
+}
+
+# --- xql-library insert + delete round-trip ----------------------------------
+
+@test "xql-library insert + delete round-trip via CLI" {
+    name="$(fixture_name roundtrip)"
+    register_xql_library_cleanup "$name"
+
+    run "$CORTEX" xql-library insert "$name" "dataset = xdr_data | limit 1"
+    [ "$status" -eq 0 ]
+    echo "$output" | jq -e --arg n "$name" '.xql_queries_added | index($n) | type == "number"' > /dev/null
+    echo "$output" | jq -e '.errors | length == 0' > /dev/null
+
+    list_output="$("$CORTEX" xql-library get)"
+    echo "$list_output" | jq -e --arg n "$name" '.xql_queries | map(select(.xql_query_name == $n)) | length == 1' > /dev/null
+
+    run "$CORTEX" xql-library delete --name "$name"
+    [ "$status" -eq 0 ]
+    echo "$output" | jq -e '.queries_count == 1' > /dev/null
+    echo "$output" | jq -e --arg n "$name" '.xql_query_names | index($n) | type == "number"' > /dev/null
+    echo "$output" | jq -e '.errors | length == 0' > /dev/null
+
+    list_after="$("$CORTEX" xql-library get)"
+    echo "$list_after" | jq -e --arg n "$name" '.xql_queries | map(select(.xql_query_name == $n)) | length == 0' > /dev/null
+}
+
+@test "xql-library insert typed decode succeeds" {
+    name="$(fixture_name typed_insert)"
+    run "$CORTEX_TEST" xql-library insert "$name" "dataset = xdr_data | limit 1"
+    [ "$status" -eq 0 ]
+}
+
+@test "xql-library delete typed decode succeeds" {
+    run "$CORTEX_TEST" xql-library delete --name "clxtest_unused"
+    [ "$status" -eq 0 ]
+}
+
+# --- argument handling -------------------------------------------------------
+
+@test "xql-library insert without args exits non-zero" {
+    run --separate-stderr "$CORTEX" xql-library insert
+    [ "$status" -ne 0 ]
+}
+
+@test "xql-library insert with only one positional exits non-zero" {
+    run --separate-stderr "$CORTEX" xql-library insert "name-only"
+    [ "$status" -ne 0 ]
+}
+
+@test "xql-library delete without selector exits non-zero" {
+    run --separate-stderr "$CORTEX" xql-library delete
+    [ "$status" -ne 0 ]
+}
+
+@test "xql-library delete with both --name and --tag exits non-zero" {
+    run --separate-stderr "$CORTEX" xql-library delete --name a --tag b
+    [ "$status" -ne 0 ]
 }

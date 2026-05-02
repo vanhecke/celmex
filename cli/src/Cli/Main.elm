@@ -292,6 +292,12 @@ run stamp config endpoint =
         Commands.XqlLibraryGet ->
             ( Idle, raw Xql.getLibrary )
 
+        Commands.XqlLibraryInsert args ->
+            ( Idle, raw (Xql.libraryInsert args) )
+
+        Commands.XqlLibraryDelete args ->
+            ( Idle, raw (Xql.libraryDelete args) )
+
         Commands.XqlStartQuery args ->
             ( Idle
             , Client.sendWith stamp

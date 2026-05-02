@@ -41,6 +41,8 @@ type Endpoint
     | XqlGetQuota
     | XqlGetDatasets
     | XqlLibraryGet
+    | XqlLibraryInsert Xql.LibraryInsertArgs
+    | XqlLibraryDelete Xql.LibraryDeleteArgs
     | XqlStartQuery Xql.StartQueryArgs
     | XqlQueryPoll Xql.StartQueryArgs Float
     | XqlGetResults Xql.GetResultsArgs
@@ -152,6 +154,12 @@ argvToEndpoint args =
 
         [ "xql-library", "get" ] ->
             Ok XqlLibraryGet
+
+        "xql-library" :: "insert" :: rest ->
+            parseXqlLibraryInsert rest
+
+        "xql-library" :: "delete" :: rest ->
+            parseXqlLibraryDelete rest
 
         "scheduled-queries" :: "list" :: rest ->
             parseStandardSearch rest
@@ -492,6 +500,57 @@ parseLookupsRemove args =
 
                     _ ->
                         Err "xql lookups remove-data: expected one positional argument <DATASET>"
+            )
+
+
+parseXqlLibraryInsert : List String -> Result String Endpoint
+parseXqlLibraryInsert args =
+    splitArgs [ "--override" ] args
+        |> Result.andThen
+            (\( positionals, flags ) ->
+                case positionals of
+                    [ name, query ] ->
+                        Ok
+                            (XqlLibraryInsert
+                                { xqlQueries = [ { name = name, query = query } ]
+                                , override = hasFlag "--override" flags
+                                , tags = allFlagValues "--tag" flags
+                                }
+                            )
+
+                    _ ->
+                        Err "xql-library insert: expected two positional arguments <NAME> <QUERY>"
+            )
+
+
+parseXqlLibraryDelete : List String -> Result String Endpoint
+parseXqlLibraryDelete args =
+    splitArgs [] args
+        |> Result.andThen
+            (\( positionals, flags ) ->
+                if not (List.isEmpty positionals) then
+                    Err ("xql-library delete: unexpected positional arguments: " ++ String.join " " positionals)
+
+                else
+                    let
+                        names =
+                            allFlagValues "--name" flags
+
+                        tags =
+                            allFlagValues "--tag" flags
+                    in
+                    case ( names, tags ) of
+                        ( [], [] ) ->
+                            Err "xql-library delete: needs at least one --name or --tag"
+
+                        ( _, [] ) ->
+                            Ok (XqlLibraryDelete { criteria = Xql.ByNames names })
+
+                        ( [], _ ) ->
+                            Ok (XqlLibraryDelete { criteria = Xql.ByTags tags })
+
+                        ( _, _ ) ->
+                            Err "xql-library delete: --name and --tag are mutually exclusive"
             )
 
 
@@ -1113,6 +1172,12 @@ endpointName endpoint =
         XqlLibraryGet ->
             "xql-library get"
 
+        XqlLibraryInsert _ ->
+            "xql-library insert"
+
+        XqlLibraryDelete _ ->
+            "xql-library delete"
+
         XqlStartQuery _ ->
             "xql query"
 
@@ -1333,6 +1398,12 @@ usage args =
             , "  cortex xql get-quota                        Get XQL query quota"
             , "  cortex xql get-datasets                     List XQL datasets"
             , "  cortex xql-library get                      List XQL library queries"
+            , "  cortex xql-library insert <NAME> <QUERY>    Insert or upsert a saved XQL query"
+            , "    --override                                  Overwrite if name already exists"
+            , "    --tag T                                     Repeatable; tag the saved query"
+            , "  cortex xql-library delete                   Delete saved XQL queries"
+            , "    --name N                                    Repeatable; delete by name"
+            , "    --tag T                                     Repeatable; delete by tag (mutually exclusive with --name)"
             , "  cortex scheduled-queries list               List scheduled queries"
             , ""
             , "  cortex xql query <QUERY> [flags]            Start an XQL query; prints query_id"

@@ -17,7 +17,7 @@ Complete inventory of all API endpoints from the OpenAPI specs in `docs/cortex-a
 > Raw total across all 22 spec files: 521. After removing the 2 duplicate files: 341 listed below.
 
 <!-- BEGIN AUTO: progress -->
-**Progress:** 70/341 endpoints implemented | 170 View | 171 Edit
+**Progress:** 72/341 endpoints implemented | 170 View | 171 Edit
 <!-- END AUTO -->
 
 
@@ -119,8 +119,8 @@ Source: `cortex-platform-papi.json`
 |  | POST | `/public_api/v1/scheduled_queries/insert` | Insert or update scheduled queries | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/scheduled_queries/delete` | Delete a scheduled query | Edit |  |  |  |  |
 | ✓ | POST | `/public_api/xql_library/get` | Get XQL Queries | View | `Cortex.Api.Xql` | `xql-library get` | `xql.bats` | ✓ |
-|  | POST | `/public_api/xql_library/insert` | Insert or update XQL queries | Edit |  |  |  |  |
-|  | POST | `/public_api/xql_library/delete` | Delete XQL Queries | Edit |  |  |  |  |
+| ✓ | POST | `/public_api/xql_library/insert` | Insert or update XQL queries | Edit | `Cortex.Api.Xql` | `xql-library insert` | `xql.bats` | skip |
+| ✓ | POST | `/public_api/xql_library/delete` | Delete XQL Queries | Edit | `Cortex.Api.Xql` | `xql-library delete` | `xql.bats` | skip |
 | ✓ | POST | `/public_api/v1/indicators/get` | Get Indicators (IOCs) | View | `Cortex.Api.Indicators` | `indicators get` | `indicators.bats` | ✓ |
 | ✓ | POST | `/public_api/v1/indicators/insert` | Insert or update IOCs | Edit | `Cortex.Api.Indicators` | `indicators insert` | `indicators.bats` | skip |
 | ✓ | POST | `/public_api/v1/indicators/delete` | Delete Indicators (IOCs) | Edit | `Cortex.Api.Indicators` | `indicators delete` | `indicators.bats` | skip |

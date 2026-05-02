@@ -8,6 +8,10 @@ module Cortex.Api.Xql exposing
     , LookupGetArgs, LookupGetResult
     , LookupRemoveArgs, LookupRemoveResult
     , lookupsAddData, lookupsGetData, lookupsRemoveData
+    , LibraryInsertArgs, LibraryInsertQuery, LibraryInsertResult, LibraryInsertError
+    , libraryInsert
+    , LibraryDeleteCriteria(..), LibraryDeleteArgs, LibraryDeleteResult
+    , libraryDelete
     )
 
 {-| XQL: saved queries, available datasets, tenant quota counters, query
@@ -22,6 +26,10 @@ execution (async start/poll), and lookup-dataset row management.
 @docs LookupGetArgs, LookupGetResult
 @docs LookupRemoveArgs, LookupRemoveResult
 @docs lookupsAddData, lookupsGetData, lookupsRemoveData
+@docs LibraryInsertArgs, LibraryInsertQuery, LibraryInsertResult, LibraryInsertError
+@docs libraryInsert
+@docs LibraryDeleteCriteria, LibraryDeleteArgs, LibraryDeleteResult
+@docs libraryDelete
 
 -}
 
@@ -286,6 +294,84 @@ type alias LookupRemoveResult =
     }
 
 
+{-| Arguments to [`libraryInsert`](#libraryInsert). `xqlQueries` is the
+batch to insert or upsert. With `override = False` the server rejects any
+entry whose name already exists; with `override = True` it upserts. `tags`
+is an optional list of labels applied to every query in the batch.
+-}
+type alias LibraryInsertArgs =
+    { xqlQueries : List LibraryInsertQuery
+    , override : Bool
+    , tags : List String
+    }
+
+
+{-| One row in [`LibraryInsertArgs`](#LibraryInsertArgs)`.xqlQueries`. The
+SDK serialises `name` to `xql_query_name` and `query` to `xql_query` on
+the wire.
+-}
+type alias LibraryInsertQuery =
+    { name : String
+    , query : String
+    }
+
+
+{-| Outcome of a [`libraryInsert`](#libraryInsert) call. `added` and
+`updated` are the names of queries the server created or upserted; `errors`
+is the list of per-item rejections (`{name, message}` pairs the API
+returns as `[name, message]` two-element arrays).
+-}
+type alias LibraryInsertResult =
+    { added : List String
+    , updated : List String
+    , errors : List LibraryInsertError
+    }
+
+
+{-| One row in the [`LibraryInsertResult`](#LibraryInsertResult) `errors`
+array — the offending query name and the server's human-readable
+rejection reason.
+-}
+type alias LibraryInsertError =
+    { name : String
+    , message : String
+    }
+
+
+{-| Selector for [`libraryDelete`](#libraryDelete). The API rejects any
+request that combines names and tags, so the SDK forces callers to pick
+one at compile time.
+-}
+type LibraryDeleteCriteria
+    = ByNames (List String)
+    | ByTags (List String)
+
+
+{-| Arguments to [`libraryDelete`](#libraryDelete).
+-}
+type alias LibraryDeleteArgs =
+    { criteria : LibraryDeleteCriteria
+    }
+
+
+{-| Outcome of a [`libraryDelete`](#libraryDelete) call. `queriesCount` is
+the number of saved queries the server removed; `xqlQueryNames` is the
+list of names it removed; `errors` is the list of free-form per-item
+failure objects the server flagged without aborting the batch.
+-}
+type alias LibraryDeleteResult =
+    { queriesCount : Int
+    , xqlQueryNames : List String
+
+    {- Decoder escape: the OpenAPI spec types delete errors as free-form
+       `object[]` with no inner schema; the live API has not been
+       observed emitting any concrete shape, so they are preserved
+       verbatim until a sample drives a typed decoder.
+    -}
+    , errors : List Encode.Value
+    }
+
+
 {-| POST /public\_api/v1/xql/get\_quota
 -}
 getQuota : Request Quota
@@ -385,6 +471,28 @@ lookupsRemoveData args =
         [ "public_api", "v1", "xql", "lookups", "remove_data" ]
         (encodeLookupRemoveBody args)
         (maybeReply lookupRemoveResultDecoder)
+
+
+{-| POST /public\_api/xql\_library/insert — insert or upsert a batch of
+saved XQL queries.
+-}
+libraryInsert : LibraryInsertArgs -> Request LibraryInsertResult
+libraryInsert args =
+    Request.post
+        [ "public_api", "xql_library", "insert" ]
+        (encodeLibraryInsertBody args)
+        (reply libraryInsertResultDecoder)
+
+
+{-| POST /public\_api/xql\_library/delete — remove saved XQL queries by
+name or by tag.
+-}
+libraryDelete : LibraryDeleteArgs -> Request LibraryDeleteResult
+libraryDelete args =
+    Request.post
+        [ "public_api", "xql_library", "delete" ]
+        (encodeLibraryDeleteBody args)
+        (reply libraryDeleteResultDecoder)
 
 
 
@@ -500,6 +608,48 @@ encodeLookupRemoveBody args =
                 ]
           )
         ]
+
+
+encodeLibraryInsertBody : LibraryInsertArgs -> Encode.Value
+encodeLibraryInsertBody args =
+    let
+        encodeOne q =
+            Encode.object
+                [ ( "xql_query_name", Encode.string q.name )
+                , ( "xql_query", Encode.string q.query )
+                ]
+
+        fields =
+            List.filterMap identity
+                [ Just ( "xql_queries", Encode.list encodeOne args.xqlQueries )
+                , if args.override then
+                    Just ( "xql_queries_override", Encode.bool True )
+
+                  else
+                    Nothing
+                , if List.isEmpty args.tags then
+                    Nothing
+
+                  else
+                    Just ( "xql_query_tags", Encode.list Encode.string args.tags )
+                ]
+    in
+    Encode.object [ ( "request_data", Encode.object fields ) ]
+
+
+encodeLibraryDeleteBody : LibraryDeleteArgs -> Encode.Value
+encodeLibraryDeleteBody args =
+    let
+        criterionField =
+            case args.criteria of
+                ByNames names ->
+                    ( "xql_query_names", Encode.list Encode.string names )
+
+                ByTags tags ->
+                    ( "xql_query_tags", Encode.list Encode.string tags )
+    in
+    Encode.object
+        [ ( "request_data", Encode.object [ criterionField ] ) ]
 
 
 
@@ -707,3 +857,37 @@ lookupRemoveResultDecoder : Decoder LookupRemoveResult
 lookupRemoveResultDecoder =
     Decode.map LookupRemoveResult
         (Decode.maybe (Decode.field "deleted" Decode.int))
+
+
+libraryInsertResultDecoder : Decoder LibraryInsertResult
+libraryInsertResultDecoder =
+    Decode.map3 LibraryInsertResult
+        (optionalList "xql_queries_added" Decode.string)
+        (optionalList "xql_queries_updated" Decode.string)
+        (optionalList "errors" libraryInsertErrorDecoder)
+
+
+libraryInsertErrorDecoder : Decoder LibraryInsertError
+libraryInsertErrorDecoder =
+    {- The API serializes each error as a two-element array `[name,
+       message]` rather than the object the spec implies. Decode that
+       shape into a typed record.
+    -}
+    Decode.list Decode.string
+        |> Decode.andThen
+            (\xs ->
+                case xs of
+                    [ name, message ] ->
+                        Decode.succeed { name = name, message = message }
+
+                    _ ->
+                        Decode.fail "expected [name, message] pair"
+            )
+
+
+libraryDeleteResultDecoder : Decoder LibraryDeleteResult
+libraryDeleteResultDecoder =
+    Decode.map3 LibraryDeleteResult
+        (Decode.oneOf [ Decode.field "queries_count" Decode.int, Decode.succeed 0 ])
+        (optionalList "xql_query_names" Decode.string)
+        (optionalList "errors" Decode.value)

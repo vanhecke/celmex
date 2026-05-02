@@ -98,7 +98,20 @@ reap_correlations() {
     fi
 }
 
-REAPERS=(reap_biocs reap_indicators reap_correlations)
+reap_xql_library() {
+    local list names
+    list="$("$CURL" POST /public_api/xql_library/get '{"request_data":{}}')"
+    names="$(printf '%s' "$list" | jq -c '[.reply.xql_queries[]?.xql_query_name | select(startswith("clxtest_"))]')"
+    if [[ "$(printf '%s' "$names" | jq 'length')" -eq 0 ]]; then
+        return 0
+    fi
+    "$CURL" POST /public_api/xql_library/delete \
+        "$(jq -c -n --argjson ns "$names" '{request_data:{xql_query_names:$ns}}')" \
+        >/dev/null
+    echo "$(printf '%s' "$names" | jq 'length') XQL library query/queries removed"
+}
+
+REAPERS=(reap_biocs reap_indicators reap_correlations reap_xql_library)
 
 # --- Driver ------------------------------------------------------------------
 
