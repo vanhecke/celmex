@@ -21,34 +21,20 @@ module.exports = function bootstrap(elmModule) {
         },
     });
 
-    // When stdout/stderr are pipes, process.stdout.write is asynchronous — if
-    // we exit immediately the OS may drop the unflushed tail of a large
-    // response. Track pending writes via the drain callback and only exit
-    // once every queued chunk has been written. Using setImmediate also
-    // gives the Elm runtime a chance to deliver every subscribe in a
-    // Cmd.batch before we decide to exit, regardless of dispatch order.
-    let pendingWrites = 0;
-    let exitCode = null;
-
-    const maybeExit = () => {
-        if (exitCode !== null && pendingWrites === 0) {
-            process.exit(exitCode);
-        }
-    };
-
-    const safeWrite = (stream, s) => {
-        pendingWrites++;
-        stream.write(s, () => {
-            pendingWrites--;
-            maybeExit();
-        });
-    };
-
-    app.ports.stdout.subscribe(s => safeWrite(process.stdout, s));
-    app.ports.stderr.subscribe(s => safeWrite(process.stderr, s));
+    // Each outgoing port has its own effect manager, and Elm chains those
+    // managers through `Process.sleep(0)` (i.e. setTimeout(0)) — so the
+    // subscribers for `Cmd.batch [stderr, exit]` are not invoked in the same
+    // JS turn, and their order is not even fixed. Calling `process.exit`
+    // from the exit subscriber would forcibly kill any setTimeouts still
+    // queued for sibling ports, dropping their stderr/stdout writes.
+    //
+    // Instead, just set `process.exitCode` and let Node exit naturally once
+    // the event loop drains. Pending stdio writes keep the loop alive, so
+    // every `Ports.stderr` queued in the same Cmd.batch is guaranteed to
+    // run and flush before exit.
+    app.ports.stdout.subscribe(s => process.stdout.write(s));
+    app.ports.stderr.subscribe(s => process.stderr.write(s));
     app.ports.exit.subscribe(code => {
-        exitCode = code;
         process.exitCode = code;
-        setImmediate(maybeExit);
     });
 };
