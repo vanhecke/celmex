@@ -598,6 +598,12 @@ run stamp config endpoint =
         Commands.BiocsDelete _ ->
             skip
 
+        Commands.CorrelationsInsert _ ->
+            skip
+
+        Commands.CorrelationsDelete _ ->
+            skip
+
         Commands.CorrelationsGet args ->
             typedAssert (Correlations.get args)
                 (\r ->

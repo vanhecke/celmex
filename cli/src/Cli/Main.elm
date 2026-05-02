@@ -371,6 +371,12 @@ run stamp config endpoint =
         Commands.CorrelationsGet args ->
             ( Idle, raw (Correlations.get args) )
 
+        Commands.CorrelationsInsert args ->
+            ( Idle, raw (Correlations.insert args) )
+
+        Commands.CorrelationsDelete args ->
+            ( Idle, raw (Correlations.delete args) )
+
         Commands.IssuesSearch args ->
             ( Idle, raw (Issues.search args) )
 

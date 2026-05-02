@@ -2,6 +2,10 @@ module Cortex.Api.Correlations exposing
     ( SearchArgs, defaultSearchArgs
     , Correlation, CorrelationsResponse
     , get
+    , InsertArgs, InsertResult, CorrelationChange, CorrelationError
+    , insert
+    , DeleteArgs, DeleteFilter, deleteFilter, DeleteResult
+    , delete
     )
 
 {-| Cortex correlation rules — XQL queries that produce alerts on a
@@ -10,6 +14,10 @@ schedule or in real time.
 @docs SearchArgs, defaultSearchArgs
 @docs Correlation, CorrelationsResponse
 @docs get
+@docs InsertArgs, InsertResult, CorrelationChange, CorrelationError
+@docs insert
+@docs DeleteArgs, DeleteFilter, deleteFilter, DeleteResult
+@docs delete
 
 -}
 
@@ -176,3 +184,161 @@ correlationDecoder =
         |> andMap (optionalField "investigation_query_link" Decode.string)
         |> andMap (optionalField "drilldown_query_timeframe" Decode.string)
         |> andMap (optionalField "mapping_strategy" Decode.string)
+
+
+
+-- INSERT
+
+
+{-| Arguments to [`insert`](#insert). `items` is the raw `request_data` array
+of correlation-rule objects. The live API requires a much larger field set
+than the published OpenAPI spec marks as optional (every scheduling /
+suppression / MITRE field plus a few undocumented ones), so the SDK does
+not type the item shape — callers supply the JSON they want sent. Pass an
+existing `rule_id` on an item to upsert that rule instead of inserting a
+new one.
+-}
+type alias InsertArgs =
+    { items : Encode.Value
+    }
+
+
+{-| Outcome of an [`insert`](#insert) call. `addedObjects` lists the newly
+created rule IDs and the server's status string for each; `updatedObjects`
+lists upserts; `errors` collects per-item failures the server flagged
+without aborting the batch.
+-}
+type alias InsertResult =
+    { addedObjects : List CorrelationChange
+    , updatedObjects : List CorrelationChange
+    , errors : List CorrelationError
+    }
+
+
+{-| One row in the [`InsertResult`](#InsertResult) `addedObjects` /
+`updatedObjects` arrays — the rule ID the server assigned and the matching
+human-readable status it returned.
+-}
+type alias CorrelationChange =
+    { id : Int
+    , status : String
+    }
+
+
+{-| One row in the [`InsertResult`](#InsertResult) `errors` array — the
+zero-based index of the offending item in the request and the server's
+human-readable rejection reason.
+-}
+type alias CorrelationError =
+    { index : Int
+    , status : String
+    }
+
+
+{-| POST /public\_api/v1/correlations/insert — insert or upsert a batch of
+correlation rules. The response carries the rule IDs of every rule the
+server touched, which a test can use to delete what it inserted.
+-}
+insert : InsertArgs -> Request InsertResult
+insert args =
+    Request.post
+        [ "public_api", "v1", "correlations", "insert" ]
+        (Encode.object [ ( "request_data", args.items ) ])
+        insertResultDecoder
+
+
+
+-- DELETE
+
+
+{-| Arguments to [`delete`](#delete). `filters` is AND-ed server-side; pass
+multiple entries to narrow the match further. Build entries via
+[`deleteFilter`](#deleteFilter) so the wire shape stays an SDK detail.
+-}
+type alias DeleteArgs =
+    { filters : List DeleteFilter
+    }
+
+
+{-| One `{field, operator, value}` predicate accepted by
+`correlations/delete`. The delete endpoint accepts the operator set
+(`EQ`, `IN`, `GTE`, `LTE`) over a closed field set including `name`,
+`severity`, `xql_query`, `is_enabled`, and the alert / scheduling /
+suppression keys; the SDK does not validate either — the server will
+reject invalid combinations.
+-}
+type DeleteFilter
+    = DeleteFilter { field : String, operator : String, value : Encode.Value }
+
+
+{-| Build a [`DeleteFilter`](#DeleteFilter) from the raw triple. The
+`operator` should already be one of the API's uppercase keywords (`EQ`,
+`IN`, `GTE`, `LTE`); the encoder writes it through verbatim.
+-}
+deleteFilter : { field : String, operator : String, value : Encode.Value } -> DeleteFilter
+deleteFilter =
+    DeleteFilter
+
+
+{-| Outcome of a [`delete`](#delete) call. `objectsCount` is the number of
+rules the server removed; `objects` is the list of rule IDs it removed.
+-}
+type alias DeleteResult =
+    { objectsCount : Int
+    , objects : List Int
+    }
+
+
+{-| POST /public\_api/v1/correlations/delete — remove every correlation
+rule matching the filters.
+-}
+delete : DeleteArgs -> Request DeleteResult
+delete args =
+    Request.post
+        [ "public_api", "v1", "correlations", "delete" ]
+        (Encode.object
+            [ ( "request_data"
+              , Encode.object
+                    [ ( "filters", Encode.list encodeDeleteFilter args.filters ) ]
+              )
+            ]
+        )
+        deleteResultDecoder
+
+
+insertResultDecoder : Decoder InsertResult
+insertResultDecoder =
+    Decode.map3 InsertResult
+        (optionalList "added_objects" correlationChangeDecoder)
+        (optionalList "updated_objects" correlationChangeDecoder)
+        (optionalList "errors" correlationErrorDecoder)
+
+
+correlationChangeDecoder : Decoder CorrelationChange
+correlationChangeDecoder =
+    Decode.map2 CorrelationChange
+        (Decode.field "id" Decode.int)
+        (Decode.field "status" Decode.string)
+
+
+correlationErrorDecoder : Decoder CorrelationError
+correlationErrorDecoder =
+    Decode.map2 CorrelationError
+        (Decode.field "index" Decode.int)
+        (Decode.field "status" Decode.string)
+
+
+deleteResultDecoder : Decoder DeleteResult
+deleteResultDecoder =
+    Decode.map2 DeleteResult
+        (Decode.oneOf [ Decode.field "objects_count" Decode.int, Decode.succeed 0 ])
+        (Decode.oneOf [ Decode.field "objects" (Decode.list Decode.int), Decode.succeed [] ])
+
+
+encodeDeleteFilter : DeleteFilter -> Encode.Value
+encodeDeleteFilter (DeleteFilter f) =
+    Encode.object
+        [ ( "field", Encode.string f.field )
+        , ( "operator", Encode.string f.operator )
+        , ( "value", f.value )
+        ]

@@ -17,7 +17,7 @@ Complete inventory of all API endpoints from the OpenAPI specs in `docs/cortex-a
 > Raw total across all 22 spec files: 521. After removing the 2 duplicate files: 341 listed below.
 
 <!-- BEGIN AUTO: progress -->
-**Progress:** 68/341 endpoints implemented | 170 View | 171 Edit
+**Progress:** 70/341 endpoints implemented | 170 View | 171 Edit
 <!-- END AUTO -->
 
 
@@ -128,8 +128,8 @@ Source: `cortex-platform-papi.json`
 | ✓ | POST | `/public_api/v1/bioc/insert` | Insert or update BIOCs | Edit | `Cortex.Api.Biocs` | `bioc insert` | `biocs.bats` | skip |
 | ✓ | POST | `/public_api/v1/bioc/delete` | Delete BIOCs | Edit | `Cortex.Api.Biocs` | `bioc delete` | `biocs.bats` | skip |
 | ✓ | POST | `/public_api/v1/correlations/get` | Get Correlation Rules | View | `Cortex.Api.Correlations` | `correlations get` | `correlations.bats` | ✓ |
-|  | POST | `/public_api/v1/correlations/insert` | Insert or update Correlation Rules | Edit |  |  |  |  |
-|  | POST | `/public_api/v1/correlations/delete` | Delete Correlation Rules | Edit |  |  |  |  |
+| ✓ | POST | `/public_api/v1/correlations/insert` | Insert or update Correlation Rules | Edit | `Cortex.Api.Correlations` | `correlations insert` | `correlations.bats` | skip |
+| ✓ | POST | `/public_api/v1/correlations/delete` | Delete Correlation Rules | Edit | `Cortex.Api.Correlations` | `correlations delete` | `correlations.bats` | skip |
 |  | POST | `/public_api/v1/playbooks/get` | Get a playbook | View |  |  |  |  |
 |  | POST | `/public_api/v1/playbooks/insert` | Insert or update playbooks | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/playbooks/delete` | Delete a playbook | Edit |  |  |  |  |

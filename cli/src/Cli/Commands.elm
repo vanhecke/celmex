@@ -57,6 +57,8 @@ type Endpoint
     | BiocsInsert Biocs.InsertArgs
     | BiocsDelete Biocs.DeleteArgs
     | CorrelationsGet Correlations.SearchArgs
+    | CorrelationsInsert Correlations.InsertArgs
+    | CorrelationsDelete Correlations.DeleteArgs
     | IssuesSearch Issues.SearchArgs
     | LegacyExceptionsGetModules
     | LegacyExceptionsList
@@ -178,6 +180,12 @@ argvToEndpoint args =
         "correlations" :: "get" :: rest ->
             parseStandardSearch rest
                 |> Result.map (\sa -> CorrelationsGet (toCorrelationsArgs sa))
+
+        "correlations" :: "insert" :: rest ->
+            parseCorrelationsInsert rest
+
+        "correlations" :: "delete" :: rest ->
+            parseCorrelationsDelete rest
 
         "issues" :: "search" :: rest ->
             parseStandardSearch rest
@@ -485,6 +493,80 @@ parseLookupsRemove args =
                     _ ->
                         Err "xql lookups remove-data: expected one positional argument <DATASET>"
             )
+
+
+parseCorrelationsInsert : List String -> Result String Endpoint
+parseCorrelationsInsert args =
+    splitArgs [] args
+        |> Result.andThen
+            (\( positionals, _ ) ->
+                case positionals of
+                    [ jsonStr ] ->
+                        parseJsonValue jsonStr
+                            |> Result.map
+                                (\items ->
+                                    CorrelationsInsert { items = items }
+                                )
+
+                    _ ->
+                        Err "correlations insert: expected one positional argument <JSON> (the request_data array)"
+            )
+
+
+parseCorrelationsDelete : List String -> Result String Endpoint
+parseCorrelationsDelete args =
+    splitArgs [] args
+        |> Result.andThen
+            (\( positionals, flags ) ->
+                if not (List.isEmpty positionals) then
+                    Err ("correlations delete: unexpected positional arguments: " ++ String.join " " positionals)
+
+                else
+                    parseCorrelationsDeleteFilters flags
+                        |> Result.andThen
+                            (\filters ->
+                                if List.isEmpty filters then
+                                    Err "correlations delete: needs at least one --filter field=op=value"
+
+                                else
+                                    Ok (CorrelationsDelete { filters = filters })
+                            )
+            )
+
+
+parseCorrelationsDeleteFilters : List ( String, Maybe String ) -> Result String (List Correlations.DeleteFilter)
+parseCorrelationsDeleteFilters flags =
+    allFlagValues "--filter" flags
+        |> List.map parseOneCorrelationsDeleteFilter
+        |> resultSequence
+
+
+parseOneCorrelationsDeleteFilter : String -> Result String Correlations.DeleteFilter
+parseOneCorrelationsDeleteFilter raw =
+    case String.split "=" raw of
+        field :: op :: rest ->
+            if String.isEmpty field then
+                Err ("--filter: empty field in '" ++ raw ++ "'")
+
+            else
+                buildCorrelationsDeleteFilter field op (String.join "=" rest)
+
+        _ ->
+            Err ("--filter: expected 'field=op=value', got '" ++ raw ++ "'")
+
+
+buildCorrelationsDeleteFilter : String -> String -> String -> Result String Correlations.DeleteFilter
+buildCorrelationsDeleteFilter field op value =
+    case String.toLower op of
+        "eq" ->
+            Ok (Correlations.deleteFilter { field = field, operator = "EQ", value = Encode.string value })
+
+        _ ->
+            Err
+                ("correlations delete --filter: unsupported operator '"
+                    ++ op
+                    ++ "' (supported: eq)"
+                )
 
 
 parseIndicatorsInsert : List String -> Result String Endpoint
@@ -1079,6 +1161,12 @@ endpointName endpoint =
         CorrelationsGet _ ->
             "correlations get"
 
+        CorrelationsInsert _ ->
+            "correlations insert"
+
+        CorrelationsDelete _ ->
+            "correlations delete"
+
         IssuesSearch _ ->
             "issues search"
 
@@ -1273,6 +1361,8 @@ usage args =
             , "  cortex indicators delete --filter k=op=v    Delete matching IOCs (op: eq|neq; repeatable)"
             , "  cortex bioc list                            List BIOCs"
             , "  cortex correlations get                     List correlation rules"
+            , "  cortex correlations insert <JSON>           Insert or upsert correlation rules (request_data array)"
+            , "  cortex correlations delete --filter k=op=v  Delete matching correlation rules (op: eq; repeatable)"
             , "  cortex issues search                        Search issues"
             , "  cortex issues schema                        Get issue field schema"
             , "  cortex cases search                         Search cases"
