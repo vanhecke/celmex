@@ -111,7 +111,20 @@ reap_xql_library() {
     echo "$(printf '%s' "$names" | jq 'length') XQL library query/queries removed"
 }
 
-REAPERS=(reap_biocs reap_indicators reap_correlations reap_xql_library)
+reap_scheduled_queries() {
+    local list ids
+    list="$("$CURL" POST /public_api/v1/scheduled_queries/list '{"request_data":{}}')"
+    ids="$(printf '%s' "$list" | jq -c '[.reply.DATA[]? | select(.query_definition_name | startswith("clxtest_")) | .query_def_id]')"
+    if [[ "$(printf '%s' "$ids" | jq 'length')" -eq 0 ]]; then
+        return 0
+    fi
+    "$CURL" POST /public_api/v1/scheduled_queries/delete \
+        "$(jq -c -n --argjson xs "$ids" '{request_data:$xs}')" \
+        >/dev/null
+    echo "$(printf '%s' "$ids" | jq 'length') scheduled query/queries removed"
+}
+
+REAPERS=(reap_biocs reap_indicators reap_correlations reap_xql_library reap_scheduled_queries)
 
 # --- Driver ------------------------------------------------------------------
 

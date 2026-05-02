@@ -356,6 +356,12 @@ run stamp config endpoint =
         Commands.ScheduledQueriesList args ->
             ( Idle, raw (ScheduledQueries.list args) )
 
+        Commands.ScheduledQueriesInsert args ->
+            ( Idle, raw (ScheduledQueries.insert args) )
+
+        Commands.ScheduledQueriesDelete args ->
+            ( Idle, raw (ScheduledQueries.delete args) )
+
         Commands.IndicatorsGet args ->
             ( Idle, raw (Indicators.get args) )
 

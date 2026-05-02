@@ -2,6 +2,10 @@ module Cortex.Api.ScheduledQueries exposing
     ( SearchArgs, defaultSearchArgs
     , ScheduledQuery, Schedule, ScheduledQueriesResponse
     , list
+    , InsertArgs, QueryDefinition, ScheduleSpec(..), CronSpec, InsertedQuery, InsertResult
+    , insert
+    , DeleteArgs, DeleteOutcome(..), DeleteResult
+    , delete
     )
 
 {-| Cortex scheduled XQL queries configured on the tenant.
@@ -9,6 +13,10 @@ module Cortex.Api.ScheduledQueries exposing
 @docs SearchArgs, defaultSearchArgs
 @docs ScheduledQuery, Schedule, ScheduledQueriesResponse
 @docs list
+@docs InsertArgs, QueryDefinition, ScheduleSpec, CronSpec, InsertedQuery, InsertResult
+@docs insert
+@docs DeleteArgs, DeleteOutcome, DeleteResult
+@docs delete
 
 -}
 
@@ -16,6 +24,7 @@ import Cortex.Decode exposing (andMap, optionalField, reply)
 import Cortex.Query as Query exposing (Filter, Range, Sort, Timeframe)
 import Cortex.Request as Request exposing (Request)
 import Cortex.RequestData as RequestData
+import Dict exposing (Dict)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
 
@@ -184,3 +193,218 @@ scheduleDecoder =
         |> andMap (optionalField "day_of_week" Decode.string)
         |> andMap (optionalField "week" Decode.string)
         |> andMap (optionalField "month" Decode.string)
+
+
+
+-- INSERT
+
+
+{-| Arguments to [`insert`](#insert). `queries` is the batch of definitions
+to send.
+-}
+type alias InsertArgs =
+    { queries : List QueryDefinition
+    }
+
+
+{-| One query definition to insert. `relativeTimeMs` is the rolling-window
+size that the query inspects on every run, in epoch-milliseconds (e.g.
+`86400000` for the last 24 hours).
+-}
+type alias QueryDefinition =
+    { name : String
+    , xql : String
+    , relativeTimeMs : Int
+    , schedule : ScheduleSpec
+    }
+
+
+{-| Trigger schedule for an inserted query. `OneShot` runs the query a
+single time at `runAtMs` (epoch-milliseconds, must be in the future);
+`Cron` runs on a recurring crontab-style schedule.
+-}
+type ScheduleSpec
+    = OneShot { runAtMs : Int }
+    | Cron CronSpec
+
+
+{-| Cron-style trigger fields. Each `Maybe String` carries either a single
+value (e.g. `"5"`) or a comma-separated list / `*` wildcard accepted by
+the Cortex scheduler. `startDate` / `endDate` bound the active window in
+epoch-milliseconds; the other fields are minute/hour/etc.
+-}
+type alias CronSpec =
+    { startDate : Maybe Int
+    , endDate : Maybe Int
+    , hour : Maybe String
+    , minute : Maybe String
+    , second : Maybe String
+    , dayOfWeek : Maybe String
+    , week : Maybe String
+    , month : Maybe String
+    }
+
+
+{-| The server-echoed definition returned in the [`InsertResult`](#InsertResult)
+dict, keyed by the assigned `query_id`. `timeframe` stays opaque for the
+same reasons as [`ScheduledQuery`](#ScheduledQuery)`.timeframe`.
+-}
+type alias InsertedQuery =
+    { name : Maybe String
+    , xql : Maybe String
+
+    {- Decoder escape: timeframe selector echoed verbatim — the
+       relativeTime field is polymorphic across the live tenant (string
+       label vs int milliseconds vs empty object).
+    -}
+    , timeframe : Maybe Encode.Value
+    , schedule : Maybe Schedule
+    }
+
+
+{-| Outcome of an [`insert`](#insert) call: a `Dict` keyed by the assigned
+`query_id` (e.g. `"qc_1683461522_18780"`) → the echoed definition. Empty
+for a request that was rejected before any item was processed.
+-}
+type alias InsertResult =
+    Dict String InsertedQuery
+
+
+{-| POST /public\_api/v1/scheduled\_queries/insert — insert a batch of
+scheduled XQL queries. The server assigns each query a fresh ID; consult
+the keys of the returned [`InsertResult`](#InsertResult) to delete or
+manage them later.
+-}
+insert : InsertArgs -> Request InsertResult
+insert args =
+    Request.post
+        [ "public_api", "v1", "scheduled_queries", "insert" ]
+        (Encode.object
+            [ ( "request_data", Encode.list encodeQueryDefinition args.queries ) ]
+        )
+        (reply insertResultDecoder)
+
+
+
+-- DELETE
+
+
+{-| Arguments to [`delete`](#delete). `ids` may be the assigned `query_id`
+strings or the human-readable `query_definition_name` values; the API
+accepts either.
+-}
+type alias DeleteArgs =
+    { ids : List String
+    }
+
+
+{-| Per-id outcome inside [`DeleteResult`](#DeleteResult). `Deleted` is the
+server's `true` reply; `DeleteFailed` carries the human-readable rejection
+reason.
+-}
+type DeleteOutcome
+    = Deleted
+    | DeleteFailed String
+
+
+{-| Outcome of a [`delete`](#delete) call: a `Dict` keyed by the same
+`ids` the caller submitted → success/failure.
+-}
+type alias DeleteResult =
+    Dict String DeleteOutcome
+
+
+{-| POST /public\_api/v1/scheduled\_queries/delete — remove scheduled
+queries by id or by name.
+-}
+delete : DeleteArgs -> Request DeleteResult
+delete args =
+    Request.post
+        [ "public_api", "v1", "scheduled_queries", "delete" ]
+        (Encode.object
+            [ ( "request_data", Encode.list Encode.string args.ids ) ]
+        )
+        (reply deleteResultDecoder)
+
+
+
+-- INSERT/DELETE ENCODERS
+
+
+encodeQueryDefinition : QueryDefinition -> Encode.Value
+encodeQueryDefinition q =
+    Encode.object
+        [ ( "query_definition_name", Encode.string q.name )
+        , ( "xql", Encode.string q.xql )
+        , ( "timeframe"
+          , Encode.object [ ( "relativeTime", Encode.int q.relativeTimeMs ) ]
+          )
+        , ( "schedule", encodeScheduleSpec q.schedule )
+        ]
+
+
+encodeScheduleSpec : ScheduleSpec -> Encode.Value
+encodeScheduleSpec spec =
+    case spec of
+        OneShot { runAtMs } ->
+            Encode.object
+                [ ( "trigger_type", Encode.string "date" )
+                , ( "run_date", Encode.int runAtMs )
+                ]
+
+        Cron cron ->
+            Encode.object
+                (( "trigger_type", Encode.string "cron" )
+                    :: List.filterMap identity
+                        [ Maybe.map (\v -> ( "start_date", Encode.int v )) cron.startDate
+                        , Maybe.map (\v -> ( "end_date", Encode.int v )) cron.endDate
+                        , Maybe.map (\v -> ( "hour", Encode.string v )) cron.hour
+                        , Maybe.map (\v -> ( "minute", Encode.string v )) cron.minute
+                        , Maybe.map (\v -> ( "second", Encode.string v )) cron.second
+                        , Maybe.map (\v -> ( "day_of_week", Encode.string v )) cron.dayOfWeek
+                        , Maybe.map (\v -> ( "week", Encode.string v )) cron.week
+                        , Maybe.map (\v -> ( "month", Encode.string v )) cron.month
+                        ]
+                )
+
+
+
+-- INSERT/DELETE DECODERS
+
+
+insertResultDecoder : Decoder InsertResult
+insertResultDecoder =
+    Decode.dict insertedQueryDecoder
+
+
+insertedQueryDecoder : Decoder InsertedQuery
+insertedQueryDecoder =
+    Decode.map4 InsertedQuery
+        (optionalField "query_definition_name" Decode.string)
+        (optionalField "xql" Decode.string)
+        {- Decoder escape: timeframe selector echoed verbatim — see the
+           field-level comment on InsertedQuery.
+        -}
+        (optionalField "timeframe" Decode.value)
+        (optionalField "schedule" scheduleDecoder)
+
+
+deleteResultDecoder : Decoder DeleteResult
+deleteResultDecoder =
+    Decode.dict deleteOutcomeDecoder
+
+
+deleteOutcomeDecoder : Decoder DeleteOutcome
+deleteOutcomeDecoder =
+    Decode.oneOf
+        [ Decode.bool
+            |> Decode.map
+                (\b ->
+                    if b then
+                        Deleted
+
+                    else
+                        DeleteFailed "false"
+                )
+        , Decode.string |> Decode.map DeleteFailed
+        ]

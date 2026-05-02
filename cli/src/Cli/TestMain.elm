@@ -527,6 +527,12 @@ run stamp config endpoint =
         Commands.XqlLibraryDelete _ ->
             skip
 
+        Commands.ScheduledQueriesInsert _ ->
+            skip
+
+        Commands.ScheduledQueriesDelete _ ->
+            skip
+
         Commands.ScheduledQueriesList args ->
             typedAssert (ScheduledQueries.list args)
                 (\r ->

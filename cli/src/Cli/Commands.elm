@@ -52,6 +52,8 @@ type Endpoint
     | XqlLookupsGetData Xql.LookupGetArgs
     | XqlLookupsRemoveData Xql.LookupRemoveArgs
     | ScheduledQueriesList ScheduledQueries.SearchArgs
+    | ScheduledQueriesInsert ScheduledQueries.InsertArgs
+    | ScheduledQueriesDelete ScheduledQueries.DeleteArgs
     | IndicatorsGet Indicators.SearchArgs
     | IndicatorsInsert Indicators.InsertArgs
     | IndicatorsDelete Indicators.DeleteArgs
@@ -164,6 +166,12 @@ argvToEndpoint args =
         "scheduled-queries" :: "list" :: rest ->
             parseStandardSearch rest
                 |> Result.map (\sa -> ScheduledQueriesList (toScheduledQueriesArgs sa))
+
+        "scheduled-queries" :: "insert" :: rest ->
+            parseScheduledQueriesInsert rest
+
+        "scheduled-queries" :: "delete" :: rest ->
+            parseScheduledQueriesDelete rest
 
         "indicators" :: "get" :: rest ->
             parseStandardSearch rest
@@ -503,6 +511,69 @@ parseLookupsRemove args =
             )
 
 
+parseScheduledQueriesInsert : List String -> Result String Endpoint
+parseScheduledQueriesInsert args =
+    splitArgs [] args
+        |> Result.andThen
+            (\( positionals, flags ) ->
+                case positionals of
+                    [ name, xql ] ->
+                        Result.map2
+                            (\rel runAt ->
+                                ScheduledQueriesInsert
+                                    { queries =
+                                        [ { name = name
+                                          , xql = xql
+                                          , relativeTimeMs = rel
+                                          , schedule = ScheduledQueries.OneShot { runAtMs = runAt }
+                                          }
+                                        ]
+                                    }
+                            )
+                            (parseRequiredInt "--relative" flags)
+                            (parseRequiredInt "--run-at" flags)
+
+                    _ ->
+                        Err "scheduled-queries insert: expected two positional arguments <NAME> <XQL>"
+            )
+
+
+parseScheduledQueriesDelete : List String -> Result String Endpoint
+parseScheduledQueriesDelete args =
+    splitArgs [] args
+        |> Result.andThen
+            (\( positionals, flags ) ->
+                if not (List.isEmpty positionals) then
+                    Err ("scheduled-queries delete: unexpected positional arguments: " ++ String.join " " positionals)
+
+                else
+                    let
+                        ids =
+                            allFlagValues "--id" flags
+                    in
+                    if List.isEmpty ids then
+                        Err "scheduled-queries delete: needs at least one --id"
+
+                    else
+                        Ok (ScheduledQueriesDelete { ids = ids })
+            )
+
+
+parseRequiredInt : String -> List ( String, Maybe String ) -> Result String Int
+parseRequiredInt name flags =
+    case flagValue name flags of
+        Nothing ->
+            Err (name ++ ": required")
+
+        Just s ->
+            case String.toInt s of
+                Just n ->
+                    Ok n
+
+                Nothing ->
+                    Err (name ++ ": expected integer, got " ++ s)
+
+
 parseXqlLibraryInsert : List String -> Result String Endpoint
 parseXqlLibraryInsert args =
     splitArgs [ "--override" ] args
@@ -549,7 +620,7 @@ parseXqlLibraryDelete args =
                         ( [], _ ) ->
                             Ok (XqlLibraryDelete { criteria = Xql.ByTags tags })
 
-                        ( _, _ ) ->
+                        _ ->
                             Err "xql-library delete: --name and --tag are mutually exclusive"
             )
 
@@ -1205,6 +1276,12 @@ endpointName endpoint =
         ScheduledQueriesList _ ->
             "scheduled-queries list"
 
+        ScheduledQueriesInsert _ ->
+            "scheduled-queries insert"
+
+        ScheduledQueriesDelete _ ->
+            "scheduled-queries delete"
+
         IndicatorsGet _ ->
             "indicators get"
 
@@ -1405,6 +1482,10 @@ usage args =
             , "    --name N                                    Repeatable; delete by name"
             , "    --tag T                                     Repeatable; delete by tag (mutually exclusive with --name)"
             , "  cortex scheduled-queries list               List scheduled queries"
+            , "  cortex scheduled-queries insert <NAME> <XQL>"
+            , "    --relative <MS>                             Required; rolling window size in epoch-ms"
+            , "    --run-at <MS>                               Required; one-shot trigger time in epoch-ms"
+            , "  cortex scheduled-queries delete --id <ID>   Repeatable; query_id or definition name"
             , ""
             , "  cortex xql query <QUERY> [flags]            Start an XQL query; prints query_id"
             , "    --poll                                      Poll until SUCCESS/FAIL, print results"
