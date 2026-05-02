@@ -37,13 +37,19 @@ cortex_post() {
 
 # cleanup_register <path> <json-body>
 #
-# Append a delete call to the per-file cleanup queue. Replayed in LIFO
+# Append a delete call to the per-test cleanup queue. Replayed in LIFO
 # order by cleanup_drain (called from teardown). Use this in single-test
 # round-trips where create+delete live in one @test - if an assertion
 # fails between them, teardown still fires the delete.
+#
+# Scoped to BATS_TEST_TMPDIR (per-test) rather than BATS_FILE_TMPDIR
+# because BATS >= 1.7 parallelises tests within a file by default; a
+# shared per-file queue would race across concurrent tests, with one
+# test's teardown draining another test's still-needed cleanups before
+# the owning test finishes its own delete.
 cleanup_register() {
-    : "${BATS_FILE_TMPDIR:?BATS_FILE_TMPDIR unset - bats 1.7+ required}"
-    local queue="$BATS_FILE_TMPDIR/cleanup-queue"
+    : "${BATS_TEST_TMPDIR:?BATS_TEST_TMPDIR unset - bats 1.7+ required}"
+    local queue="$BATS_TEST_TMPDIR/cleanup-queue"
     # tab-separated: path \t body. body is base64'd to survive newlines.
     printf '%s\t%s\n' "$1" "$(printf '%s' "${2:-}" | base64)" >> "$queue"
 }
@@ -54,7 +60,7 @@ cleanup_register() {
 # failed delete does not block the rest. Tests should call this from
 # teardown(); it is a no-op when the queue is empty.
 cleanup_drain() {
-    local queue="${BATS_FILE_TMPDIR:-}/cleanup-queue"
+    local queue="${BATS_TEST_TMPDIR:-}/cleanup-queue"
     [[ -f "$queue" ]] || return 0
     local path body_b64 body
     while IFS=$'\t' read -r path body_b64; do

@@ -890,4 +890,8 @@ libraryDeleteResultDecoder =
     Decode.map3 LibraryDeleteResult
         (Decode.oneOf [ Decode.field "queries_count" Decode.int, Decode.succeed 0 ])
         (optionalList "xql_query_names" Decode.string)
+        {- Decoder escape: per-spec error objects are free-form `object[]`
+           with no inner schema; preserved verbatim until a sample drives
+           a typed decoder.
+        -}
         (optionalList "errors" Decode.value)
