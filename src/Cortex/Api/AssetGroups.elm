@@ -10,7 +10,7 @@ module Cortex.Api.AssetGroups exposing
 
 -}
 
-import Cortex.Decode exposing (andMap, optionalList, reply)
+import Cortex.Decode exposing (andMap, optionalField, optionalList, reply)
 import Cortex.Request as Request exposing (Request)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
@@ -132,8 +132,3 @@ filterPartDecoder =
         (optionalField "render_type" Decode.string)
         (optionalField "entity_map" Decode.string)
         (optionalField "dml_type" Decode.string)
-
-
-optionalField : String -> Decoder a -> Decoder (Maybe a)
-optionalField name d =
-    Decode.maybe (Decode.field name d)

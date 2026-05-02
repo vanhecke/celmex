@@ -12,7 +12,7 @@ module Cortex.Api.ScheduledQueries exposing
 
 -}
 
-import Cortex.Decode exposing (andMap, reply)
+import Cortex.Decode exposing (andMap, optionalField, reply)
 import Cortex.Query as Query exposing (Filter, Range, Sort, Timeframe)
 import Cortex.Request as Request exposing (Request)
 import Cortex.RequestData as RequestData
@@ -178,8 +178,3 @@ scheduleDecoder =
         |> andMap (optionalField "day_of_week" Decode.string)
         |> andMap (optionalField "week" Decode.string)
         |> andMap (optionalField "month" Decode.string)
-
-
-optionalField : String -> Decoder a -> Decoder (Maybe a)
-optionalField name d =
-    Decode.maybe (Decode.field name d)

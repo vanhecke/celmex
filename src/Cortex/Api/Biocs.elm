@@ -12,7 +12,7 @@ module Cortex.Api.Biocs exposing
 
 -}
 
-import Cortex.Decode exposing (andMap, optionalList)
+import Cortex.Decode exposing (andMap, optionalField, optionalList)
 import Cortex.Query as Query exposing (Filter, Range, Sort, Timeframe)
 import Cortex.Request as Request exposing (Request)
 import Cortex.RequestData as RequestData
@@ -131,8 +131,3 @@ biocDecoder =
         |> andMap (optionalList "mitre_tactic_id_and_name" Decode.string)
         |> andMap (optionalList "mitre_technique_id_and_name" Decode.string)
         |> andMap (optionalField "indicator" Decode.value)
-
-
-optionalField : String -> Decoder a -> Decoder (Maybe a)
-optionalField name d =
-    Decode.maybe (Decode.field name d)

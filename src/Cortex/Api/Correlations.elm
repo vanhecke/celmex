@@ -13,7 +13,7 @@ schedule or in real time.
 
 -}
 
-import Cortex.Decode exposing (andMap, optionalList)
+import Cortex.Decode exposing (andMap, optionalField, optionalList)
 import Cortex.Query as Query exposing (Filter, Range, Sort, Timeframe)
 import Cortex.Request as Request exposing (Request)
 import Cortex.RequestData as RequestData
@@ -166,8 +166,3 @@ correlationDecoder =
         |> andMap (optionalField "investigation_query_link" Decode.string)
         |> andMap (optionalField "drilldown_query_timeframe" Decode.string)
         |> andMap (optionalField "mapping_strategy" Decode.string)
-
-
-optionalField : String -> Decoder a -> Decoder (Maybe a)
-optionalField name d =
-    Decode.maybe (Decode.field name d)

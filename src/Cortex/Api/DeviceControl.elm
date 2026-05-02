@@ -11,7 +11,7 @@ device (USB stick, optical drive, etc.) was blocked by an endpoint policy.
 
 -}
 
-import Cortex.Decode exposing (reply)
+import Cortex.Decode exposing (andMap, optionalField, reply)
 import Cortex.Request as Request exposing (Request)
 import Json.Decode as Decode exposing (Decoder)
 
@@ -90,13 +90,3 @@ violationDecoder =
         |> andMap (optionalField "product" Decode.string)
         |> andMap (optionalField "product_id" Decode.string)
         |> andMap (optionalField "serial" Decode.string)
-
-
-optionalField : String -> Decoder a -> Decoder (Maybe a)
-optionalField name d =
-    Decode.maybe (Decode.field name d)
-
-
-andMap : Decoder a -> Decoder (a -> b) -> Decoder b
-andMap =
-    Cortex.Decode.andMap

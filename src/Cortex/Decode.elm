@@ -1,14 +1,14 @@
-module Cortex.Decode exposing (reply, optionalList, andMap)
+module Cortex.Decode exposing (reply, optionalField, optionalList, andMap)
 
 {-| Decoder helpers shared across `Cortex.Api.*` modules.
 
 The Cortex Advanced API consistently wraps responses in a `{"reply": ...}`
 envelope, several response shapes return lists that may be omitted when
 empty, and pipeline-style decoders need an `andMap` once `Json.Decode.map8`
-runs out of slots. Centralising these three primitives here keeps the
-per-API modules focused on their own shapes.
+runs out of slots. Centralising these primitives here keeps the per-API
+modules focused on their own shapes.
 
-@docs reply, optionalList, andMap
+@docs reply, optionalField, optionalList, andMap
 
 -}
 
@@ -20,6 +20,15 @@ import Json.Decode as Decode exposing (Decoder)
 reply : Decoder a -> Decoder a
 reply inner =
     Decode.field "reply" inner
+
+
+{-| Decode a field that may be absent, returning `Maybe`. Equivalent to
+`Decode.maybe (Decode.field name d)` but reads more naturally in
+pipeline-style decoders.
+-}
+optionalField : String -> Decoder a -> Decoder (Maybe a)
+optionalField name d =
+    Decode.maybe (Decode.field name d)
 
 
 {-| Decode a list field, defaulting to the empty list when the field is absent.

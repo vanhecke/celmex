@@ -21,7 +21,7 @@ Two endpoints:
 
 -}
 
-import Cortex.Decode exposing (andMap, optionalList, reply)
+import Cortex.Decode exposing (andMap, optionalField, optionalList, reply)
 import Cortex.Request as Request exposing (Request)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
@@ -176,8 +176,3 @@ exceptionRuleDecoder =
         |> andMap (optionalList "profile_ids" Decode.int)
         |> andMap (optionalList "associated_targets" Decode.string)
         |> andMap (optionalField "is_in_user_scope" Decode.bool)
-
-
-optionalField : String -> Decoder a -> Decoder (Maybe a)
-optionalField name d =
-    Decode.maybe (Decode.field name d)

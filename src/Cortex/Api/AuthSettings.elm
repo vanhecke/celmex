@@ -17,7 +17,7 @@ issuer, SSO URL, and attribute mappings.
 
 -}
 
-import Cortex.Decode exposing (andMap, reply)
+import Cortex.Decode exposing (andMap, optionalField, reply)
 import Cortex.Request as Request exposing (Request)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
@@ -141,8 +141,3 @@ advancedSettingsDecoder =
         (optionalField "relay_state" Decode.string)
         (optionalField "service_provider_private_key" Decode.string)
         (optionalField "service_provider_public_cert" Decode.string)
-
-
-optionalField : String -> Decoder a -> Decoder (Maybe a)
-optionalField name d =
-    Decode.maybe (Decode.field name d)

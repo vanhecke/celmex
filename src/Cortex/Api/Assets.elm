@@ -30,7 +30,7 @@ module Cortex.Api.Assets exposing
 
 -}
 
-import Cortex.Decode exposing (andMap, optionalList, reply)
+import Cortex.Decode exposing (andMap, optionalField, optionalList, reply)
 import Cortex.Query as Query exposing (Filter, Range, Sort, Timeframe)
 import Cortex.Request as Request exposing (Request)
 import Cortex.RequestData as RequestData
@@ -649,8 +649,3 @@ lastAssessmentDecoder =
     Decode.map2 LastAssessment
         (Decode.maybe (Decode.field "status" Decode.bool))
         (Decode.maybe (Decode.field "time" Decode.int))
-
-
-optionalField : String -> Decoder a -> Decoder (Maybe a)
-optionalField name d =
-    Decode.maybe (Decode.field name d)

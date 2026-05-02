@@ -12,7 +12,7 @@ module Cortex.Api.Cases exposing
 
 -}
 
-import Cortex.Decode exposing (andMap, optionalList, reply)
+import Cortex.Decode exposing (andMap, optionalField, optionalList, reply)
 import Cortex.Query as Query exposing (Filter, Range, Sort, Timeframe)
 import Cortex.Request as Request exposing (Request)
 import Cortex.RequestData as RequestData
@@ -171,8 +171,3 @@ caseDecoder =
         |> andMap (optionalList "mitre_tactics_ids_and_names" Decode.string)
         |> andMap (optionalList "mitre_techniques_ids_and_names" Decode.string)
         |> andMap (optionalField "custom_fields" Decode.value)
-
-
-optionalField : String -> Decoder a -> Decoder (Maybe a)
-optionalField name d =
-    Decode.maybe (Decode.field name d)

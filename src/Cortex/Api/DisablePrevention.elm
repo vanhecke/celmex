@@ -19,7 +19,7 @@ Three endpoints:
 
 -}
 
-import Cortex.Decode exposing (andMap, optionalList, reply)
+import Cortex.Decode exposing (andMap, optionalField, optionalList, reply)
 import Cortex.Request as Request exposing (Request)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
@@ -149,8 +149,3 @@ moduleDecoder =
         (optionalField "description" Decode.string)
         (optionalField "profile_type" Decode.string)
         (optionalField "conditions_definition" Decode.value)
-
-
-optionalField : String -> Decoder a -> Decoder (Maybe a)
-optionalField name d =
-    Decode.maybe (Decode.field name d)
