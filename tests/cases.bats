@@ -1,5 +1,7 @@
 #!/usr/bin/env bats
 
+bats_require_minimum_version 1.5.0
+
 setup() {
     load test_helper/common
 }
@@ -43,5 +45,34 @@ setup() {
 
 @test "cases search --filter unknown operator exits non-zero" {
     run "$CORTEX" cases search --filter severity=unknown=high
+    [ "$status" -ne 0 ]
+}
+
+first_case_id() {
+    "$CORTEX" cases search 2>/dev/null \
+        | jq -r '.DATA[0].case_id // empty'
+}
+
+@test "cases artifacts returns top-level JSON array of case artifacts" {
+    case_id="$(first_case_id)"
+    [ -n "$case_id" ] || skip "no cases on this tenant"
+    run "$CORTEX" cases artifacts "$case_id"
+    [ "$status" -eq 0 ]
+    echo "$output" | jq -e 'type == "array"' > /dev/null
+    if [ "$(echo "$output" | jq 'length')" -gt 0 ]; then
+        echo "$output" | jq -e '.[0].case_id | type == "number"' > /dev/null
+        echo "$output" | jq -e '.[0] | has("file_artifacts") and has("network_artifacts")' > /dev/null
+    fi
+}
+
+@test "cases artifacts typed decode succeeds" {
+    case_id="$(first_case_id)"
+    [ -n "$case_id" ] || skip "no cases on this tenant"
+    run "$CORTEX_TEST" cases artifacts "$case_id"
+    [ "$status" -eq 0 ]
+}
+
+@test "cases artifacts non-numeric id exits non-zero" {
+    run --separate-stderr "$CORTEX" cases artifacts not-a-number
     [ "$status" -ne 0 ]
 }

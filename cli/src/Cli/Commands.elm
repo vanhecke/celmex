@@ -12,6 +12,7 @@ import Cortex.Api.Biocs as Biocs
 import Cortex.Api.Cases as Cases
 import Cortex.Api.Correlations as Correlations
 import Cortex.Api.Endpoints as Endpoints
+import Cortex.Api.Entries as Entries
 import Cortex.Api.Indicators as Indicators
 import Cortex.Api.Issues as Issues
 import Cortex.Api.Quarantine as Quarantine
@@ -40,6 +41,7 @@ type Endpoint
     | AttackSurfaceGetRules
     | XqlGetQuota
     | XqlGetDatasets
+    | XqlGetCreatedDatasets
     | XqlLibraryGet
     | XqlLibraryInsert Xql.LibraryInsertArgs
     | XqlLibraryDelete Xql.LibraryDeleteArgs
@@ -85,12 +87,15 @@ type Endpoint
     | RiskUsers
     | RiskHosts
     | CasesSearch Cases.SearchArgs
+    | CasesArtifacts Int
+    | EntriesGet Entries.GetArgs
     | IssuesSchema
     | DisablePreventionFetch
     | DisablePreventionFetchInjection
     | DisablePreventionGetModules String
     | AssetsList
     | AssetsSchema
+    | AssetsRawFields String
     | AssetsExternalServices Assets.SearchArgs
     | AssetsInternetExposures Assets.SearchArgs
     | AssetsIpRanges Assets.SearchArgs
@@ -271,6 +276,14 @@ argvToEndpoint args =
             parseStandardSearch rest
                 |> Result.map (\sa -> CasesSearch (toCasesArgs sa))
 
+        [ "cases", "artifacts", id ] ->
+            String.toInt id
+                |> Result.fromMaybe ("cases artifacts: <CASE_ID> must be an integer, got: " ++ id)
+                |> Result.map CasesArtifacts
+
+        [ "entries", "get", id ] ->
+            Ok (EntriesGet (Entries.defaultGetArgs id))
+
         [ "issues", "schema" ] ->
             Ok IssuesSchema
 
@@ -288,6 +301,9 @@ argvToEndpoint args =
 
         [ "assets", "schema" ] ->
             Ok AssetsSchema
+
+        [ "assets", "raw-fields", id ] ->
+            Ok (AssetsRawFields id)
 
         "assets" :: "external-services" :: rest ->
             parseStandardSearch rest
@@ -336,6 +352,9 @@ parseXql sub =
 
         [ "get-datasets" ] ->
             Ok XqlGetDatasets
+
+        [ "get-created-datasets" ] ->
+            Ok XqlGetCreatedDatasets
 
         "query" :: rest ->
             parseXqlQueryCmd rest
@@ -1240,6 +1259,9 @@ endpointName endpoint =
         XqlGetDatasets ->
             "xql get-datasets"
 
+        XqlGetCreatedDatasets ->
+            "xql get-created-datasets"
+
         XqlLibraryGet ->
             "xql-library get"
 
@@ -1375,6 +1397,12 @@ endpointName endpoint =
         CasesSearch _ ->
             "cases search"
 
+        CasesArtifacts _ ->
+            "cases artifacts"
+
+        EntriesGet _ ->
+            "entries get"
+
         IssuesSchema ->
             "issues schema"
 
@@ -1392,6 +1420,9 @@ endpointName endpoint =
 
         AssetsSchema ->
             "assets schema"
+
+        AssetsRawFields _ ->
+            "assets raw-fields"
 
         AssetsExternalServices _ ->
             "assets external-services"
@@ -1474,6 +1505,7 @@ usage args =
             , ""
             , "  cortex xql get-quota                        Get XQL query quota"
             , "  cortex xql get-datasets                     List XQL datasets"
+            , "  cortex xql get-created-datasets             List user-created XQL datasets (XSIAM Notebook)"
             , "  cortex xql-library get                      List XQL library queries"
             , "  cortex xql-library insert <NAME> <QUERY>    Insert or upsert a saved XQL query"
             , "    --override                                  Overwrite if name already exists"
@@ -1518,6 +1550,8 @@ usage args =
             , "  cortex issues search                        Search issues"
             , "  cortex issues schema                        Get issue field schema"
             , "  cortex cases search                         Search cases"
+            , "  cortex cases artifacts <CASE_ID>            List network and file artifacts for a case"
+            , "  cortex entries get <ID>                     Get War Room entries (prepend CASE- for case IDs)"
             , ""
             , "  cortex risk score <id>                      Get risk score for a user or endpoint"
             , "  cortex risk users                           List highest-risk users"
@@ -1530,6 +1564,7 @@ usage args =
             , ""
             , "  cortex assets list                          List assets"
             , "  cortex assets schema                        Get asset inventory schema"
+            , "  cortex assets raw-fields <ASSET_ID>         Get raw provider-native fields for an asset"
             , "  cortex assets external-services             List external services"
             , "  cortex assets internet-exposures            List internet exposures"
             , "  cortex assets ip-ranges                     List external IP ranges"

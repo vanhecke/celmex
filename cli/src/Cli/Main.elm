@@ -18,6 +18,7 @@ import Cortex.Api.DeviceControl as DeviceControl
 import Cortex.Api.DisablePrevention as DisablePrevention
 import Cortex.Api.Distributions as Distributions
 import Cortex.Api.Endpoints as Endpoints
+import Cortex.Api.Entries as Entries
 import Cortex.Api.Healthcheck as Healthcheck
 import Cortex.Api.Indicators as Indicators
 import Cortex.Api.Issues as Issues
@@ -289,6 +290,9 @@ run stamp config endpoint =
         Commands.XqlGetDatasets ->
             ( Idle, raw Xql.getDatasets )
 
+        Commands.XqlGetCreatedDatasets ->
+            ( Idle, raw Xql.getCreatedDatasets )
+
         Commands.XqlLibraryGet ->
             ( Idle, raw Xql.getLibrary )
 
@@ -455,6 +459,12 @@ run stamp config endpoint =
         Commands.CasesSearch args ->
             ( Idle, raw (Cases.search args) )
 
+        Commands.CasesArtifacts caseId ->
+            ( Idle, raw (Cases.getArtifacts caseId) )
+
+        Commands.EntriesGet args ->
+            ( Idle, raw (Entries.get args) )
+
         Commands.IssuesSchema ->
             ( Idle, raw Issues.schema )
 
@@ -472,6 +482,9 @@ run stamp config endpoint =
 
         Commands.AssetsSchema ->
             ( Idle, raw Assets.getSchema )
+
+        Commands.AssetsRawFields id ->
+            ( Idle, raw (Assets.getRawFields id) )
 
         Commands.AssetsExternalServices args ->
             ( Idle, raw (Assets.getExternalServices args) )

@@ -44,6 +44,23 @@ register_xql_library_cleanup() {
     [ "$status" -eq 0 ]
 }
 
+@test "xql get-created-datasets returns valid JSON or skips on unsupported tenant" {
+    run "$CORTEX" xql get-created-datasets
+    if [[ "$output" == *"HTTP 402"* ]] || [[ "$output" == *"HTTP 500"* ]]; then
+        skip "tenant does not support XSIAM Notebook user datasets"
+    fi
+    [ "$status" -eq 0 ]
+    echo "$output" | jq -e '.datasets | type == "array"' > /dev/null
+}
+
+@test "xql get-created-datasets typed decode succeeds or skips on unsupported tenant" {
+    run "$CORTEX_TEST" xql get-created-datasets
+    if [[ "$output" == *"HTTP 402"* ]] || [[ "$output" == *"HTTP 500"* ]]; then
+        skip "tenant does not support XSIAM Notebook user datasets"
+    fi
+    [ "$status" -eq 0 ]
+}
+
 @test "xql-library get returns valid JSON with xql_queries array" {
     run "$CORTEX" xql-library get
     [ "$status" -eq 0 ]

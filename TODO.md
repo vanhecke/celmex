@@ -17,7 +17,7 @@ Complete inventory of all API endpoints from the OpenAPI specs in `docs/cortex-a
 > Raw total across all 22 spec files: 521. After removing the 2 duplicate files: 341 listed below.
 
 <!-- BEGIN AUTO: progress -->
-**Progress:** 74/341 endpoints implemented | 170 View | 171 Edit
+**Progress:** 78/341 endpoints implemented | 170 View | 171 Edit
 <!-- END AUTO -->
 
 
@@ -89,7 +89,7 @@ Source: `cortex-platform-papi.json`
 | ✓ | POST | `/public_api/v1/assets/get_vulnerability_tests` | Get vulnerability tests | View | `Cortex.Api.Assets` | `assets vulnerability-tests` | `assets.bats` | ✓ |
 |  | POST | `/public_api/v1/assets/bulk_update_vulnerability_tests` | Bulk Update Vulnerability Tests | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/dataset/define_dataset` | Define an XQL user dataset | Edit |  |  |  |  |
-|  | POST | `/public_api/v1/dataset/get_created_datasets` | Get created XQL user datasets | View |  |  |  |  |
+| ✓ | POST | `/public_api/v1/dataset/get_created_datasets` | Get created XQL user datasets (tenant-unsupported) | View | `Cortex.Api.Xql` | `xql get-created-datasets` | `xql.bats` | — |
 |  | POST | `/public_api/v1/dataset/delete_dataset` | Delete an XQL user dataset | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/xql/add_dataset` | Add Dataset | Edit |  |  |  |  |
 |  | POST | `/public_api/v2/xql/delete_dataset` | Delete a dataset | Edit |  |  |  |  |
@@ -148,12 +148,12 @@ Source: `cortex-platform-papi.json`
 | ✓ | POST | `/public_api/v1/issue/schema` | Retrieve issue schema (tenant-unsupported on this fixture) | View | `Cortex.Api.Issues` | `issues schema` | `issues.bats` | ✓ |
 | ✓ | POST | `/public_api/v1/case/search` | Retrieve Cases based on filters | View | `Cortex.Api.Cases` | `cases search` | `cases.bats` | ✓ |
 |  | POST | `/public_api/v1/case/update/{case-id}` | Update existing case | Edit |  |  |  |  |
-|  | GET | `/public_api/v1/case/artifacts/{case-id}` | Retrieve Case Artifacts by Case ID | View |  |  |  |  |
-|  | POST | `/public_api/v1/entries/get` | Get War Room entries | View |  |  |  |  |
+| ✓ | GET | `/public_api/v1/case/artifacts/{case-id}` | Retrieve Case Artifacts by Case ID | View | `Cortex.Api.Cases` | `cases artifacts` | `cases.bats` | ✓ |
+| ✓ | POST | `/public_api/v1/entries/get` | Get War Room entries | View | `Cortex.Api.Entries` | `entries get` | `entries.bats` | ✓ |
 |  | POST | `/public_api/v1/entries/insert` | Add War Room entries | Edit |  |  |  |  |
 | ✓ | POST | `/public_api/v1/assets` | Get all or filtered assets | View | `Cortex.Api.Assets` | `assets list` | `assets.bats` | ✓ |
 |  | GET | `/public_api/v1/assets/{id}` | Get asset by ID | View |  |  |  |  |
-|  | GET | `/public_api/v1/assets/{id}/raw_fields` | Get raw fields of asset by ID | View |  |  |  |  |
+| ✓ | GET | `/public_api/v1/assets/{id}/raw_fields` | Get raw fields of asset by ID | View | `Cortex.Api.Assets` | `assets raw-fields` | `assets.bats` | ✓ |
 | ✓ | GET | `/public_api/v1/assets/schema` | Get schema of asset inventory | View | `Cortex.Api.Assets` | `assets schema` | `assets.bats` | ✓ |
 |  | GET | `/public_api/v1/assets/enum/{field_name}` | Get enum values of specified field | View |  |  |  |  |
 | ✓ | POST | `/public_api/v1/asset-groups` | Get all or filtered asset groups | View | `Cortex.Api.AssetGroups` | `asset-groups list` | `asset_groups.bats` | ✓ |

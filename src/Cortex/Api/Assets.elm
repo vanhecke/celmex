@@ -8,7 +8,8 @@ module Cortex.Api.Assets exposing
     , VulnerabilityTest, AffectedSoftware, VulnerabilityTestsResponse
     , ExternalWebsite, ExternalWebsitesResponse
     , LastAssessment, WebsitesLastAssessment
-    , list, getSchema
+    , RawFieldsResponse, RawFieldsEntry
+    , list, getSchema, getRawFields
     , getExternalServices, getInternetExposures, getExternalIpRanges
     , getVulnerabilityTests, getExternalWebsites, getWebsitesLastAssessment
     )
@@ -24,7 +25,8 @@ module Cortex.Api.Assets exposing
 @docs VulnerabilityTest, AffectedSoftware, VulnerabilityTestsResponse
 @docs ExternalWebsite, ExternalWebsitesResponse
 @docs LastAssessment, WebsitesLastAssessment
-@docs list, getSchema
+@docs RawFieldsResponse, RawFieldsEntry
+@docs list, getSchema, getRawFields
 @docs getExternalServices, getInternetExposures, getExternalIpRanges
 @docs getVulnerabilityTests, getExternalWebsites, getWebsitesLastAssessment
 
@@ -343,6 +345,39 @@ type alias LastAssessment =
 
 
 
+-- RAW FIELDS
+
+
+{-| Top-level envelope returned by [`getRawFields`](#getRawFields).
+-}
+type alias RawFieldsResponse =
+    { data : List RawFieldsEntry
+    , filterCount : Maybe Int
+    , totalCount : Maybe Int
+    }
+
+
+{-| One row of [`RawFieldsResponse`](#RawFieldsResponse)`.data`. Wraps the
+single `xdm.asset.raw_fields` payload — the wrapper is preserved so the
+record can grow if the API later adds peer fields next to the raw map.
+The wire field name uses dot separators (`xdm.asset.raw_fields`),
+matching the rest of the asset namespace; the OpenAPI spec misrenders
+it as `xdm__asset__raw_fields`.
+-}
+type alias RawFieldsEntry =
+    { {- Decoder escape: per-asset-type free-form map of category names
+         (e.g. "Platform Discovery") to nested objects. The top-level
+         categories AND their nested schemas vary entirely per asset
+         type AND per cloud provider/source — no fixed schema can be
+         expressed at the SDK layer. Often `null` for assets without
+         provider-native discovery data (e.g. on-prem agents).
+         Preserved verbatim.
+      -}
+      xdmAssetRawFields : Maybe Encode.Value
+    }
+
+
+
 -- ENDPOINTS
 
 
@@ -362,6 +397,17 @@ getSchema =
     Request.get
         [ "public_api", "v1", "assets", "schema" ]
         (Decode.at [ "reply", "data" ] (Decode.list schemaEntryDecoder))
+
+
+{-| GET /public\_api/v1/assets/{id}/raw\_fields — retrieve the raw,
+provider-native fields for a single asset (the ungrouped JSON the
+discovery source returned, before normalization to the XDM schema).
+-}
+getRawFields : String -> Request RawFieldsResponse
+getRawFields id =
+    Request.get
+        [ "public_api", "v1", "assets", id, "raw_fields" ]
+        (reply rawFieldsResponseDecoder)
 
 
 {-| POST /public\_api/v1/assets/get\_external\_services — externally reachable services.
@@ -653,3 +699,25 @@ lastAssessmentDecoder =
     Decode.map2 LastAssessment
         (Decode.maybe (Decode.field "status" Decode.bool))
         (Decode.maybe (Decode.field "time" Decode.int))
+
+
+rawFieldsResponseDecoder : Decoder RawFieldsResponse
+rawFieldsResponseDecoder =
+    Decode.map3 RawFieldsResponse
+        (Decode.oneOf
+            [ Decode.field "data" (Decode.list rawFieldsEntryDecoder)
+            , Decode.succeed []
+            ]
+        )
+        (Decode.maybe (Decode.at [ "metadata", "filter_count" ] Decode.int))
+        (Decode.maybe (Decode.at [ "metadata", "total_count" ] Decode.int))
+
+
+rawFieldsEntryDecoder : Decoder RawFieldsEntry
+rawFieldsEntryDecoder =
+    Decode.map RawFieldsEntry
+        {- Decoder escape: free-form per-asset map; see RawFieldsEntry doc.
+           Decode.maybe maps a wire `null` to `Nothing` so on-prem assets
+           without provider-native discovery data still satisfy the decoder.
+        -}
+        (Decode.maybe (Decode.field "xdm.asset.raw_fields" Decode.value))

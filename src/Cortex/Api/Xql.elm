@@ -1,6 +1,6 @@
 module Cortex.Api.Xql exposing
     ( Dataset, DatasetRange, Library, LibraryQuery, Quota
-    , getDatasets, getLibrary, getQuota
+    , getCreatedDatasets, getDatasets, getLibrary, getQuota
     , QueryStatus(..), Timeframe(..)
     , StartQueryArgs, GetResultsArgs, QueryResults, StreamArgs
     , startQuery, getQueryResults, getQueryResultsStream
@@ -18,7 +18,7 @@ module Cortex.Api.Xql exposing
 execution (async start/poll), and lookup-dataset row management.
 
 @docs Dataset, DatasetRange, Library, LibraryQuery, Quota
-@docs getDatasets, getLibrary, getQuota
+@docs getCreatedDatasets, getDatasets, getLibrary, getQuota
 @docs QueryStatus, Timeframe
 @docs StartQueryArgs, GetResultsArgs, QueryResults, StreamArgs
 @docs startQuery, getQueryResults, getQueryResultsStream
@@ -388,6 +388,25 @@ getDatasets =
     Request.postEmpty
         [ "public_api", "v1", "xql", "get_datasets" ]
         (reply (Decode.list datasetDecoder))
+
+
+{-| POST /public\_api/v1/dataset/get\_created\_datasets — list the names
+of XQL user datasets created via the Cortex SDK. License-gated to the
+XSIAM Notebook environment; tenants without it return HTTP 402 / 500.
+
+The wire body is the literal `{}` object — **not** the
+`{request_data: {}}` envelope `Request.postEmpty` would emit (the
+adjacent `delete_dataset` endpoint wraps in `request_data`; the
+asymmetry here is intentional per the OpenAPI spec). The response is
+top-level `{datasets: [string]}`, not wrapped in `reply`.
+
+-}
+getCreatedDatasets : Request (List String)
+getCreatedDatasets =
+    Request.post
+        [ "public_api", "v1", "dataset", "get_created_datasets" ]
+        (Encode.object [])
+        (Decode.field "datasets" (Decode.list Decode.string))
 
 
 {-| POST /public\_api/xql\_library/get

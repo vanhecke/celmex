@@ -27,6 +27,7 @@
         "Cortex.Api.DisablePrevention",
         "Cortex.Api.Distributions",
         "Cortex.Api.Endpoints",
+        "Cortex.Api.Entries",
         "Cortex.Api.Healthcheck",
         "Cortex.Api.Indicators",
         "Cortex.Api.Issues",

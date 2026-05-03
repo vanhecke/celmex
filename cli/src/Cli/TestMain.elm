@@ -18,6 +18,7 @@ import Cortex.Api.DeviceControl as DeviceControl
 import Cortex.Api.DisablePrevention as DisablePrevention
 import Cortex.Api.Distributions as Distributions
 import Cortex.Api.Endpoints as Endpoints
+import Cortex.Api.Entries as Entries
 import Cortex.Api.Healthcheck as Healthcheck
 import Cortex.Api.Indicators as Indicators
 import Cortex.Api.Issues as Issues
@@ -472,6 +473,12 @@ run stamp config endpoint =
                             )
                 )
 
+        Commands.XqlGetCreatedDatasets ->
+            -- License-gated to XSIAM Notebook environment; tenants without it
+            -- typically return empty, so a `nonEmpty` assertion would false-fail.
+            -- Bare typed (no checks) catches structural drift only.
+            typedAssert Xql.getCreatedDatasets (\_ -> [])
+
         Commands.XqlLibraryGet ->
             typedAssert Xql.getLibrary
                 (\lib ->
@@ -897,6 +904,39 @@ run stamp config endpoint =
                            )
                 )
 
+        Commands.CasesArtifacts caseId ->
+            typedAssert (Cases.getArtifacts caseId)
+                (\artifacts ->
+                    if List.isEmpty artifacts then
+                        -- a case may legitimately have no artifacts at all
+                        []
+
+                    else
+                        sampleFirst "artifacts"
+                            artifacts
+                            (\ca -> [ positive "caseId" ca.caseId ])
+                )
+
+        Commands.EntriesGet args ->
+            typedAssert (Entries.get args)
+                (\r ->
+                    nonNegative "total" r.total
+                        :: (if List.isEmpty r.data then
+                                -- a case may legitimately have no war-room entries
+                                []
+
+                            else
+                                sampleFirst "data"
+                                    r.data
+                                    (\e ->
+                                        [ nonBlank "id" e.id
+                                        , nonBlank "investigationId" e.investigationId
+                                        , present "category" e.category
+                                        ]
+                                    )
+                           )
+                )
+
         Commands.IssuesSchema ->
             typedAssert Issues.schema
                 (\fields ->
@@ -991,6 +1031,22 @@ run stamp config endpoint =
                                 , nonBlank "dataType" f.dataType
                                 ]
                             )
+                )
+
+        Commands.AssetsRawFields id ->
+            typedAssert (Assets.getRawFields id)
+                (\r ->
+                    [ nonNegative "totalCount" r.totalCount
+                    , nonNegative "filterCount" r.filterCount
+                    ]
+                        ++ (if List.isEmpty r.data then
+                                []
+
+                            else
+                                sampleFirst "data"
+                                    r.data
+                                    (\e -> [ present "xdmAssetRawFields" e.xdmAssetRawFields ])
+                           )
                 )
 
         Commands.AssetsExternalServices args ->

@@ -161,3 +161,22 @@ setup() {
     run "$CORTEX_TEST" assets websites-last-assessment
     [ "$status" -eq 0 ]
 }
+
+first_asset_id() {
+    "$CORTEX" assets list 2>/dev/null | jq -r '.data[0]."xdm.asset.id" // empty'
+}
+
+@test "assets raw-fields returns valid JSON with reply data array" {
+    asset_id="$(first_asset_id)"
+    [ -n "$asset_id" ] || skip "no assets on this tenant"
+    run "$CORTEX" assets raw-fields "$asset_id"
+    [ "$status" -eq 0 ]
+    echo "$output" | jq -e '.data | type == "array"' > /dev/null
+}
+
+@test "assets raw-fields typed decode succeeds" {
+    asset_id="$(first_asset_id)"
+    [ -n "$asset_id" ] || skip "no assets on this tenant"
+    run "$CORTEX_TEST" assets raw-fields "$asset_id"
+    [ "$status" -eq 0 ]
+}
