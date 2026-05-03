@@ -118,6 +118,11 @@ check-docs:
 # Bump both manifests to VERSION in lockstep, commit, tag, push, then publish
 # to both registries. Run this from a clean `main` after `just test` passes.
 #
+# The release commit and tag are signed with the personal 1Password-managed
+# key (`newkey2024`, ~/.ssh/joris_signing.pub) rather than the
+# `claude_signing.pub` key Claude uses for routine commits. Releases are
+# Joris's signature, not Claude's.
+#
 # Important: the FIRST publish to the Elm registry MUST use version 1.0.0 —
 # the registry hard-rejects anything else for an unpublished package.
 #   just publish 1.0.0   # initial
@@ -135,8 +140,8 @@ publish VERSION:
     npm version --no-git-tag-version {{VERSION}}
     sed -i '' 's/"version": "[^"]*"/"version": "{{VERSION}}"/' elm.json
     git add elm.json package.json package-lock.json
-    git commit -m "chore: release {{VERSION}}"
-    git tag {{VERSION}}
+    git -c user.signingkey=/Users/joris/.ssh/joris_signing.pub commit -m "chore: release {{VERSION}}"
+    git -c user.signingkey=/Users/joris/.ssh/joris_signing.pub tag -s {{VERSION}} -m "release {{VERSION}}"
     git push origin main
     git push origin {{VERSION}}
     just publish-elm
