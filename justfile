@@ -105,8 +105,24 @@ publish-elm:
 
 # Publish the CLI to npm. `prepublishOnly` in package.json triggers `just build`
 # so the tarball always contains a freshly-compiled cli/dist/elm.js.
-publish-npm:
+publish-npm: _npm-auth
     npm publish
+
+# Verify npm auth is live, prompt `npm login` if the token is missing/expired.
+# Stale tokens are why `npm publish` returns the misleading 404 on a scope you
+# own — npm collapses 401-on-write to 404. Catching it here keeps `just publish`
+# from getting halfway through (tag pushed, elm published) before noticing.
+_npm-auth:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    if who="$(npm whoami 2>/dev/null)"; then
+        echo "npm: logged in as $who"
+        exit 0
+    fi
+    echo "npm: not authenticated — running 'npm login' (interactive)"
+    npm login
+    who="$(npm whoami)"
+    echo "npm: logged in as $who"
 
 # Pre-flight: verify every exposed Elm module is fully documented. Runs the
 # same strictness check the Elm registry applies at publish time, so doc
@@ -133,6 +149,7 @@ publish VERSION:
     git fetch origin main --quiet
     @[ "$(git rev-parse HEAD)" = "$(git rev-parse origin/main)" ] || { echo "error: local main not in sync with origin/main"; exit 1; }
     @if npm view @vanhecke/celmex@{{VERSION}} version 2>/dev/null | grep -q .; then echo "error: @vanhecke/celmex@{{VERSION}} already published to npm"; exit 1; fi
+    just _npm-auth
     elm-format src/ cli/src/ --validate
     just check-docs
     just review
