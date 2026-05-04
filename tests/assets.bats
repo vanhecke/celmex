@@ -180,3 +180,101 @@ first_asset_id() {
     run "$CORTEX_TEST" assets raw-fields "$asset_id"
     [ "$status" -eq 0 ]
 }
+
+@test "assets get round-trips through assets list" {
+    asset_id="$(first_asset_id)"
+    [ -n "$asset_id" ] || skip "no assets on this tenant"
+    run "$CORTEX" assets get "$asset_id"
+    [ "$status" -eq 0 ]
+    echo "$output" | jq -e '.data | type == "array" and length == 1' > /dev/null
+    echo "$output" | jq -e --arg id "$asset_id" '.data[0]."xdm.asset.id" == $id' > /dev/null
+}
+
+@test "assets get typed decode succeeds" {
+    asset_id="$(first_asset_id)"
+    [ -n "$asset_id" ] || skip "no assets on this tenant"
+    run "$CORTEX_TEST" assets get "$asset_id"
+    [ "$status" -eq 0 ]
+}
+
+@test "assets enum returns NAME/PRETTY_NAME pairs" {
+    run "$CORTEX" assets enum xdm.asset.provider
+    [ "$status" -eq 0 ]
+    echo "$output" | jq -e '.data | type == "array" and length > 0' > /dev/null
+    echo "$output" | jq -e '.data[0].NAME | type == "string" and length > 0' > /dev/null
+    echo "$output" | jq -e '.data[0].PRETTY_NAME | type == "string" and length > 0' > /dev/null
+}
+
+@test "assets enum typed decode succeeds" {
+    run "$CORTEX_TEST" assets enum xdm.asset.provider
+    [ "$status" -eq 0 ]
+}
+
+@test "assets enum on non-enum field exits non-zero" {
+    run "$CORTEX" assets enum xdm.asset.id
+    [ "$status" -ne 0 ]
+}
+
+@test "assets external-service singular returns details array" {
+    run "$CORTEX" assets external-service --id none
+    [ "$status" -eq 0 ]
+    echo "$output" | jq -e '.details | type == "array"' > /dev/null
+}
+
+@test "assets external-service typed decode succeeds" {
+    run "$CORTEX_TEST" assets external-service --id none
+    [ "$status" -eq 0 ]
+}
+
+@test "assets external-service without --id exits non-zero" {
+    run "$CORTEX" assets external-service
+    [ "$status" -ne 0 ]
+}
+
+@test "assets internet-exposure singular returns details array" {
+    run "$CORTEX" assets internet-exposure --id none
+    [ "$status" -eq 0 ]
+    echo "$output" | jq -e '.details | type == "array"' > /dev/null
+}
+
+@test "assets internet-exposure typed decode succeeds" {
+    run "$CORTEX_TEST" assets internet-exposure --id none
+    [ "$status" -eq 0 ]
+}
+
+@test "assets internet-exposure without --id exits non-zero" {
+    run "$CORTEX" assets internet-exposure
+    [ "$status" -ne 0 ]
+}
+
+@test "assets ip-range singular returns details array" {
+    run "$CORTEX" assets ip-range --id none
+    [ "$status" -eq 0 ]
+    echo "$output" | jq -e '.details | type == "array"' > /dev/null
+}
+
+@test "assets ip-range typed decode succeeds" {
+    run "$CORTEX_TEST" assets ip-range --id none
+    [ "$status" -eq 0 ]
+}
+
+@test "assets ip-range without --id exits non-zero" {
+    run "$CORTEX" assets ip-range
+    [ "$status" -ne 0 ]
+}
+
+@test "assets external-website singular returns details array" {
+    run "$CORTEX" assets external-website --id none
+    [ "$status" -eq 0 ]
+    echo "$output" | jq -e '.details | type == "array"' > /dev/null
+}
+
+@test "assets external-website typed decode succeeds" {
+    run "$CORTEX_TEST" assets external-website --id none
+    [ "$status" -eq 0 ]
+}
+
+@test "assets external-website without --id exits non-zero" {
+    run "$CORTEX" assets external-website
+    [ "$status" -ne 0 ]
+}

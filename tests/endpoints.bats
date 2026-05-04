@@ -35,3 +35,26 @@ setup() {
     run "$CORTEX" endpoints list --extra foo=not-json
     [ "$status" -ne 0 ]
 }
+
+@test "endpoints get --id round-trips through endpoints list" {
+    aid="$("$CORTEX" endpoints list --limit 1 | jq -r '.[0].agent_id')"
+    [ -n "$aid" ] && [ "$aid" != "null" ]
+    run "$CORTEX" endpoints get --id "$aid"
+    [ "$status" -eq 0 ]
+    echo "$output" | jq -e --arg id "$aid" '.endpoints | length == 1 and .[0].endpoint_id == $id' > /dev/null
+    echo "$output" | jq -e '.total_count == 1' > /dev/null
+    echo "$output" | jq -e '.result_count == 1' > /dev/null
+    echo "$output" | jq -e '.endpoints[0].endpoint_status | type == "string" and length > 0' > /dev/null
+}
+
+@test "endpoints get typed decode succeeds" {
+    aid="$("$CORTEX" endpoints list --limit 1 | jq -r '.[0].agent_id')"
+    [ -n "$aid" ] && [ "$aid" != "null" ]
+    run "$CORTEX_TEST" endpoints get --id "$aid"
+    [ "$status" -eq 0 ]
+}
+
+@test "endpoints get without --id exits non-zero" {
+    run "$CORTEX" endpoints get
+    [ "$status" -ne 0 ]
+}

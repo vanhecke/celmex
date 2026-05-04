@@ -55,3 +55,26 @@ skip_if_unsupported() {
     run "$CORTEX_TEST" profiles get-policy "$endpoint_id"
     [ "$status" -eq 0 ]
 }
+
+@test "profiles prevention get-modules Malware Windows returns module catalog" {
+    run "$CORTEX" profiles prevention get-modules Malware Windows
+    skip_if_unsupported
+    [ "$status" -eq 0 ]
+    echo "$output" | jq . > /dev/null
+    echo "$output" | jq -e 'type == "array" and length > 0' > /dev/null
+    echo "$output" | jq -e '.[0].id | type == "string"' > /dev/null
+    echo "$output" | jq -e '.[0].profile_type == "Malware"' > /dev/null
+    echo "$output" | jq -e '.[0].platform == "Windows"' > /dev/null
+    echo "$output" | jq -e '.[0].schema | type == "object"' > /dev/null
+}
+
+@test "profiles prevention get-modules typed decode succeeds" {
+    run "$CORTEX_TEST" profiles prevention get-modules Malware Windows
+    skip_if_unsupported
+    [ "$status" -eq 0 ]
+}
+
+@test "profiles prevention get-modules with invalid type fails clearly" {
+    run "$CORTEX" profiles prevention get-modules malware Windows
+    [ "$status" -ne 0 ]
+}

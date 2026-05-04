@@ -17,7 +17,7 @@ Complete inventory of all API endpoints from the OpenAPI specs in `docs/cortex-a
 > Raw total across all 22 spec files: 521. After removing the 2 duplicate files: 341 listed below.
 
 <!-- BEGIN AUTO: progress -->
-**Progress:** 78/341 endpoints implemented | 170 View | 171 Edit
+**Progress:** 87/341 endpoints implemented | 170 View | 171 Edit
 <!-- END AUTO -->
 
 
@@ -72,19 +72,19 @@ Source: `cortex-platform-papi.json`
 | ✓ | POST | `/public_api/v1/rbac/get_roles` | Get Roles | View | `Cortex.Api.Rbac` | `rbac get-roles` | `rbac.bats` | ✓ |
 | ✓ | POST | `/public_api/v1/rbac/get_user_group` | Get User Groups | View | `Cortex.Api.Rbac` | `rbac get-user-groups` | `rbac.bats` | ✓ |
 |  | POST | `/public_api/v1/rbac/set_user_role` | Set a User Role | Edit |  |  |  |  |
-|  | POST | `/public_api/v1/endpoints/get_endpoint` | Get Endpoint | View |  |  |  |  |
+| ✓ | POST | `/public_api/v1/endpoints/get_endpoint` | Get Endpoint | View | `Cortex.Api.Endpoints` | `endpoints get` | `endpoints.bats` | ✓ |
 | ✓ | POST | `/public_api/v1/get_risk_score` | Get Risk Score (tenant-unsupported) | View | `Cortex.Api.Risk` | `risk score` | `risk.bats` | ✓ |
 | ✓ | POST | `/public_api/v1/get_risky_users` | Get Risky Users (tenant-unsupported) | View | `Cortex.Api.Risk` | `risk users` | `risk.bats` | ✓ |
 | ✓ | POST | `/public_api/v1/get_risky_hosts` | Get Risky Hosts (tenant-unsupported) | View | `Cortex.Api.Risk` | `risk hosts` | `risk.bats` | ✓ |
 |  | POST | `/public_api/v1/endpoints/file_retrieval` | Retrieve File | View |  |  |  |  |
 |  | POST | `/public_api/v1/endpoints/isolate` | Isolate Endpoints | Edit |  |  |  |  |
 | ✓ | POST | `/public_api/v1/audits/agents_reports` | Get Audit Agent Report | View | `Cortex.Api.AuditLogs` | `audit-logs agents-reports` | `audit_logs_agents_reports.bats` | ✓ |
-|  | POST | `/public_api/v1/assets/get_external_service` | Get External Service | View |  |  |  |  |
+| ✓ | POST | `/public_api/v1/assets/get_external_service` | Get External Service | View | `Cortex.Api.Assets` | `assets external-service` | `assets.bats` | ✗ |
 | ✓ | POST | `/public_api/v1/assets/get_external_services` | Get All Services | View | `Cortex.Api.Assets` | `assets external-services` | `assets.bats` | ✓ |
 | ✓ | POST | `/public_api/v1/assets/get_assets_internet_exposure` | Get all Internet Exposures | View | `Cortex.Api.Assets` | `assets internet-exposures` | `assets.bats` | ✓ |
-|  | POST | `/public_api/v1/assets/get_asset_internet_exposure` | Get Internet Exposure | View |  |  |  |  |
+| ✓ | POST | `/public_api/v1/assets/get_asset_internet_exposure` | Get Internet Exposure | View | `Cortex.Api.Assets` | `assets internet-exposure` | `assets.bats` | ✗ |
 | ✓ | POST | `/public_api/v1/assets/get_external_ip_address_ranges` | Get all External IP Address Ranges | View | `Cortex.Api.Assets` | `assets ip-ranges` | `assets.bats` | ✓ |
-|  | POST | `/public_api/v1/assets/get_external_ip_address_range` | Get External IP Address Range | View |  |  |  |  |
+| ✓ | POST | `/public_api/v1/assets/get_external_ip_address_range` | Get External IP Address Range | View | `Cortex.Api.Assets` | `assets ip-range` | `assets.bats` | ✗ |
 |  | POST | `/public_api/v1/triage_endpoint` | Initiate Forensics Triage | Edit |  |  |  |  |
 | ✓ | POST | `/public_api/v1/assets/get_vulnerability_tests` | Get vulnerability tests | View | `Cortex.Api.Assets` | `assets vulnerability-tests` | `assets.bats` | ✓ |
 |  | POST | `/public_api/v1/assets/bulk_update_vulnerability_tests` | Bulk Update Vulnerability Tests | Edit |  |  |  |  |
@@ -102,9 +102,9 @@ Source: `cortex-platform-papi.json`
 |  | POST | `/public_api/v1/authentication-settings/update` | Update authentication settings | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/authentication-settings/delete` | Delete authentication settings by domain | Edit |  |  |  |  |
 | ✓ | POST | `/public_api/v1/authentication-settings/get/settings` | Get authentication settings for all configured domains | View | `Cortex.Api.AuthSettings` | `authentication-settings get` | `authentication_settings.bats` | ✓ |
-|  | POST | `/public_api/v1/authentication-settings/get/metadata` | Get IdP metadata | View |  |  |  |  |
+| ✓ | POST | `/public_api/v1/authentication-settings/get/metadata` | Get IdP metadata | View | `Cortex.Api.AuthSettings` | `authentication-settings get-metadata` | `authentication_settings.bats` | ✓ |
 |  | POST | `/public_api/v1/asm_management/upload_asm_data` | Upload assets to the inventory | Edit |  |  |  |  |
-|  | POST | `/public_api/v1/assets/get_external_website` | Get Website Details | View |  |  |  |  |
+| ✓ | POST | `/public_api/v1/assets/get_external_website` | Get Website Details | View | `Cortex.Api.Assets` | `assets external-website` | `assets.bats` | ✗ |
 | ✓ | POST | `/public_api/v1/assets/get_external_websites` | Get all Websites | View | `Cortex.Api.Assets` | `assets external-websites` | `assets.bats` | ✓ |
 | ✓ | POST | `/public_api/v1/assets/get_external_websites/last_external_assessment` | Get Websites Last Assessment | View | `Cortex.Api.Assets` | `assets websites-last-assessment` | `assets.bats` | ✓ |
 |  | POST | `/public_api/v1/integrations/syslog/create` | Create a syslog integration | Edit |  |  |  |  |
@@ -152,10 +152,10 @@ Source: `cortex-platform-papi.json`
 | ✓ | POST | `/public_api/v1/entries/get` | Get War Room entries | View | `Cortex.Api.Entries` | `entries get` | `entries.bats` | ✓ |
 |  | POST | `/public_api/v1/entries/insert` | Add War Room entries | Edit |  |  |  |  |
 | ✓ | POST | `/public_api/v1/assets` | Get all or filtered assets | View | `Cortex.Api.Assets` | `assets list` | `assets.bats` | ✓ |
-|  | GET | `/public_api/v1/assets/{id}` | Get asset by ID | View |  |  |  |  |
+| ✓ | GET | `/public_api/v1/assets/{id}` | Get asset by ID | View | `Cortex.Api.Assets` | `assets get` | `assets.bats` | ✓ |
 | ✓ | GET | `/public_api/v1/assets/{id}/raw_fields` | Get raw fields of asset by ID | View | `Cortex.Api.Assets` | `assets raw-fields` | `assets.bats` | ✓ |
 | ✓ | GET | `/public_api/v1/assets/schema` | Get schema of asset inventory | View | `Cortex.Api.Assets` | `assets schema` | `assets.bats` | ✓ |
-|  | GET | `/public_api/v1/assets/enum/{field_name}` | Get enum values of specified field | View |  |  |  |  |
+| ✓ | GET | `/public_api/v1/assets/enum/{field_name}` | Get enum values of specified field | View | `Cortex.Api.Assets` | `assets enum` | `assets.bats` | ✓ |
 | ✓ | POST | `/public_api/v1/asset-groups` | Get all or filtered asset groups | View | `Cortex.Api.AssetGroups` | `asset-groups list` | `asset_groups.bats` | ✓ |
 |  | POST | `/public_api/v1/asset-groups/create` | Create an Asset Group | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/asset-groups/update/{group_id}` | Update an Asset Group | Edit |  |  |  |  |
@@ -174,7 +174,7 @@ Source: `cortex-platform-papi.json`
 |  | POST | `/public_api/v1/profiles/prevention/add` | Add Prevention Profile | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/profiles/add_signer_cn_to_allowlist` | Add Signer CN to Allowlist | Edit |  |  |  |  |
 |  | POST | `/public_api/v1/profiles/prevention/edit` | Edit Prevention Profile | Edit |  |  |  |  |
-|  | POST | `/public_api/v1/profiles/prevention/get_modules` | Get Prevention Profile Modules | View |  |  |  |  |
+| ✓ | POST | `/public_api/v1/profiles/prevention/get_modules` | Get Prevention Profile Modules | View | `Cortex.Api.Profiles` | `profiles prevention get-modules` | `profiles.bats` | ✓ |
 <!-- END AUTO -->
 
 ## Agent Configuration

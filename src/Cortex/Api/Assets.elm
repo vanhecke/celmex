@@ -1,7 +1,7 @@
 module Cortex.Api.Assets exposing
     ( SearchArgs, defaultSearchArgs
     , AssetsResponse, Asset, AssetCounts
-    , SchemaEntry
+    , SchemaEntry, EnumValue
     , ExternalService, ExternalServicesResponse
     , InternetExposure, InternetExposuresResponse
     , ExternalIpRange, ExternalIpRangesResponse
@@ -9,16 +9,19 @@ module Cortex.Api.Assets exposing
     , ExternalWebsite, ExternalWebsitesResponse
     , LastAssessment, WebsitesLastAssessment
     , RawFieldsResponse, RawFieldsEntry
-    , list, getSchema, getRawFields
-    , getExternalServices, getInternetExposures, getExternalIpRanges
-    , getVulnerabilityTests, getExternalWebsites, getWebsitesLastAssessment
+    , list, getAsset, getSchema, getRawFields, getEnum
+    , getExternalServices, getExternalService
+    , getInternetExposures, getInternetExposure
+    , getExternalIpRanges, getExternalIpRange
+    , getVulnerabilityTests
+    , getExternalWebsites, getExternalWebsite, getWebsitesLastAssessment
     )
 
 {-| Cortex asset inventory and external attack-surface views.
 
 @docs SearchArgs, defaultSearchArgs
 @docs AssetsResponse, Asset, AssetCounts
-@docs SchemaEntry
+@docs SchemaEntry, EnumValue
 @docs ExternalService, ExternalServicesResponse
 @docs InternetExposure, InternetExposuresResponse
 @docs ExternalIpRange, ExternalIpRangesResponse
@@ -26,9 +29,12 @@ module Cortex.Api.Assets exposing
 @docs ExternalWebsite, ExternalWebsitesResponse
 @docs LastAssessment, WebsitesLastAssessment
 @docs RawFieldsResponse, RawFieldsEntry
-@docs list, getSchema, getRawFields
-@docs getExternalServices, getInternetExposures, getExternalIpRanges
-@docs getVulnerabilityTests, getExternalWebsites, getWebsitesLastAssessment
+@docs list, getAsset, getSchema, getRawFields, getEnum
+@docs getExternalServices, getExternalService
+@docs getInternetExposures, getInternetExposure
+@docs getExternalIpRanges, getExternalIpRange
+@docs getVulnerabilityTests
+@docs getExternalWebsites, getExternalWebsite, getWebsitesLastAssessment
 
 -}
 
@@ -126,6 +132,16 @@ type alias SchemaEntry =
     { fieldName : Maybe String
     , fieldPrettyName : Maybe String
     , dataType : Maybe String
+    }
+
+
+{-| One enum value returned by [`getEnum`](#getEnum) — a wire identifier
+plus its human-friendly display label (e.g. `{name = Just "AWS",
+prettyName = Just "AWS"}`).
+-}
+type alias EnumValue =
+    { name : Maybe String
+    , prettyName : Maybe String
     }
 
 
@@ -399,6 +415,20 @@ getSchema =
         (Decode.at [ "reply", "data" ] (Decode.list schemaEntryDecoder))
 
 
+{-| GET /public\_api/v1/assets/{id} — fetch one asset by its `xdm.asset.id`.
+
+Returns an [`AssetsResponse`](#AssetsResponse) for symmetry with
+[`list`](#list); the wire shape is the same envelope (a one-element
+`data` array on success).
+
+-}
+getAsset : String -> Request AssetsResponse
+getAsset id =
+    Request.get
+        [ "public_api", "v1", "assets", id ]
+        (reply assetsResponseDecoder)
+
+
 {-| GET /public\_api/v1/assets/{id}/raw\_fields — retrieve the raw,
 provider-native fields for a single asset (the ungrouped JSON the
 discovery source returned, before normalization to the XDM schema).
@@ -408,6 +438,21 @@ getRawFields id =
     Request.get
         [ "public_api", "v1", "assets", id, "raw_fields" ]
         (reply rawFieldsResponseDecoder)
+
+
+{-| GET /public\_api/v1/assets/enum/{field\_name} — list the allowed
+enum values for one schema field.
+
+The `fieldName` argument must name an `ENUM`-typed field from
+[`getSchema`](#getSchema) (e.g. `xdm.asset.provider`); other types
+return a 500 error from the API.
+
+-}
+getEnum : String -> Request (List EnumValue)
+getEnum fieldName =
+    Request.get
+        [ "public_api", "v1", "assets", "enum", fieldName ]
+        (Decode.at [ "reply", "data" ] (Decode.list enumValueDecoder))
 
 
 {-| POST /public\_api/v1/assets/get\_external\_services — externally reachable services.
@@ -427,6 +472,22 @@ getExternalServices args =
         (reply (countedDecoder "external_services" externalServiceDecoder ExternalServicesResponse))
 
 
+{-| POST /public\_api/v1/assets/get\_external\_service — fetch one or
+more external services by service ID. Up to 20 IDs per call.
+
+Returns the matching [`ExternalService`](#ExternalService) records
+directly (no `total_count` envelope — the singular endpoints wrap their
+items in a `details` array which the SDK strips).
+
+-}
+getExternalService : { serviceIdList : List String } -> Request (List ExternalService)
+getExternalService { serviceIdList } =
+    Request.post
+        [ "public_api", "v1", "assets", "get_external_service" ]
+        (singularRequestBody "service_id_list" serviceIdList)
+        (reply (detailsDecoder externalServiceDecoder))
+
+
 {-| POST /public\_api/v1/assets/get\_assets\_internet\_exposure — assets exposed to the public internet.
 -}
 getInternetExposures : SearchArgs -> Request InternetExposuresResponse
@@ -444,6 +505,17 @@ getInternetExposures args =
         (reply (countedDecoder "assets_internet_exposure" internetExposureDecoder InternetExposuresResponse))
 
 
+{-| POST /public\_api/v1/assets/get\_asset\_internet\_exposure — fetch
+one or more internet-exposed assets by ASM asset ID.
+-}
+getInternetExposure : { asmIdList : List String } -> Request (List InternetExposure)
+getInternetExposure { asmIdList } =
+    Request.post
+        [ "public_api", "v1", "assets", "get_asset_internet_exposure" ]
+        (singularRequestBody "asm_id_list" asmIdList)
+        (reply (detailsDecoder internetExposureDecoder))
+
+
 {-| POST /public\_api/v1/assets/get\_external\_ip\_address\_ranges — discovered external IP ranges.
 -}
 getExternalIpRanges : SearchArgs -> Request ExternalIpRangesResponse
@@ -459,6 +531,17 @@ getExternalIpRanges args =
             }
         )
         (reply (countedDecoder "external_ip_address_ranges" externalIpRangeDecoder ExternalIpRangesResponse))
+
+
+{-| POST /public\_api/v1/assets/get\_external\_ip\_address\_range —
+fetch one or more external IP-address ranges by range ID.
+-}
+getExternalIpRange : { rangeIdList : List String } -> Request (List ExternalIpRange)
+getExternalIpRange { rangeIdList } =
+    Request.post
+        [ "public_api", "v1", "assets", "get_external_ip_address_range" ]
+        (singularRequestBody "range_id_list" rangeIdList)
+        (reply (detailsDecoder externalIpRangeDecoder))
 
 
 {-| POST /public\_api/v1/assets/get\_vulnerability\_tests — vulnerability scanner results.
@@ -495,6 +578,17 @@ getExternalWebsites args =
         (reply (countedDecoder "websites" externalWebsiteDecoder ExternalWebsitesResponse))
 
 
+{-| POST /public\_api/v1/assets/get\_external\_website — fetch one or
+more external websites by website ID. Up to 20 IDs per call.
+-}
+getExternalWebsite : { websiteIdList : List String } -> Request (List ExternalWebsite)
+getExternalWebsite { websiteIdList } =
+    Request.post
+        [ "public_api", "v1", "assets", "get_external_website" ]
+        (singularRequestBody "website_id_list" websiteIdList)
+        (reply (detailsDecoder externalWebsiteDecoder))
+
+
 {-| POST /public\_api/v1/assets/get\_external\_websites/last\_external\_assessment —
 status + timestamp of the most recent websites scan.
 -}
@@ -503,6 +597,19 @@ getWebsitesLastAssessment =
     Request.postEmpty
         [ "public_api", "v1", "assets", "get_external_websites", "last_external_assessment" ]
         websitesLastAssessmentDecoder
+
+
+
+-- ENCODERS
+
+
+singularRequestBody : String -> List String -> Encode.Value
+singularRequestBody fieldName ids =
+    Encode.object
+        [ ( "request_data"
+          , Encode.object [ ( fieldName, Encode.list Encode.string ids ) ]
+          )
+        ]
 
 
 
@@ -519,6 +626,14 @@ countedDecoder itemKey itemDecoder ctor =
             , Decode.succeed []
             ]
         )
+
+
+detailsDecoder : Decoder item -> Decoder (List item)
+detailsDecoder itemDecoder =
+    Decode.oneOf
+        [ Decode.field "details" (Decode.list itemDecoder)
+        , Decode.succeed []
+        ]
 
 
 assetsResponseDecoder : Decoder AssetsResponse
@@ -572,6 +687,13 @@ schemaEntryDecoder =
         (optionalField "field_name" Decode.string)
         (optionalField "field_pretty_name" Decode.string)
         (optionalField "data_type" Decode.string)
+
+
+enumValueDecoder : Decoder EnumValue
+enumValueDecoder =
+    Decode.map2 EnumValue
+        (optionalField "NAME" Decode.string)
+        (optionalField "PRETTY_NAME" Decode.string)
 
 
 externalServiceDecoder : Decoder ExternalService

@@ -1,16 +1,20 @@
 module Cortex.Api.Profiles exposing
     ( Profile, GetPolicyResponse
+    , PreventionModule
     , getProfiles, getPolicy
+    , getPreventionModules
     )
 
 {-| Cortex endpoint security profiles and per-endpoint policy lookups.
 
 @docs Profile, GetPolicyResponse
+@docs PreventionModule
 @docs getProfiles, getPolicy
+@docs getPreventionModules
 
 -}
 
-import Cortex.Decode exposing (andMap, optionalList, reply)
+import Cortex.Decode exposing (andMap, optionalField, optionalList, reply)
 import Cortex.Request as Request exposing (Request)
 import Json.Decode as Decode exposing (Decoder)
 import Json.Encode as Encode
@@ -53,6 +57,28 @@ type alias GetPolicyResponse =
     }
 
 
+{-| One prevention-profile module returned by
+[`getPreventionModules`](#getPreventionModules) — a category of policy
+behaviour that a prevention profile can configure (e.g. "Network Packet
+Inspection Engine"). The wire `id` is a stable string slug
+(`"networkSignature"`), not an integer.
+-}
+type alias PreventionModule =
+    { id : Maybe String
+    , profileType : Maybe String
+    , platform : Maybe String
+    , prettyName : Maybe String
+
+    {- schema is a JSON-Schema-style description of the configuration
+       shape this module accepts (mode enums, path arrays, etc.). The
+       shape is module-specific and intentionally polymorphic across the
+       28+ prevention modules. Preserved verbatim so downstream consumers
+       can introspect or re-emit per module type.
+    -}
+    , schema : Maybe Encode.Value
+    }
+
+
 {-| POST /public\_api/v1/endpoints/get\_profiles
 
 Get endpoint security profiles of the requested type. The API requires
@@ -71,6 +97,32 @@ getProfiles { type_ } =
             ]
         )
         (reply (Decode.list profileDecoder))
+
+
+{-| POST /public\_api/v1/profiles/prevention/get\_modules
+
+List the prevention-profile module catalog for a given profile type and
+platform. The two arguments must be capitalised exactly as the API
+expects: `profileType` ∈ `Exploit`, `Malware`, `Restrictions`,
+`Agent Settings`; `platform` ∈ `Windows`, `macOS`, `Linux`, `Android`,
+`iOS`, `Serverless Function`. The OpenAPI spec documents lowercase
+values, but the live API rejects them.
+
+-}
+getPreventionModules : { profileType : String, platform : String } -> Request (List PreventionModule)
+getPreventionModules { profileType, platform } =
+    Request.post
+        [ "public_api", "v1", "profiles", "prevention", "get_modules" ]
+        (Encode.object
+            [ ( "request_data"
+              , Encode.object
+                    [ ( "profile_type", Encode.string profileType )
+                    , ( "platform", Encode.string platform )
+                    ]
+              )
+            ]
+        )
+        (reply (Decode.list preventionModuleDecoder))
 
 
 {-| POST /public\_api/v1/endpoints/get\_policy
@@ -127,3 +179,16 @@ getPolicyResponseDecoder : Decoder GetPolicyResponse
 getPolicyResponseDecoder =
     Decode.map GetPolicyResponse
         (Decode.maybe (Decode.field "policy_name" Decode.string))
+
+
+preventionModuleDecoder : Decoder PreventionModule
+preventionModuleDecoder =
+    Decode.map5 PreventionModule
+        (optionalField "id" Decode.string)
+        (optionalField "profile_type" Decode.string)
+        (optionalField "platform" Decode.string)
+        (optionalField "pretty_name" Decode.string)
+        {- Decoder escape: per-module JSON-Schema-style configuration
+           shape; varies entirely per module type and is opaque to the SDK.
+        -}
+        (optionalField "schema" Decode.value)

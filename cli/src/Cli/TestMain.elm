@@ -274,6 +274,27 @@ run stamp config endpoint =
                             )
                 )
 
+        Commands.EndpointsGetEndpoint args ->
+            typedAssert (Endpoints.getEndpoint args)
+                (\r ->
+                    [ nonNegative "totalCount" r.totalCount
+                    , nonNegative "resultCount" r.resultCount
+                    , nonEmpty "endpoints" r.endpoints
+                    ]
+                        ++ sampleFirst "endpoints"
+                            r.endpoints
+                            (\e ->
+                                [ satisfies "endpointId" (not (String.isEmpty e.endpointId)) "blank endpointId"
+                                , nonBlank "endpointStatus" e.endpointStatus
+                                , nonBlank "endpointType" e.endpointType
+                                , nonBlank "osType" e.osType
+                                , nonBlank "endpointVersion" e.endpointVersion
+                                , present "firstSeen" e.firstSeen
+                                , present "lastSeen" e.lastSeen
+                                ]
+                            )
+                )
+
         Commands.AuditLogsSearch args ->
             typedAssert (AuditLogs.search args)
                 (\r ->
@@ -399,6 +420,16 @@ run stamp config endpoint =
                                 , nonBlank "spLogoutUrl" s.spLogoutUrl
                                 ]
                             )
+                )
+
+        Commands.AuthSettingsGetMetadata ->
+            typedAssert AuthSettings.getMetadata
+                (\m ->
+                    [ nonBlank "tenantId" m.tenantId
+                    , nonBlank "spEntityId" m.spEntityId
+                    , nonBlank "spUrl" m.spUrl
+                    , nonBlank "spLogoutUrl" m.spLogoutUrl
+                    ]
                 )
 
         Commands.DeviceControlGetViolations ->
@@ -723,6 +754,22 @@ run stamp config endpoint =
             typedAssert (Profiles.getPolicy { endpointId = endpointId })
                 (\r -> [ nonBlank "policyName" r.policyName ])
 
+        Commands.ProfilesGetPreventionModules profileType platform ->
+            typedAssert (Profiles.getPreventionModules { profileType = profileType, platform = platform })
+                (\modules ->
+                    nonEmpty "modules" modules
+                        :: sampleFirst "modules"
+                            modules
+                            (\m ->
+                                [ nonBlank "id" m.id
+                                , nonBlank "profileType" m.profileType
+                                , nonBlank "platform" m.platform
+                                , nonBlank "prettyName" m.prettyName
+                                , present "schema" m.schema
+                                ]
+                            )
+                )
+
         Commands.AgentConfigContentManagement ->
             typedAssert AgentConfig.getContentManagement
                 (\r ->
@@ -1020,6 +1067,20 @@ run stamp config endpoint =
                             )
                 )
 
+        Commands.AssetsGet id ->
+            typedAssert (Assets.getAsset id)
+                (\r ->
+                    nonEmpty "data" r.data
+                        :: sampleFirst "data"
+                            r.data
+                            (\a ->
+                                [ satisfies "id" (a.id == Just id) "asset id mismatch"
+                                , nonBlank "typeId" a.typeId
+                                , present "firstObserved" a.firstObserved
+                                ]
+                            )
+                )
+
         Commands.AssetsSchema ->
             typedAssert Assets.getSchema
                 (\fields ->
@@ -1029,6 +1090,19 @@ run stamp config endpoint =
                             (\f ->
                                 [ nonBlank "fieldName" f.fieldName
                                 , nonBlank "dataType" f.dataType
+                                ]
+                            )
+                )
+
+        Commands.AssetsEnum fieldName ->
+            typedAssert (Assets.getEnum fieldName)
+                (\values ->
+                    nonEmpty "values" values
+                        :: sampleFirst "values"
+                            values
+                            (\v ->
+                                [ nonBlank "name" v.name
+                                , nonBlank "prettyName" v.prettyName
                                 ]
                             )
                 )
@@ -1069,6 +1143,10 @@ run stamp config endpoint =
                            )
                 )
 
+        Commands.AssetsExternalService ids ->
+            -- structural decode only; tenant typically has no services on test fixtures
+            typedAssert (Assets.getExternalService { serviceIdList = ids }) (\_ -> [])
+
         Commands.AssetsInternetExposures args ->
             typedAssert (Assets.getInternetExposures args)
                 (\r ->
@@ -1089,6 +1167,9 @@ run stamp config endpoint =
                            )
                 )
 
+        Commands.AssetsInternetExposure ids ->
+            typedAssert (Assets.getInternetExposure { asmIdList = ids }) (\_ -> [])
+
         Commands.AssetsIpRanges args ->
             typedAssert (Assets.getExternalIpRanges args)
                 (\r ->
@@ -1108,6 +1189,9 @@ run stamp config endpoint =
                                     )
                            )
                 )
+
+        Commands.AssetsIpRange ids ->
+            typedAssert (Assets.getExternalIpRange { rangeIdList = ids }) (\_ -> [])
 
         Commands.AssetsVulnerabilityTests args ->
             typedAssert (Assets.getVulnerabilityTests args)
@@ -1146,6 +1230,9 @@ run stamp config endpoint =
                                     (\w -> [ nonBlank "url" w.url ])
                            )
                 )
+
+        Commands.AssetsExternalWebsite ids ->
+            typedAssert (Assets.getExternalWebsite { websiteIdList = ids }) (\_ -> [])
 
         Commands.AssetsWebsitesLastAssessment ->
             typedAssert Assets.getWebsitesLastAssessment

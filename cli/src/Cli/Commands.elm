@@ -28,6 +28,7 @@ type Endpoint
     | TenantInfo
     | CliVersion
     | EndpointsList Endpoints.SearchArgs
+    | EndpointsGetEndpoint Endpoints.GetEndpointArgs
     | AuditLogsSearch AuditLogs.SearchArgs
     | AuditLogsAgentsReports
     | DistributionsGetVersions
@@ -37,6 +38,7 @@ type Endpoint
     | TriagePresetsList
     | RbacGetUsers
     | AuthSettingsGet
+    | AuthSettingsGetMetadata
     | DeviceControlGetViolations
     | AttackSurfaceGetRules
     | XqlGetQuota
@@ -70,6 +72,7 @@ type Endpoint
     | LegacyExceptionsList
     | ProfilesList String
     | ProfilesGetPolicy String
+    | ProfilesGetPreventionModules String String
     | AgentConfigContentManagement
     | AgentConfigAutoUpgrade
     | AgentConfigWildfireAnalysis
@@ -94,13 +97,19 @@ type Endpoint
     | DisablePreventionFetchInjection
     | DisablePreventionGetModules String
     | AssetsList
+    | AssetsGet String
     | AssetsSchema
+    | AssetsEnum String
     | AssetsRawFields String
     | AssetsExternalServices Assets.SearchArgs
+    | AssetsExternalService (List String)
     | AssetsInternetExposures Assets.SearchArgs
+    | AssetsInternetExposure (List String)
     | AssetsIpRanges Assets.SearchArgs
+    | AssetsIpRange (List String)
     | AssetsVulnerabilityTests Assets.SearchArgs
     | AssetsExternalWebsites Assets.SearchArgs
+    | AssetsExternalWebsite (List String)
     | AssetsWebsitesLastAssessment
     | AssetGroupsList
     | QuarantineStatus Quarantine.FileQuery
@@ -124,6 +133,9 @@ argvToEndpoint args =
         "endpoints" :: "list" :: rest ->
             parseStandardSearch rest
                 |> Result.map (\sa -> EndpointsList (toEndpointsArgs sa))
+
+        "endpoints" :: "get" :: rest ->
+            parseEndpointsGet rest
 
         "audit-logs" :: "search" :: rest ->
             parseStandardSearch rest
@@ -152,6 +164,9 @@ argvToEndpoint args =
 
         [ "authentication-settings", "get" ] ->
             Ok AuthSettingsGet
+
+        [ "authentication-settings", "get-metadata" ] ->
+            Ok AuthSettingsGetMetadata
 
         [ "device-control", "get-violations" ] ->
             Ok DeviceControlGetViolations
@@ -223,6 +238,9 @@ argvToEndpoint args =
 
         [ "profiles", "get-policy", endpointId ] ->
             Ok (ProfilesGetPolicy endpointId)
+
+        [ "profiles", "prevention", "get-modules", profileType, platform ] ->
+            Ok (ProfilesGetPreventionModules profileType platform)
 
         [ "agent-config", "content-management" ] ->
             Ok AgentConfigContentManagement
@@ -299,8 +317,14 @@ argvToEndpoint args =
         [ "assets", "list" ] ->
             Ok AssetsList
 
+        [ "assets", "get", id ] ->
+            Ok (AssetsGet id)
+
         [ "assets", "schema" ] ->
             Ok AssetsSchema
+
+        [ "assets", "enum", fieldName ] ->
+            Ok (AssetsEnum fieldName)
 
         [ "assets", "raw-fields", id ] ->
             Ok (AssetsRawFields id)
@@ -309,13 +333,22 @@ argvToEndpoint args =
             parseStandardSearch rest
                 |> Result.map (\sa -> AssetsExternalServices (toAssetsArgs sa))
 
+        "assets" :: "external-service" :: rest ->
+            parseAssetsByIdList "assets external-service" "--id" AssetsExternalService rest
+
         "assets" :: "internet-exposures" :: rest ->
             parseStandardSearch rest
                 |> Result.map (\sa -> AssetsInternetExposures (toAssetsArgs sa))
 
+        "assets" :: "internet-exposure" :: rest ->
+            parseAssetsByIdList "assets internet-exposure" "--id" AssetsInternetExposure rest
+
         "assets" :: "ip-ranges" :: rest ->
             parseStandardSearch rest
                 |> Result.map (\sa -> AssetsIpRanges (toAssetsArgs sa))
+
+        "assets" :: "ip-range" :: rest ->
+            parseAssetsByIdList "assets ip-range" "--id" AssetsIpRange rest
 
         "assets" :: "vulnerability-tests" :: rest ->
             parseStandardSearch rest
@@ -324,6 +357,9 @@ argvToEndpoint args =
         "assets" :: "external-websites" :: rest ->
             parseStandardSearch rest
                 |> Result.map (\sa -> AssetsExternalWebsites (toAssetsArgs sa))
+
+        "assets" :: "external-website" :: rest ->
+            parseAssetsByIdList "assets external-website" "--id" AssetsExternalWebsite rest
 
         [ "assets", "websites-last-assessment" ] ->
             Ok AssetsWebsitesLastAssessment
@@ -1102,6 +1138,53 @@ resultSequence results =
     List.foldr (\r acc -> Result.map2 (::) r acc) (Ok []) results
 
 
+parseAssetsByIdList : String -> String -> (List String -> Endpoint) -> List String -> Result String Endpoint
+parseAssetsByIdList cmdName flagName ctor args =
+    splitArgs [] args
+        |> Result.andThen
+            (\( positionals, flags ) ->
+                if not (List.isEmpty positionals) then
+                    Err (cmdName ++ ": unexpected positional arguments: " ++ String.join " " positionals)
+
+                else
+                    let
+                        ids =
+                            allFlagValues flagName flags
+                    in
+                    if List.isEmpty ids then
+                        Err (cmdName ++ ": needs at least one " ++ flagName ++ " <id>")
+
+                    else
+                        Ok (ctor ids)
+            )
+
+
+parseEndpointsGet : List String -> Result String Endpoint
+parseEndpointsGet args =
+    splitArgs [] args
+        |> Result.andThen
+            (\( positionals, flags ) ->
+                if not (List.isEmpty positionals) then
+                    Err ("endpoints get: unexpected positional arguments: " ++ String.join " " positionals)
+
+                else
+                    let
+                        ids =
+                            allFlagValues "--id" flags
+                    in
+                    if List.isEmpty ids then
+                        Err "endpoints get: needs at least one --id <agent-id>"
+
+                    else
+                        Ok
+                            (EndpointsGetEndpoint
+                                { endpointIdList = ids
+                                , extraFilters = []
+                                }
+                            )
+            )
+
+
 parseStandardSearch : List String -> Result String StandardFlags.StandardArgs
 parseStandardSearch args =
     splitArgs [] args
@@ -1220,6 +1303,9 @@ endpointName endpoint =
         EndpointsList _ ->
             "endpoints list"
 
+        EndpointsGetEndpoint _ ->
+            "endpoints get"
+
         AuditLogsSearch _ ->
             "audit-logs search"
 
@@ -1246,6 +1332,9 @@ endpointName endpoint =
 
         AuthSettingsGet ->
             "authentication-settings get"
+
+        AuthSettingsGetMetadata ->
+            "authentication-settings get-metadata"
 
         DeviceControlGetViolations ->
             "device-control get-violations"
@@ -1346,6 +1435,9 @@ endpointName endpoint =
         ProfilesGetPolicy _ ->
             "profiles get-policy"
 
+        ProfilesGetPreventionModules _ _ ->
+            "profiles prevention get-modules"
+
         AgentConfigContentManagement ->
             "agent-config content-management"
 
@@ -1418,8 +1510,14 @@ endpointName endpoint =
         AssetsList ->
             "assets list"
 
+        AssetsGet _ ->
+            "assets get"
+
         AssetsSchema ->
             "assets schema"
+
+        AssetsEnum _ ->
+            "assets enum"
 
         AssetsRawFields _ ->
             "assets raw-fields"
@@ -1427,17 +1525,29 @@ endpointName endpoint =
         AssetsExternalServices _ ->
             "assets external-services"
 
+        AssetsExternalService _ ->
+            "assets external-service"
+
         AssetsInternetExposures _ ->
             "assets internet-exposures"
 
+        AssetsInternetExposure _ ->
+            "assets internet-exposure"
+
         AssetsIpRanges _ ->
             "assets ip-ranges"
+
+        AssetsIpRange _ ->
+            "assets ip-range"
 
         AssetsVulnerabilityTests _ ->
             "assets vulnerability-tests"
 
         AssetsExternalWebsites _ ->
             "assets external-websites"
+
+        AssetsExternalWebsite _ ->
+            "assets external-website"
 
         AssetsWebsitesLastAssessment ->
             "assets websites-last-assessment"
@@ -1487,6 +1597,7 @@ usage args =
             , "  cortex audit-logs agents-reports            Get agent event reports"
             , ""
             , "  cortex endpoints list                       List all endpoints"
+            , "  cortex endpoints get --id <agent-id>        Get rich endpoint detail (repeatable --id)"
             , "  cortex distributions get-versions           List all agent versions"
             , "  cortex distributions list                   List agent distributions"
             , "  cortex distributions get-status <id>        Get build status of a distribution"
@@ -1499,6 +1610,7 @@ usage args =
             , "  cortex rbac get-user-groups <name>          Get details for a user group by name"
             , "  cortex api-keys list                        List API keys"
             , "  cortex authentication-settings get          Get IdP/SSO settings"
+            , "  cortex authentication-settings get-metadata Get SAML service-provider metadata"
             , ""
             , "  cortex device-control get-violations        List device-control violations"
             , "  cortex attack-surface get-rules             List attack surface rules"
@@ -1563,13 +1675,19 @@ usage args =
             , "                                              List prevention modules for a platform (windows|linux|macos)"
             , ""
             , "  cortex assets list                          List assets"
+            , "  cortex assets get <ASSET_ID>                Get asset by ID"
             , "  cortex assets schema                        Get asset inventory schema"
+            , "  cortex assets enum <FIELD_NAME>             List enum values for an ENUM-typed schema field"
             , "  cortex assets raw-fields <ASSET_ID>         Get raw provider-native fields for an asset"
             , "  cortex assets external-services             List external services"
+            , "  cortex assets external-service --id <id>    Get external services by ID (repeatable --id)"
             , "  cortex assets internet-exposures            List internet exposures"
+            , "  cortex assets internet-exposure --id <id>   Get internet exposures by ASM ID (repeatable --id)"
             , "  cortex assets ip-ranges                     List external IP ranges"
+            , "  cortex assets ip-range --id <id>            Get external IP ranges by range ID (repeatable --id)"
             , "  cortex assets vulnerability-tests           List vulnerability tests"
             , "  cortex assets external-websites             List external websites"
+            , "  cortex assets external-website --id <id>    Get external websites by website ID (repeatable --id)"
             , "  cortex assets websites-last-assessment      Get websites last assessment"
             , "  cortex asset-groups list                    List asset groups"
             , ""
@@ -1581,6 +1699,10 @@ usage args =
             , ""
             , "  cortex profiles list <type>                 List endpoint security profiles (type: prevention|extension)"
             , "  cortex profiles get-policy <endpoint-id>    Get policy assigned to an endpoint"
+            , "  cortex profiles prevention get-modules <type> <platform>"
+            , "                                              List prevention-profile modules"
+            , "                                                type: Exploit|Malware|Restrictions|Agent Settings"
+            , "                                                platform: Windows|macOS|Linux|Android|iOS|'Serverless Function'"
             , ""
             , "  cortex agent-config content-management              Get content management settings"
             , "  cortex agent-config auto-upgrade                    Get agent auto-upgrade settings"

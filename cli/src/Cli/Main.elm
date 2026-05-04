@@ -251,6 +251,9 @@ run stamp config endpoint =
         Commands.EndpointsList args ->
             ( Idle, raw (Endpoints.list args) )
 
+        Commands.EndpointsGetEndpoint args ->
+            ( Idle, raw (Endpoints.getEndpoint args) )
+
         Commands.AuditLogsSearch args ->
             ( Idle, raw (AuditLogs.search args) )
 
@@ -277,6 +280,9 @@ run stamp config endpoint =
 
         Commands.AuthSettingsGet ->
             ( Idle, raw AuthSettings.get )
+
+        Commands.AuthSettingsGetMetadata ->
+            ( Idle, raw AuthSettings.getMetadata )
 
         Commands.DeviceControlGetViolations ->
             ( Idle, raw DeviceControl.getViolations )
@@ -408,6 +414,9 @@ run stamp config endpoint =
         Commands.ProfilesGetPolicy endpointId ->
             ( Idle, raw (Profiles.getPolicy { endpointId = endpointId }) )
 
+        Commands.ProfilesGetPreventionModules profileType platform ->
+            ( Idle, raw (Profiles.getPreventionModules { profileType = profileType, platform = platform }) )
+
         Commands.AgentConfigContentManagement ->
             ( Idle, raw AgentConfig.getContentManagement )
 
@@ -480,8 +489,14 @@ run stamp config endpoint =
         Commands.AssetsList ->
             ( Idle, raw Assets.list )
 
+        Commands.AssetsGet id ->
+            ( Idle, raw (Assets.getAsset id) )
+
         Commands.AssetsSchema ->
             ( Idle, raw Assets.getSchema )
+
+        Commands.AssetsEnum fieldName ->
+            ( Idle, raw (Assets.getEnum fieldName) )
 
         Commands.AssetsRawFields id ->
             ( Idle, raw (Assets.getRawFields id) )
@@ -489,17 +504,29 @@ run stamp config endpoint =
         Commands.AssetsExternalServices args ->
             ( Idle, raw (Assets.getExternalServices args) )
 
+        Commands.AssetsExternalService ids ->
+            ( Idle, raw (Assets.getExternalService { serviceIdList = ids }) )
+
         Commands.AssetsInternetExposures args ->
             ( Idle, raw (Assets.getInternetExposures args) )
 
+        Commands.AssetsInternetExposure ids ->
+            ( Idle, raw (Assets.getInternetExposure { asmIdList = ids }) )
+
         Commands.AssetsIpRanges args ->
             ( Idle, raw (Assets.getExternalIpRanges args) )
+
+        Commands.AssetsIpRange ids ->
+            ( Idle, raw (Assets.getExternalIpRange { rangeIdList = ids }) )
 
         Commands.AssetsVulnerabilityTests args ->
             ( Idle, raw (Assets.getVulnerabilityTests args) )
 
         Commands.AssetsExternalWebsites args ->
             ( Idle, raw (Assets.getExternalWebsites args) )
+
+        Commands.AssetsExternalWebsite ids ->
+            ( Idle, raw (Assets.getExternalWebsite { websiteIdList = ids }) )
 
         Commands.AssetsWebsitesLastAssessment ->
             ( Idle, raw Assets.getWebsitesLastAssessment )
