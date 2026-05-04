@@ -6,24 +6,8 @@ on:
   pull_request:
 
 jobs:
-  format:
-    name: Format check
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: "20"
-
-      - run: npm install -g elm-format@0.8.7
-
-      - name: Check formatting
-        run: elm-format src/ cli/src/ --validate
-
-  todo-check:
-    name: TODO/OpenAPI sync
-    needs: format
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -35,24 +19,9 @@ jobs:
 
       - run: npm ci
 
-      - uses: extractions/setup-just@v3
-
-      - run: just todo-check
-
-  review:
-    name: elm-review
-    needs: format
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-
       - uses: jorelali/setup-elm@v6
         with:
           elm-version: 0.19.1
-
-      - uses: actions/setup-node@v6
-        with:
-          node-version: "20"
 
       - uses: actions/cache@v5
         with:
@@ -64,8 +33,31 @@ jobs:
           restore-keys: |
             elm-review-${{ runner.os }}-
 
+      - uses: actions/cache@v5
+        id: cache-elm-format
+        with:
+          path: ~/.npm-global
+          key: npm-global-elm-format-0.8.7
+
+      - name: Configure npm global prefix
+        run: |
+          mkdir -p ~/.npm-global
+          npm config set prefix ~/.npm-global
+          echo "$HOME/.npm-global/bin" >> $GITHUB_PATH
+
+      - if: steps.cache-elm-format.outputs.cache-hit != 'true'
+        run: npm install -g elm-format@0.8.7
+
+      - name: Format check
+        run: elm-format src/ cli/src/ --validate
+
+      - uses: extractions/setup-just@v3
+
+      - name: TODO/OpenAPI sync check
+        run: just todo-check
+
       - name: Review SDK
-        run: npx --yes elm-review
+        run: npx elm-review
 
       - name: Review CLI
         working-directory: cli
@@ -73,7 +65,6 @@ jobs:
 
   compile:
     name: Compile
-    needs: [format, review]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -128,12 +119,34 @@ jobs:
       - name: npm audit (high+)
         run: npm audit --audit-level=high
 
-      - run: npm install -g bats
+      - uses: actions/cache@v5
+        id: cache-bats
+        with:
+          path: ~/.npm-global
+          key: npm-global-bats-${{ runner.os }}
+
+      - name: Configure npm global prefix
+        run: |
+          mkdir -p ~/.npm-global
+          npm config set prefix ~/.npm-global
+          echo "$HOME/.npm-global/bin" >> $GITHUB_PATH
+
+      - if: steps.cache-bats.outputs.cache-hit != 'true'
+        run: npm install -g bats
 
       - uses: actions/download-artifact@v8
         with:
           name: cli-dist
           path: cli/dist
 
+      - name: Reap orphaned test fixtures (pre)
+        run: ./cli/bin/cortex-test-clean
+
       - name: Run BATS tests
-        run: bats --jobs 4 tests/
+        run: |
+          BATS_RUN_ID="$(date +%s)_$(openssl rand -hex 2)" \
+            bats --jobs 8 tests/*.bats
+
+      - name: Reap orphaned test fixtures (post)
+        if: always()
+        run: ./cli/bin/cortex-test-clean
