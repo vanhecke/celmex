@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+cd "$(dirname "$0")/.."
+
 echo "==> Installing system dependencies..."
 apt-get update -qq
 apt-get install -y -qq jq curl gzip > /dev/null
@@ -34,5 +36,8 @@ bats --version
 
 echo "==> Installing npm dependencies..."
 npm ci
+
+echo "==> Pre-building CLI..."
+just build
 
 echo "==> Setup complete."

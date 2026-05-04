@@ -37,7 +37,11 @@ body="${3:-}"
 timestamp=$(perl -MTime::HiRes=time -e 'printf "%d\n", time() * 1000')
 nonce=$(openssl rand -hex 32)
 
-hash=$(printf '%s' "${CORTEX_API_KEY}${nonce}${timestamp}" | shasum -a 256 | cut -d' ' -f1)
+if command -v sha256sum >/dev/null 2>&1; then
+    hash=$(printf '%s' "${CORTEX_API_KEY}${nonce}${timestamp}" | sha256sum | cut -d' ' -f1)
+else
+    hash=$(printf '%s' "${CORTEX_API_KEY}${nonce}${timestamp}" | shasum -a 256 | cut -d' ' -f1)
+fi
 
 url="${CORTEX_TENANT_URL%/}${path}"
 
