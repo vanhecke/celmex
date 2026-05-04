@@ -84,14 +84,25 @@ function specEndpoints(spec) {
 // --------------------------------------------------------- elm scan (SDK)
 
 // Match `Request.get`/`Request.post`/`Request.postEmpty`/etc. followed by a
-// list of string segments. Captures the helper name and the joined path.
-// `postEmpty` and any future `*Empty` variant are normalized to their base
-// HTTP verb.
+// single-line list of segments. Captures the helper name and the bracket
+// contents. `postEmpty` and any future `*Empty` variant are normalized to
+// their base HTTP verb. Segments may be string literals or Elm expressions
+// (variables, function applications) for path parameters; the latter are
+// normalized to `{*}` so they line up with OpenAPI parameter slots.
 const ELM_ENDPOINT =
-  /Request\.(getEmpty|postEmpty|putEmpty|deleteEmpty|get|post|put|delete|patch)\s*\n\s*\[\s*((?:"[^"]+"\s*,?\s*)+)\]/g;
+  /Request\.(getEmpty|postEmpty|putEmpty|deleteEmpty|get|post|put|delete|patch)\s*\n\s*\[\s*([^\]\n]+?)\s*\]/g;
 
 function helperToMethod(helper) {
   return helper.replace(/Empty$/, "").toUpperCase();
+}
+
+function parseSegment(raw) {
+  const literal = raw.match(/^"([^"]+)"$/);
+  return literal ? literal[1] : "{*}";
+}
+
+function normalizeSpecPath(path) {
+  return path.replace(/\{[^/}]+\}/g, "{*}");
 }
 
 function elmEndpoints() {
@@ -102,7 +113,7 @@ function elmEndpoints() {
     const src = readFileSync(join(SDK_API_DIR, file), "utf8");
     for (const m of src.matchAll(ELM_ENDPOINT)) {
       const method = helperToMethod(m[1]);
-      const segments = [...m[2].matchAll(/"([^"]+)"/g)].map((x) => x[1]);
+      const segments = m[2].split(",").map((s) => parseSegment(s.trim()));
       const path = "/" + segments.join("/");
       map.set(`${method} ${path}`, moduleName);
     }
@@ -157,7 +168,7 @@ function renderRow(ep, elm, manual) {
 function renderTable(endpoints, elmMap, manual) {
   const lines = [TABLE_HEADER];
   for (const ep of endpoints) {
-    const elm = elmMap.get(`${ep.method} ${ep.path}`);
+    const elm = elmMap.get(`${ep.method} ${normalizeSpecPath(ep.path)}`);
     lines.push(renderRow(ep, elm, manual.get(`${ep.method} ${ep.path}`)));
   }
   return lines.join("\n");
@@ -214,7 +225,8 @@ function main() {
     const eps = specEndpoints(spec);
     totalEndpoints += eps.length;
     for (const ep of eps) {
-      if (elmMap.has(`${ep.method} ${ep.path}`)) totalImplemented++;
+      if (elmMap.has(`${ep.method} ${normalizeSpecPath(ep.path)}`))
+        totalImplemented++;
       if (ep.type === "View") totalView++;
       else totalEdit++;
     }
