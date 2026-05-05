@@ -35,7 +35,8 @@ fi
 bats --version
 
 echo "==> Installing npm dependencies..."
-npm ci
+rm -rf node_modules
+npm install
 
 echo "==> Pre-building CLI..."
 just build
