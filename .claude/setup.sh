@@ -24,7 +24,7 @@ elm-format --help | head -1
 echo "==> Installing just..."
 if ! command -v just &> /dev/null; then
     curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh \
-        | bash -s -- --to /usr/local/bin
+        | bash -s -- --tag 1.50.0 --to /usr/local/bin
 fi
 just --version
 
