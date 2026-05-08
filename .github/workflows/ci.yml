@@ -51,7 +51,7 @@ jobs:
       - name: Format check
         run: elm-format src/ cli/src/ --validate
 
-      - uses: extractions/setup-just@v3
+      - uses: extractions/setup-just@v4
 
       - name: TODO/OpenAPI sync check
         run: just todo-check
